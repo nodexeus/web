@@ -7,8 +7,7 @@ import { SEO } from 'ui';
 const LoginPage: NextPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { login, register, resetPassword, loginWithGoogle, loginWithFacebook } =
-    useAuth();
+  const { login, register, resetPassword } = useAuth();
 
   return (
     <>
@@ -58,10 +57,10 @@ const LoginPage: NextPage = () => {
               Forgot password
             </button>
             <br />
-            <button type="button" onClick={loginWithGoogle}>
+            <button type="button">
               Google
             </button>
-            <button type="button" onClick={loginWithFacebook}>
+            <button type="button">
               Facebook
             </button>
           </div>
