@@ -1,0 +1,9 @@
+{
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  "typescript.tsdk": "./node_modules/typescript/lib",
+  "eslint.validate": ["typescript", "typescriptreact"],
+  "github-actions.workflows.pinned.workflows": [".github/workflows/*.yml"],
+  "cssVariables.lookupFiles": ["**/*.styles.ts"]
+}

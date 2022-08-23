@@ -1,0 +1,29 @@
+name: "Close PR if there's no description."
+
+# ** What it does? **
+#    - Checks if PR has no description and if doesn't have, close PR.
+# ** Why we have it? **
+#    - To keep consistency across all PRs.
+# ** Who does it impact? **
+#    - All developers.
+
+on: 
+  pull_request:
+    types: 
+      - opened
+      - reopened
+      - edited
+
+permissions:
+  pull-requests: write
+
+jobs: 
+  pr_description_check:
+    name: 'Check if PR has no description'
+    if: github.event.pull_request.body == null
+    runs-on: ubuntu-latest
+    steps: 
+      - name: Close PR if there is no description
+        uses: peter-evans/close-pull@v2
+        with:
+          comment: "Please provide a description of a pull request."

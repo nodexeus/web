@@ -1,0 +1,38 @@
+name: 'Auto merge dependabot updates'
+
+# ** What it does? **
+#    - Handles dependabot pull requests and automerges them.
+# ** Why we have it? **
+#    - To avoid dependabot pull requests from bloating PR list
+# ** Who does it impact? **
+#    - All developers.
+
+on: 
+  pull_request_target:
+    paths:
+      - 'package*.json'
+      - 'yarn*'
+
+  pull_request_review:
+    types:
+      - edited
+      - submitted
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  automerge_dependabot_updates:
+    name: 'Automerge if dependabot has raised PR'
+    if: >-
+      ${{
+        github.event.pull_request.number && 
+        github.event.pull_request.user.login == 'dependabot[bot]' &&
+        github.event.pull_request.state == 'open'
+      }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ahmadnassri/action-dependabot-auto-merge@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
