@@ -24,6 +24,7 @@ import {
   sortVersions,
   NodeLauncherRegion,
   nodeLauncherSelectors,
+  NodeLauncherVariantSegments,
 } from '@modules/node';
 import { organizationSelectors } from '@modules/organization';
 import { ROUTES, useNavigate } from '@shared/index';
@@ -32,6 +33,7 @@ import { usePricing } from '@modules/billing';
 import { ResourceAffinity } from '@modules/grpc/library/blockjoy/common/v1/node';
 import { imageClient, protocolClient } from '@modules/grpc';
 import { authSelectors } from '@modules/auth';
+import { Visibility } from '@modules/grpc/library/blockjoy/common/v1/protocol';
 
 type IUseNodeLauncherHandlersParams = {
   fulfilReqs: boolean;
@@ -54,6 +56,9 @@ interface IUseNodeLauncherHandlersHook {
   ) => void;
   handleVersionChanged: (version: ProtocolVersion) => void;
   handleVariantChanged: (variant: string) => void;
+  handleVariantSegmentsChanged: (
+    variantSegments: NodeLauncherVariantSegments,
+  ) => void;
   handleCreateNodeClicked: () => void;
 }
 
@@ -63,13 +68,14 @@ export const useNodeLauncherHandlers = ({
 }: IUseNodeLauncherHandlersParams): IUseNodeLauncherHandlersHook => {
   const searchParams = useSearchParams();
   const { navigate } = useNavigate();
-
   const { getHosts } = useHostSelect();
   const { createNode } = useNodeAdd();
   const { getRegions } = useGetRegions();
   const { getPrice } = usePricing();
 
   const isSuperUser = useRecoilValue(authSelectors.isSuperUser);
+
+  const isVariantValid = useRecoilValue(nodeLauncherSelectors.isVariantValid);
 
   const defaultOrganization = useRecoilValue(
     organizationSelectors.defaultOrganization,
@@ -79,6 +85,10 @@ export const useNodeLauncherHandlers = ({
 
   const totalNodesToLaunch = useRecoilValue(
     nodeLauncherSelectors.totalNodesToLaunch,
+  );
+
+  const setVersionMetadata = useSetRecoilState(
+    nodeLauncherAtoms.versionMetadata,
   );
 
   const [selectedProtocol, setSelectedProtocol] = useRecoilState(
@@ -102,6 +112,15 @@ export const useNodeLauncherHandlers = ({
   const resetSelectedVersion = useResetRecoilState(
     nodeLauncherAtoms.selectedVersion,
   );
+
+  const resetSelectedVariant = useResetRecoilState(
+    nodeLauncherAtoms.selectedVariant,
+  );
+
+  const resetSelectedVariantSegments = useResetRecoilState(
+    nodeLauncherAtoms.selectedVariantSegments,
+  );
+
   const [selectedRegions, setSelectedRegions] = useRecoilState(
     nodeLauncherAtoms.selectedRegions,
   );
@@ -112,10 +131,14 @@ export const useNodeLauncherHandlers = ({
 
   const setVariants = useSetRecoilState(nodeLauncherAtoms.variants);
 
-  const [versions, setVersions] = useRecoilState(nodeLauncherAtoms.versions);
+  const setVersions = useSetRecoilState(nodeLauncherAtoms.versions);
 
   const [selectedVariant, setSelectedVariant] = useRecoilState(
     nodeLauncherAtoms.selectedVariant,
+  );
+
+  const [selectedVariantSegments, setSelectedVariantSegments] = useRecoilState(
+    nodeLauncherAtoms.selectedVariantSegments,
   );
 
   const resetSelectedImage = useResetRecoilState(
@@ -226,13 +249,18 @@ export const useNodeLauncherHandlers = ({
         return;
       }
 
-      const imageResponse = await imageClient.getImage({
-        versionKey: selectedVersion.versionKey,
-        semanticVersion: selectedVersion.semanticVersion,
-        orgId: defaultOrganization?.orgId,
-      });
+      try {
+        const imageResponse = await imageClient.getImage({
+          versionKey: selectedVersion.versionKey,
+          semanticVersion: selectedVersion.semanticVersion,
+          orgId: defaultOrganization?.orgId,
+        });
 
-      setSelectedImage(imageResponse.image!);
+        setSelectedImage(imageResponse.image!);
+      } catch (err) {
+        setSelectedImage(null);
+        console.log('getImageError', err);
+      }
     })();
   }, [selectedVersion]);
 
@@ -246,16 +274,44 @@ export const useNodeLauncherHandlers = ({
 
       setVariants(variantsResponse);
 
-      setSelectedVariant({
-        protocol: selectedProtocol.key,
-        variantKey: variantsResponse[0],
+      if (selectedProtocol.key === 'legacy') {
+        setSelectedVariant({
+          protocol: selectedProtocol.key,
+          variantKey: 'legacy',
+        });
+      }
+
+      const metadata = selectedProtocol.versions
+        .filter(
+          (v) =>
+            v.visibility === Visibility.VISIBILITY_PUBLIC && v.metadata.length,
+        )
+        .map((innerArray) => {
+          const item: Record<string, string> = {};
+
+          for (const kv of innerArray.metadata) {
+            if (!item[kv.metadataKey]) {
+              item[kv.metadataKey] = '';
+            }
+            item[kv.metadataKey] = kv.value;
+          }
+
+          return item;
+        });
+
+      setVersionMetadata(metadata?.length ? metadata : null);
+      setSelectedVariantSegments({
+        client: { selectedItem: null },
+        network: { selectedItem: null },
+        nodeType: { selectedItem: null },
       });
+      setSelectedVariant(null);
     })();
   }, [selectedProtocol, defaultOrganization]);
 
   useEffect(() => {
     (async () => {
-      if (!selectedVariant?.variantKey) {
+      if ((!isVariantValid || !selectedProtocol?.key) && !selectedVariant) {
         setSelectedVersion(null);
         return;
       }
@@ -263,7 +319,9 @@ export const useNodeLauncherHandlers = ({
       const versionsResponse = await protocolClient.listVersions({
         versionKey: {
           protocolKey: selectedProtocol?.key!,
-          variantKey: selectedVariant.variantKey,
+          variantKey:
+            selectedVariant?.variantKey ||
+            `${selectedVariantSegments.client.selectedItem?.id}-${selectedVariantSegments.network.selectedItem?.id}-${selectedVariantSegments.nodeType.selectedItem?.id}`,
         },
         orgId: defaultOrganization?.orgId,
       });
@@ -271,10 +329,17 @@ export const useNodeLauncherHandlers = ({
       setVersions(versionsResponse);
 
       setSelectedVersion(
-        versionsResponse.length ? sortVersions(versionsResponse)[0] : null,
+        versionsResponse.length
+          ? sortVersions(
+              versionsResponse.filter(
+                (version) =>
+                  version.visibility === Visibility.VISIBILITY_PUBLIC,
+              ),
+            )[0]
+          : null,
       );
     })();
-  }, [selectedVariant]);
+  }, [selectedVariant, selectedVariantSegments]);
 
   useEffect(() => {
     if (selectedVersion && selectedRegions && defaultOrganization)
@@ -304,7 +369,6 @@ export const useNodeLauncherHandlers = ({
   }, [defaultOrganization?.orgId, isSuperUser]);
 
   useEffect(() => {
-    console.log('defaultOrganization', defaultOrganization);
     if (defaultOrganization?.orgId) getRegions();
   }, [defaultOrganization?.orgId, selectedImage]);
 
@@ -398,11 +462,21 @@ export const useNodeLauncherHandlers = ({
     setSelectedVersion(version);
   };
 
-  const handleVariantChanged = (variant: string) =>
+  const handleVariantChanged = (variantKey: string) => {
+    Mixpanel.track('Launch Node - Variant Changed');
+    resetSelectedVariantSegments();
     setSelectedVariant({
       protocol: selectedProtocol?.key!,
-      variantKey: variant,
+      variantKey,
     });
+  };
+
+  const handleVariantSegmentsChanged = (
+    variantSegments: NodeLauncherVariantSegments,
+  ) => {
+    if (isVariantValid) resetSelectedVariant();
+    setSelectedVariantSegments(variantSegments);
+  };
 
   const handleCreateNodeClicked = async () => {
     setIsLaunching(true);
@@ -478,6 +552,7 @@ export const useNodeLauncherHandlers = ({
     handleNodeConfigPropertyChanged,
     handleVersionChanged,
     handleVariantChanged,
+    handleVariantSegmentsChanged,
     handleCreateNodeClicked,
   };
 };

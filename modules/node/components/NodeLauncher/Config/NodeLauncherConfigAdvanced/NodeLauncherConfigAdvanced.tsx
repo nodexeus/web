@@ -1,6 +1,13 @@
+import { authSelectors } from '@modules/auth';
 import { FirewallRule } from '@modules/grpc/library/blockjoy/common/v1/config';
 import { UiType } from '@modules/grpc/library/blockjoy/common/v1/protocol';
-import { NodeFirewallRules, nodeLauncherAtoms } from '@modules/node';
+import { ProtocolVersion } from '@modules/grpc/library/blockjoy/v1/protocol';
+import {
+  NodeFirewallRules,
+  nodeLauncherAtoms,
+  NodeVariantSelect,
+  NodeVersionSelect,
+} from '@modules/node';
 import {
   NodeLauncherState,
   NodePropertyGroup,
@@ -23,24 +30,39 @@ type Props = {
     name: K,
     value: NodeLauncherState[K],
   ) => void;
+  onVersionChanged: (version: ProtocolVersion) => void;
+  onVariantChanged: (variant: string) => void;
 };
 
 export const NodeLauncherConfigAdvanced = ({
   isOpen,
   onNodeConfigPropertyChanged,
   onNodePropertyChanged,
+  onVersionChanged,
+  onVariantChanged,
 }: Props) => {
   const nodeLauncher = useRecoilValue(nodeLauncherAtoms.nodeLauncher);
+
+  const isSuperUser = useRecoilValue(authSelectors.isSuperUser);
 
   const { properties, firewall } = nodeLauncher;
 
   const handleFirewallChanged = (nextFirewall: FirewallRule[]) =>
     onNodePropertyChanged('firewall', nextFirewall);
 
-  const sortedProperties = sort(properties, { field: 'key' });
+  const sortedProperties = sort(properties ?? [], { field: 'key' });
 
   return (
     <div css={[styles.advancedConfig, isOpen && styles.advancedConfigOpen]}>
+      {isSuperUser && (
+        <>
+          <FormLabel>Variant</FormLabel>
+          <NodeVariantSelect onVariantChanged={onVariantChanged} />
+
+          <FormLabel>Version</FormLabel>
+          <NodeVersionSelect onVersionChanged={onVersionChanged} />
+        </>
+      )}
       <FormLabel hint="Add IP addresses that are allowed/rejected">
         Firewall Rules
       </FormLabel>

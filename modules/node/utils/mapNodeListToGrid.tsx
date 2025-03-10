@@ -1,16 +1,17 @@
 import { css } from '@emotion/react';
-import { TableGridCell, NodeStatus } from '@shared/components';
+import { TableGridCell, NodeItems } from '@shared/components';
 import { ProtocolIcon } from '@shared/components';
 import { Node } from '@modules/grpc/library/blockjoy/v1/node';
 import { escapeHtml } from '@shared/utils/escapeHtml';
-import { NodeTags } from '@modules/node';
+import { getNodeMetadataString, NodeTags } from '@modules/node';
+import { checkIfNodeInProgress } from './getNodeJobProgress';
 
 const styles = {
   blockchainNetwork: css`
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    text-transform: capitalize;
+    text-transform: lowercase;
     margin: 2px 0 10px;
     line-height: 1.6;
   `,
@@ -33,6 +34,7 @@ export const mapNodeListToGrid = (
 ) => {
   return nodeList?.map((node: Node) => {
     const hasTags = Boolean(node.tags?.tags.length);
+    const inProgress = checkIfNodeInProgress(node.nodeStatus);
 
     return {
       key: node.nodeId,
@@ -50,18 +52,23 @@ export const mapNodeListToGrid = (
             />
           }
           footer={
-            <NodeStatus
-              hasBorder
-              status={node.nodeStatus?.state!}
-              protocolStatus={node.nodeStatus?.protocol?.state}
-              jobs={node.jobs}
-            />
+            inProgress ? (
+              <NodeItems.ProtocolStatus
+                nodeStatus={node.nodeStatus}
+                jobs={node.jobs}
+                view="badge"
+              />
+            ) : (
+              <NodeItems.NodeStatus nodeStatus={node.nodeStatus} view="badge" />
+            )
           }
           middleRow={
             <>
               <NodeTags autoHide={false} node={node} itemsPerView={3} />
               <p css={styles.blockchainNetwork}>
-                {node.versionKey?.protocolKey} | {node.versionKey?.variantKey}
+                {node.protocolName}
+                {' | '}
+                {getNodeMetadataString(node.versionMetadata, node.versionKey!)}
               </p>
             </>
           }

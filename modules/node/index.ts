@@ -1,4 +1,5 @@
 export * from './constants/nodeList';
+export * from './constants/nodeState';
 
 export * from './components/NodeList/NodeCustomize/NodeCustomize';
 export * from './components/NodeList/NodeCustomize/NodeColumns/NodeColumns';
@@ -45,6 +46,9 @@ export * from './store/nodeLauncherSelectors';
 export * from './types/common';
 
 export * from './utils/getCreatedByName';
+export * from './utils/getNodeJobProgress';
+export * from './utils/getNodeMetadataString';
+export * from './utils/getNodeRpcUrl';
 export * from './utils/mapNodeListToRows';
 export * from './utils/resultsStatus';
 export * from './utils/sortLists';

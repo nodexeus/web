@@ -1,9 +1,8 @@
 import { Node } from '@modules/grpc/library/blockjoy/v1/node';
 import { SortOrder } from '@modules/grpc/library/blockjoy/common/v1/search';
 import { NodeSortField } from '@modules/grpc/library/blockjoy/v1/node';
-import { NodeStatus, SortingItem } from '@shared/components';
-import { NodeItems, NodeGroups } from '@shared/components';
-import { NodeTags } from '@modules/node';
+import { SortingItem, NodeItems, NodeGroups } from '@shared/components';
+import { checkIfNodeInProgress, NodeTags } from '@modules/node';
 import { NodeListLayoutGroupItem, NodeListItem } from '../types/common';
 
 const SORT_ACTIONS: TableHeaderAction[] = ['sort_asc', 'sort_desc'];
@@ -36,12 +35,16 @@ export const NODE_LIST_ITEMS: NodeListItem[] = [
   },
   {
     key: 'versionKey',
-    label: 'Protocol',
+    label: 'Type',
     minWidth: '110px',
     width: '180px',
     isVisible: false,
     component: (node: Node) => (
-      <NodeItems.ProtocolName versionKey={node.versionKey} showName={true} />
+      <NodeItems.ProtocolName
+        versionKey={node.versionKey}
+        versionMetadata={node.versionMetadata}
+        showName={true}
+      />
     ),
     actions: LAYOUT_ACTIONS,
   },
@@ -51,18 +54,16 @@ export const NODE_LIST_ITEMS: NodeListItem[] = [
     width: '200px',
     dataField: NodeSortField.NODE_SORT_FIELD_PROTOCOL_STATE,
     isVisible: false,
-    component: (node: Node) =>
-      node.nodeStatus?.protocol?.state &&
-      node.nodeStatus?.protocol?.state !== 'uploading' &&
-      node.nodeStatus?.protocol?.state !== 'downloading' ? (
-        <NodeStatus
-          protocolStatus={node.nodeStatus?.protocol?.state}
-          hasBorder={false}
-          view="simple"
+    component: (node: Node) => {
+      const inProgress = checkIfNodeInProgress(node.nodeStatus);
+
+      return (
+        <NodeItems.ProtocolStatus
+          nodeStatus={!inProgress ? node.nodeStatus : undefined}
+          jobs={node.jobs}
         />
-      ) : (
-        <>-</>
-      ),
+      );
+    },
     actions: ALL_ACTIONS,
   },
   {
@@ -107,15 +108,18 @@ export const NODE_LIST_ITEMS: NodeListItem[] = [
     width: '200px',
     dataField: NodeSortField.NODE_SORT_FIELD_NODE_STATE,
     isVisible: true,
-    component: (node: Node) => (
-      <NodeStatus
-        status={node.nodeStatus?.state!}
-        protocolStatus={node.nodeStatus?.protocol?.state}
-        jobs={node.jobs}
-        hasBorder={false}
-        view="simple"
-      />
-    ),
+    component: (node: Node) => {
+      const inProgress = checkIfNodeInProgress(node.nodeStatus);
+
+      return inProgress ? (
+        <NodeItems.ProtocolStatus
+          nodeStatus={node.nodeStatus}
+          jobs={node.jobs}
+        />
+      ) : (
+        <NodeItems.NodeStatus nodeStatus={node.nodeStatus} />
+      );
+    },
     actions: ALL_ACTIONS,
   },
   {
@@ -126,12 +130,7 @@ export const NODE_LIST_ITEMS: NodeListItem[] = [
     dataField: NodeSortField.NODE_SORT_FIELD_PROTOCOL_HEALTH,
     isVisible: true,
     component: (node: Node) => (
-      <NodeStatus
-        status={node.nodeStatus?.protocol?.health!}
-        hasBorder={false}
-        view="simple"
-        type="protocol"
-      />
+      <NodeItems.ProtocolHealth nodeStatus={node.nodeStatus} />
     ),
     actions: LAYOUT_ACTIONS,
   },
@@ -142,26 +141,6 @@ export const NODE_LIST_ITEMS: NodeListItem[] = [
     isVisible: false,
     component: (node: Node) => (
       <NodeItems.Version semanticVersion={node.semanticVersion} />
-    ),
-    actions: LAYOUT_ACTIONS,
-  },
-  {
-    key: 'ipAddress',
-    label: 'Ip Address',
-    width: '160px',
-    isVisible: true,
-    component: (node: Node) => (
-      <NodeItems.IpAddress ipAddress={node.ipAddress} />
-    ),
-    actions: LAYOUT_ACTIONS,
-  },
-  {
-    key: 'ipGateway',
-    label: 'Ip Gateway',
-    width: '160px',
-    isVisible: false,
-    component: (node: Node) => (
-      <NodeItems.IpGetaway ipGateway={node.ipGateway} />
     ),
     actions: LAYOUT_ACTIONS,
   },
@@ -204,21 +183,12 @@ export const NODE_LIST_ITEMS: NodeListItem[] = [
     actions: LAYOUT_ACTIONS,
   },
   {
-    key: 'cost',
-    label: 'Cost per month',
-    minWidth: '130px',
-    width: '160px',
-    isVisible: true,
-    component: (node: Node) => <NodeItems.Cost cost={node.cost} />,
-    actions: LAYOUT_ACTIONS,
-  },
-  {
-    key: 'dnsUrl',
+    key: 'dnsName',
     label: 'RPC Url',
     minWidth: '130px',
     width: '160px',
     isVisible: true,
-    component: (node: Node) => <NodeItems.RPCUrl dnsUrl={node.dnsUrl} />,
+    component: (node: Node) => <NodeItems.RPCUrl dnsName={node.dnsName} />,
     actions: LAYOUT_ACTIONS,
   },
 ];

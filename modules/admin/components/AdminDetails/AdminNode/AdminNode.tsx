@@ -1,7 +1,7 @@
 import { nodeClient, userClient } from '@modules/grpc';
 import { useRouter } from 'next/router';
 import { AdminDetail } from '../AdminDetail/AdminDetail';
-import { NextLink, NodeStatus } from '@shared/components';
+import { NextLink, NodeItems } from '@shared/components';
 import {
   Node,
   NodeServiceUpdateConfigRequest,
@@ -36,6 +36,9 @@ const ignoreItems = [
   'jobs',
   'config',
   'cost',
+  'versionKey',
+  'versionMetadata',
+  'semanticVersion',
 ];
 
 export const AdminNode = () => {
@@ -76,7 +79,7 @@ export const AdminNode = () => {
         { currentPage: 0, itemsPerPage: 1 },
       );
       const { nodeId } = nodeResults.nodes[0];
-      router.replace(`/admin?name=nodes&id=${id}`);
+      router.replace(`/admin?name=nodes&id=${nodeId}`);
       return await nodeClient.getNode(nodeId);
     } else {
       return await nodeClient.getNode(id as string);
@@ -124,6 +127,60 @@ export const AdminNode = () => {
         copyValue: node.nodeId,
       },
       {
+        id: 'protocolName',
+        label: 'Protocol Name',
+        data: (
+          <p>
+            <NextLink href={`/admin?name=protocols&id=${node.protocolId}`}>
+              {node.protocolName}
+            </NextLink>
+          </p>
+        ),
+        copyValue: node.protocolName,
+      },
+      {
+        id: 'protocolId',
+        label: 'Protocol Id',
+        data: (
+          <p>
+            <NextLink href={`/admin?name=protocols&id=${node.protocolId}`}>
+              {node.protocolId}
+            </NextLink>
+          </p>
+        ),
+        copyValue: node.protocolId,
+      },
+      {
+        id: 'nodeType',
+        label: 'Node Type',
+        data: node.versionMetadata.find((m) => m.metadataKey === 'node-type')
+          ?.value,
+      },
+      {
+        id: 'network',
+        label: 'Network',
+        data: node.versionMetadata.find((m) => m.metadataKey === 'network')
+          ?.value,
+      },
+      {
+        id: 'client',
+        label: 'Client',
+        data: node.versionMetadata.find((m) => m.metadataKey === 'client')
+          ?.value,
+      },
+      {
+        id: 'variant',
+        label: 'Variant Key',
+        data: node.versionKey?.variantKey,
+        copyValue: node.versionKey?.variantKey,
+      },
+      {
+        id: 'version',
+        label: 'Semantic Version',
+        data: node.semanticVersion,
+        copyValue: node.semanticVersion,
+      },
+      {
         id: 'cost',
         label: 'Cost',
         data: <Currency cents={node.cost?.amount?.amountMinorUnits} />,
@@ -143,32 +200,21 @@ export const AdminNode = () => {
       {
         id: 'status',
         label: 'Node State',
-        data: (
-          <NodeStatus
-            hasBorder={false}
-            status={node.nodeStatus?.state!}
-          ></NodeStatus>
-        ),
+        data: <NodeItems.NodeStatus nodeStatus={node.nodeStatus} />,
       },
       {
         id: 'health',
         label: 'Node Health',
-        data: (
-          <NodeStatus
-            hasBorder={false}
-            status={node.nodeStatus?.protocol?.health}
-            type="protocol"
-          ></NodeStatus>
-        ),
+        data: <NodeItems.ProtocolHealth nodeStatus={node.nodeStatus} />,
       },
       {
         id: 'protocolState',
         label: 'Protocol State',
         data: node.nodeStatus?.protocol?.state ? (
-          <NodeStatus
-            hasBorder={false}
-            protocolStatus={node.nodeStatus?.protocol?.state}
-          ></NodeStatus>
+          <NodeItems.ProtocolStatus
+            nodeStatus={node.nodeStatus}
+            jobs={node.jobs}
+          />
         ) : (
           '-'
         ),
@@ -177,18 +223,6 @@ export const AdminNode = () => {
         id: 'blockheight',
         label: 'Block Height',
         data: node.blockHeight?.toLocaleString('en-US'),
-      },
-      {
-        id: 'protocolName',
-        label: 'Protocol Name',
-        data: node.protocolName,
-        copyValue: node.protocolName,
-      },
-      {
-        id: 'protocolId',
-        label: 'Protocol Id',
-        data: node.protocolId,
-        copyValue: node.protocolId,
       },
       {
         id: 'orgName',

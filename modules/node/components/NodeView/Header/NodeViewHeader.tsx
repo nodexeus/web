@@ -8,6 +8,8 @@ import { typo } from 'styles/utils.typography.styles';
 import { styles } from './NodeViewHeader.styles';
 import { ProtocolIcon } from '@shared/components';
 import {
+  checkIfNodeInProgress,
+  getNodeMetadataString,
   NodeTags,
   NodeViewReportProblem,
   useNodeAdd,
@@ -22,7 +24,7 @@ import { useGetOrganizations } from '@modules/organization';
 import { useHostList } from '@modules/host';
 import { nodeClient } from '@modules/grpc';
 import { escapeHtml, useNavigate, useViewport } from '@shared/index';
-import { Copy, EditableTitle, NodeStatus } from '@shared/components';
+import { Copy, EditableTitle, NodeItems } from '@shared/components';
 
 export const NodeViewHeader = () => {
   const { navigate } = useNavigate();
@@ -109,6 +111,8 @@ export const NodeViewHeader = () => {
     setIsSaving(null);
   };
 
+  const inProgress = checkIfNodeInProgress(node?.nodeStatus);
+
   return (
     <>
       {actionView === 'delete' && (
@@ -154,6 +158,7 @@ export const NodeViewHeader = () => {
                   <ProtocolIcon
                     size="40px"
                     protocolName={node.versionKey?.protocolKey}
+                    hideTooltip
                   />
                 </div>
                 <div css={styles.name}>
@@ -175,9 +180,11 @@ export const NodeViewHeader = () => {
                     <div css={styles.detailsFooter}>
                       <div css={styles.nodeType}>
                         <p>
-                          {node.versionKey?.protocolKey}
-                          {' | '}
-                          {node.versionKey?.variantKey}
+                          {node.protocolName} |{' '}
+                          {getNodeMetadataString(
+                            node.versionMetadata,
+                            node.versionKey!,
+                          )}
                         </p>
                       </div>
                       {node!.createdAt && (
@@ -192,11 +199,18 @@ export const NodeViewHeader = () => {
                   </div>
                 </div>
                 <div css={styles.nodeStatus}>
-                  <NodeStatus
-                    status={node.nodeStatus?.state!}
-                    protocolStatus={node.nodeStatus?.protocol?.state}
-                    jobs={node.jobs}
-                  />
+                  {inProgress ? (
+                    <NodeItems.ProtocolStatus
+                      nodeStatus={node.nodeStatus}
+                      jobs={node.jobs}
+                      view="badge"
+                    />
+                  ) : (
+                    <NodeItems.NodeStatus
+                      nodeStatus={node.nodeStatus}
+                      view="badge"
+                    />
+                  )}
                 </div>
                 <div css={styles.actions}>
                   <NodeViewHeaderActions handleActionView={handleActionView} />
