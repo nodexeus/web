@@ -57,7 +57,7 @@ export const useUpdates = () => {
 
         addToOrganizations(org!);
 
-        if (createdBy === user?.userId) break;
+        if (createdBy.resourceId === user?.userId) break;
 
         showNotification(
           type,

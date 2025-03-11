@@ -22,13 +22,10 @@ export const useCommands = () => {
   }) => {
     setLoadingState('initializing');
 
-    const nodeIdAsString = nodeId ? nodeId.toString() : nodeId;
-    const hostIdAsString = hostId ? hostId.toString() : hostId;
-
     try {
       const response = await commandClient.listCommands(
-        nodeIdAsString,
-        hostIdAsString,
+        nodeId as string,
+        nodeId as string,
         exitCode,
       );
 
