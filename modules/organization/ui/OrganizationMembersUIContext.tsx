@@ -38,10 +38,6 @@ export function OrganizationMembersUIProvider({
   );
   const setQueryParams = useCallback((nextQueryParams: InitialQueryParams) => {
     setQueryParamsBase((prevQueryParams) => {
-      if (isFunction(nextQueryParams)) {
-        nextQueryParams = nextQueryParams(prevQueryParams);
-      }
-
       if (isEqual(prevQueryParams, nextQueryParams)) {
         return prevQueryParams;
       }

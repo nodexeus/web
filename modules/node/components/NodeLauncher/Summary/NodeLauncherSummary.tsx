@@ -10,7 +10,6 @@ import {
   OrganizationSelect,
   Pricing,
 } from '@shared/components';
-import { usePipedriveForm } from '@shared/index';
 import { hostAtoms } from '@modules/host';
 import {
   NodeRegionSelect,
@@ -80,38 +79,12 @@ export const NodeLauncherSummary = ({
 
   const [isLaunched, setIsLaunched] = useState(false);
 
-  const { nodeLauncherForm } = usePipedriveForm();
-
   useEffect(() => {
     setIsLaunching(false);
   }, []);
 
-  const handleIssueReport = async (isValid?: boolean) => {
-    if (!isValid) setIsLaunching(true);
-
-    const leadData: PipedriveAddLeadParams = {
-      nodeInfo: Object.values(nodeLauncherInfo)
-        .filter((value) => value)
-        .join(' | '),
-    };
-
-    if (!isValid) leadData.nodeIssues = nodeLauncherStatus.reasons.join(' | ');
-
-    await nodeLauncherForm({
-      leadData,
-      callback: () => {
-        if (!isValid) setIsLaunched(true);
-      },
-    });
-
-    if (!isValid) setIsLaunching(false);
-  };
-
   const handleNodeClicked = () => {
-    const isValid = !nodeLauncherStatus.isDisabled;
-
-    if (!billingExempt) handleIssueReport(isValid);
-    if (isValid) onCreateNodeClicked();
+    onCreateNodeClicked();
   };
 
   const handleHostChanged = (host: Host | null) => {

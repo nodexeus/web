@@ -14,7 +14,6 @@ import { handleTokenFromQueryString } from '@modules/auth/utils/handleTokenFromQ
 import { PasswordField } from '../PasswordField/PasswordField';
 import { usePasswordStrength } from '@modules/auth/hooks/usePasswordStrength';
 import { userClient } from '@modules/grpc';
-import { usePipedriveForm } from '@shared/index';
 import { styles } from './RegisterForm.styles';
 
 type RegisterForm = {
@@ -48,8 +47,6 @@ export function RegisterForm() {
 
   const { setPassword } = usePasswordStrength();
 
-  const { registerForm } = usePipedriveForm();
-
   const onSubmit = handleSubmit(
     async ({ email, password, firstName, lastName }) => {
       setIsLoading(true);
@@ -68,10 +65,6 @@ export function RegisterForm() {
         setIsLoading(false);
         return;
       }
-
-      registerForm({
-        user: { email, firstName, lastName } as User,
-      });
 
       setIsLoading(false);
       Router.push(Routes.verify);

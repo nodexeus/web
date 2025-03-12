@@ -1500,11 +1500,6 @@
   resolved "https://registry.yarnpkg.com/@types/json5/-/json5-0.0.29.tgz#ee28707ae94e11d2b827bcbe5270bcea7f3e71ee"
   integrity sha512-dRLjCWHYg4oaA77cxO64oO+7JwCwnIzkZPdrrC71jQmQtlhM556pwKo5bUzqvZndkVbeFLIIi+9TC40JNF5hNQ==
 
-"@types/mixpanel-browser@^2.47.1":
-  version "2.47.1"
-  resolved "https://registry.yarnpkg.com/@types/mixpanel-browser/-/mixpanel-browser-2.47.1.tgz#9f06b3ebf109f89dcd69288f9326dd0297c5b689"
-  integrity sha512-4Oif1hbjmStA6KI1OLer19rbKjlPd67ujp5Wipfa7rIskA/lOFZbp6kYsPjXD0f5AiiCQTbf0R/SnnzgOaKrbA==
-
 "@types/node@*":
   version "18.11.19"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-18.11.19.tgz#35e26df9ec441ab99d73e99e9aca82935eea216d"
@@ -3287,11 +3282,6 @@ minimist@^1.2.8:
   version "1.2.8"
   resolved "https://registry.yarnpkg.com/minimist/-/minimist-1.2.8.tgz#c1a464e7693302e082a075cee0c057741ac4772c"
   integrity sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==
-
-mixpanel-browser@^2.47.0:
-  version "2.47.0"
-  resolved "https://registry.yarnpkg.com/mixpanel-browser/-/mixpanel-browser-2.47.0.tgz#4e7fd3bb660c6f63443efbd169d1cd327db71ed4"
-  integrity sha512-Ldrva0fRBEIFWmEibBQO1PulfpJVF3pf28Guk09lDirDaSQqqU/xs9zQLwN2rL5VwVtsP1aD3JaCgaa98EjojQ==
 
 mqtt-packet@^9.0.0:
   version "9.0.0"

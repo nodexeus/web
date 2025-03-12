@@ -25,7 +25,7 @@ export const useCommands = () => {
     try {
       const response = await commandClient.listCommands(
         nodeId as string,
-        nodeId as string,
+        hostId as string,
         exitCode,
       );
 
