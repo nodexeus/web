@@ -96,14 +96,20 @@ const Layout = ({ children, isPageFlex, pageTitle }: LayoutProps) => {
   );
 };
 
-export const AppLayout = (props: LayoutProps) => {
+const LayoutWrapper = ({ children }: React.PropsWithChildren) => {
   const { stripe } = useStripeSetup();
 
+  if (stripe) return <Elements stripe={stripe}>{children}</Elements>;
+
+  return <>{children}</>;
+};
+
+export const AppLayout = (props: LayoutProps) => {
   return (
     <MasterLayout>
-      <Elements stripe={stripe}>
+      <LayoutWrapper>
         <Layout {...props} />
-      </Elements>
+      </LayoutWrapper>
     </MasterLayout>
   );
 };

@@ -16,6 +16,12 @@ export const getServerSideProps = <
 >(
   context: GetServerSidePropsContext<Q, D>,
 ) => {
+  if (!process.env.NEXT_PUBLIC_STRIPE_KEY) {
+    return {
+      notFound: true,
+    };
+  }
+
   let { slug } = context.query;
   if (!slug) {
     slug = undefined;
