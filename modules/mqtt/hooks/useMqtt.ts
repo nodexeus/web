@@ -150,9 +150,9 @@ export const useMqtt = (): IMqttHook => {
         setConnectStatus('Connect');
       });
 
-      client.on('packetreceive', () => {
-        client.pingResp = true;
-      });
+      // client.on('packetreceive', () => {
+      //   client.pingResp = true;
+      // });
     }
 
     return () => {
