@@ -9,6 +9,7 @@ import {
 } from '@modules/billing';
 import { organizationSelectors } from '@modules/organization';
 import { authAtoms } from '@modules/auth';
+import { env } from '@shared/constants/env';
 
 export const useBilling = () => {
   const defaultOrganization = useRecoilValue(
@@ -29,7 +30,8 @@ export const useBilling = () => {
   useEffect(() => {
     if (
       currentOrgId.current !== defaultOrganization?.orgId &&
-      permissionsLoadingState === 'finished'
+      permissionsLoadingState === 'finished' &&
+      env.stripeKey
     ) {
       getPaymentMethods();
       getBillingAddress();
