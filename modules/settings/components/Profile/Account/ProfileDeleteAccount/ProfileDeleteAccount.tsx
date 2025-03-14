@@ -20,7 +20,7 @@ export const ProfileDeleteAccount = () => {
 
   return (
     <DangerZone
-      elementName="Need to leave BlockJoy"
+      elementName="Need to leave BlockVisor"
       placeholder="your email address"
       elementNameToCompare={user?.email!}
       handleAction={handleDelete}

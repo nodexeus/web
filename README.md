@@ -1,4 +1,4 @@
-# Blockvisor App Web
+# BlockVisor App Web
 
 User-centric, intuitive dashboard designed for the seamless operation, management, and monitoring of Web3 nodes. It empowers users to deploy, control, and optimize decentralized network infrastructure effortlessly.
 

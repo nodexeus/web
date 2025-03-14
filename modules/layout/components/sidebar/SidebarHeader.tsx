@@ -1,7 +1,7 @@
 import { useRecoilValue } from 'recoil';
 import { layoutAtoms, layoutSelectors } from '@modules/layout';
 import { styles } from './SidebarHeader.styles';
-import Logo from '@public/assets/icons/app/BlockJoyLogoFull.svg';
+import Logo from '@public/assets/icons/app/BlockVisorLogoLarge.svg';
 
 export const SidebarHeader = () => {
   const isSidebarOpen = useRecoilValue(layoutSelectors.isSidebarOpen);

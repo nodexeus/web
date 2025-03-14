@@ -107,7 +107,7 @@ export default () => {
   if (isSuperUser) {
     blocks.unshift({
       id: 'admin',
-      title: 'BLOCKJOY',
+      title: 'SUPER USER',
       items: [
         {
           name: 'Admin',

@@ -1,16 +1,16 @@
-import { styles } from './BlockjoyLogo.styles';
+import { styles } from './BlockVisorLogo.styles';
 import { SvgIcon } from '@shared/components';
-import BlockJoyLogoBeta from '@public/assets/icons/app/BlockJoyLogoBeta.svg';
+import BlockVisor from '@public/assets/icons/app/BlockVisorLogoSmall.svg';
 
 type Props = {
   scale?: number;
 };
 
-export const BlockjoyLogo = ({ scale = 0.8 }: Props) => (
+export const BlockVisorLogo = ({ scale = 0.8 }: Props) => (
   <span css={[styles.wrapper]}>
     <span css={styles.icon} style={{ transform: `scale(${scale})` }}>
       <SvgIcon size="64px">
-        <BlockJoyLogoBeta />
+        <BlockVisor />
       </SvgIcon>
     </span>
   </span>

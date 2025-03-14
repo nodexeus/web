@@ -28,7 +28,7 @@ const columns = [
   },
 ];
 
-const blockjoyOrgs = [
+const blockvisorOrgs = [
   'f0210007-f981-4f53-8826-efa2509991d2',
   '2a98604b-8d01-4dda-8516-a3e99f564170',
   'c71f6380-0c26-479c-a220-463d1637844b',
@@ -147,7 +147,7 @@ export const AdminFinancesByOrg = () => {
           orgRevenueArray.filter(
             (org) =>
               (org.orgName === 'Personal' && org.nodes > 0) ||
-              (org.nodes > 0 && !blockjoyOrgs.includes(org.orgId)),
+              (org.nodes > 0 && !blockvisorOrgs.includes(org.orgId)),
           ),
           'revenue',
           SortOrder.SORT_ORDER_DESCENDING,

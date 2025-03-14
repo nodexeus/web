@@ -93,7 +93,7 @@ export function LoginForm() {
     <>
       {invitation_id && invited && (
         <Alert isSuccess>
-          You've been invited to a BlockJoy organization. Please login to
+          You've been invited to a BlockVisor organization. Please login to
           accept.
         </Alert>
       )}

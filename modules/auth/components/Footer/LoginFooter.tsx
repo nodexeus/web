@@ -23,7 +23,7 @@ export function LoginFooter() {
         </Link>
       </div>
       <div css={[footerLoginAccount]}>
-        <p css={[colors.text2]}>Don't have a BlockJoy account?</p>
+        <p css={[colors.text2]}>Don't have a BlockVisor account?</p>
         <Link
           css={[link, linkPrimary, linkUnderline]}
           href={ROUTES.REGISTER}
