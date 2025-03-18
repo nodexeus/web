@@ -1,15 +1,9 @@
-import LogoLarge from '@public/assets/icons/app/BlockJoyLogoLarge.svg';
-import LogoSmall from '@public/assets/icons/app/BlockJoyLogoSmall.svg';
-import {
-  logo,
-  logoLink,
-  logoPrimary,
-  logoLinkCentered,
-  logoFaded,
-} from './Logo.styles';
+import LogoLarge from '@public/assets/icons/app/BlockVisorLogoLarge.svg';
+import LogoSmall from '@public/assets/icons/app/BlockVisorLogoSmall.svg';
+import { logo, logoPrimary, logoLinkCentered, logoFaded } from './Logo.styles';
 import { display } from 'styles/utils.display.styles';
 
-type IconType = 'blockvisor-small' | 'faded' | 'blockjoy-large';
+type IconType = 'blockvisor-small' | 'faded' | 'blockvisor-large';
 
 type Props = {
   type?: IconType;
@@ -19,10 +13,10 @@ type Props = {
 export function Logo({ type = 'blockvisor-small', centered = false }: Props) {
   const renderIcon = (type: IconType) => {
     switch (type) {
-      case 'blockjoy-large':
+      case 'blockvisor-large':
         return (
           <>
-            <span css={[display.visuallyHidden]}>BlockJoy</span>
+            <span css={[display.visuallyHidden]}>BlockVisor</span>
             <LogoLarge />
           </>
         );
@@ -36,7 +30,7 @@ export function Logo({ type = 'blockvisor-small', centered = false }: Props) {
       default:
         return (
           <span css={[logoPrimary]}>
-            <span css={[display.visuallyHidden]}>BlockJoy</span>
+            <span css={[display.visuallyHidden]}>BlockVisor</span>
             <LogoSmall />
           </span>
         );

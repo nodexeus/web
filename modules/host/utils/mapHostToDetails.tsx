@@ -20,7 +20,7 @@ export const mapHostToDetails = (host: Host) => {
     { label: 'Version', data: host?.bvVersion || '-' },
     {
       label: 'OS',
-      data: <HostOs os={host.os} osVersion={host.osVersion} /> || '-',
+      data: host.os ? <HostOs os={host.os} osVersion={host.osVersion} /> : '-',
     },
     { label: 'IP Address', data: host?.ipAddress || '-' },
     { label: 'Gateway IP', data: host?.ipGateway || '-' },

@@ -28,7 +28,6 @@ import {
 } from '@modules/node';
 import { organizationSelectors } from '@modules/organization';
 import { ROUTES, useNavigate } from '@shared/index';
-import { Mixpanel } from '@shared/services/mixpanel';
 import { usePricing } from '@modules/billing';
 import { ResourceAffinity } from '@modules/grpc/library/blockjoy/common/v1/node';
 import { imageClient, protocolClient } from '@modules/grpc';
@@ -357,10 +356,6 @@ export const useNodeLauncherHandlers = ({
   }, [fulfilReqs]);
 
   useEffect(() => {
-    Mixpanel.track('Launch Node - Opened');
-  }, []);
-
-  useEffect(() => {
     if (!isSuperUser && !defaultOrganization?.orgId) {
       return;
     }
@@ -373,13 +368,11 @@ export const useNodeLauncherHandlers = ({
   }, [defaultOrganization?.orgId, selectedImage]);
 
   const handleHostsChanged = (hosts: NodeLauncherHost[] | null) => {
-    Mixpanel.track('Launch Node - Host Changed');
     setSelectedHosts(hosts);
     setSelectedRegions(null);
   };
 
   const handleRegionsChanged = (regions: NodeLauncherRegion[] | null) => {
-    Mixpanel.track('Launch Node - Region Changed');
     setSelectedRegions(regions);
   };
 
@@ -396,9 +389,6 @@ export const useNodeLauncherHandlers = ({
 
   const handleProtocolSelected = (protocol: Protocol) => {
     setSelectedProtocol(protocol);
-    Mixpanel.track('Launch Node - Protocol Selected', {
-      protocol: protocol.name,
-    });
   };
 
   const handleNodePropertyChanged = <K extends keyof NodeLauncherState>(
@@ -409,11 +399,6 @@ export const useNodeLauncherHandlers = ({
       ...nodeLauncherOldState,
       [name]: value,
     }));
-
-    Mixpanel.track('Launch Node - Property Changed', {
-      propertyName: name,
-      propertyValue: value,
-    });
   };
 
   const handleNodeConfigPropertyChanged = (
@@ -446,20 +431,13 @@ export const useNodeLauncherHandlers = ({
       ...nodeLauncherOldState,
       properties: propertiesCopy,
     }));
-
-    Mixpanel.track('Launch Node - Node Config Property Changed', {
-      propertyName: updatedProperty.keyGroup,
-      propertyValue: value?.toString(),
-    });
   };
 
   const handleVersionChanged = (version: ProtocolVersion) => {
-    Mixpanel.track('Launch Node - Version Changed');
     setSelectedVersion(version);
   };
 
   const handleVariantChanged = (variantKey: string) => {
-    Mixpanel.track('Launch Node - Variant Changed');
     resetSelectedVariantSegments();
     setSelectedVariant({
       protocol: selectedProtocol?.key!,
@@ -518,8 +496,6 @@ export const useNodeLauncherHandlers = ({
     await createNode(
       params,
       (nodeId: string) => {
-        Mixpanel.track('Launch Node - Node Launched');
-
         if (!isSingleNode) toast.success('All nodes launched');
 
         navigate(isSingleNode ? ROUTES.NODE(nodeId) : ROUTES.NODES, () => {

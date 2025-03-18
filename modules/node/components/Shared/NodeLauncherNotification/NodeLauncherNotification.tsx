@@ -27,17 +27,6 @@ export const NodeLauncherNotification = ({
               working on it and will be in touch!
             </p>
             <br />
-            <p>
-              For immediate assistance please reach out on{' '}
-              <a
-                css={styles.link}
-                href="https://t.me/blockjoyweb3"
-                target="_blank"
-              >
-                Telegram
-              </a>
-              .
-            </p>
           </>
         }
         additionalStyles={styles.emptyColumn}

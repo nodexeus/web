@@ -3,6 +3,7 @@ import { useRecoilValue } from 'recoil';
 import { useRouter } from 'next/router';
 import { Content, PageTitle } from '@shared/components';
 import { ROUTES } from '@shared/index';
+import { env } from '@shared/constants/env';
 import { useApiKeys } from '@modules/settings';
 import { authSelectors } from '@modules/auth';
 import {
@@ -42,7 +43,8 @@ export const SettingsWrapper = ({ children, scope = 'user' }: Props) => {
   }, [router.isReady]);
 
   const sidebarItems = items.filter((item) => {
-    if (item.name === 'billing' && !canGetBillingDetails) return false;
+    if (item.name === 'billing' && (!canGetBillingDetails || !env.stripeKey))
+      return false;
     return true;
   });
 

@@ -2,6 +2,7 @@ import { useRecoilState } from 'recoil';
 import { protocolClient } from '@modules/grpc';
 import { ProtocolServiceGetPricingRequest } from '@modules/grpc/library/blockjoy/v1/protocol';
 import { Amount } from '@modules/grpc/library/blockjoy/common/v1/currency';
+import { env } from '@shared/constants/env';
 import { billingAtoms } from '@modules/billing';
 
 type UsePricingHook = {
@@ -17,6 +18,8 @@ export const usePricing = (): UsePricingHook => {
   );
 
   const getPrice = async (params: ProtocolServiceGetPricingRequest) => {
+    if (!env.stripeKey) return;
+
     try {
       setPriceLoadingState('loading');
 

@@ -4,7 +4,7 @@ import { opacity } from 'styles/utils.opacity.styles';
 import { typo } from 'styles/utils.typography.styles';
 import { styles } from './SidebarFooter.styles';
 import { spacing } from 'styles/utils.spacing.styles';
-import { BlockjoyLogo } from '@shared/components';
+import { BlockVisorLogo } from '@shared/components';
 import { layoutSelectors } from '@modules/layout';
 
 export function SidebarFooter() {
@@ -21,7 +21,7 @@ export function SidebarFooter() {
           spacing.top.medium,
         ]}
       >
-        <BlockjoyLogo />
+        <BlockVisorLogo />
         <p
           css={[
             typo.micro,
@@ -31,7 +31,7 @@ export function SidebarFooter() {
           ]}
           className="sidebar-copy"
         >
-          Dashboard created by BlockJoy. All rights reserved.
+          Dashboard created by BlockVisor. All rights reserved.
           <br />
           Version: {process.env.NEXT_PUBLIC_SHORT_SHA || 'dev'}
         </p>

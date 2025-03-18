@@ -12,4 +12,13 @@ Component.getLayout = function getLayout(page: React.ReactNode) {
   );
 };
 
+export async function getServerSideProps() {
+  if (!process.env.NEXT_PUBLIC_STRIPE_KEY) {
+    return {
+      notFound: true,
+    };
+  }
+  return { props: {} };
+}
+
 export default Component;

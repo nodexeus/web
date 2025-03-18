@@ -66,11 +66,11 @@ export const SubscriptionActivation = ({
       handleClose={handleBack}
     >
       <h2 css={[typo.medium, spacing.bottom.medium]}>
-        Activate Your BlockJoy Subscription
+        Activate Your BlockVisor Subscription
       </h2>
       <div css={[spacing.top.medium, spacing.bottom.medium]}>
         <p css={spacing.bottom.small}>
-          You are about to activate your BlockJoy subscription.
+          You are about to activate your BlockVisor subscription.
         </p>
         <p css={spacing.bottom.medium}>
           Once activated, you will have access to all our premium features.

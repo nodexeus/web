@@ -15,7 +15,7 @@ type Totals = {
   totalNegativeHosts: number;
 };
 
-const blockjoyOrgs = [
+const blockvisorOrgs = [
   'f0210007-f981-4f53-8826-efa2509991d2',
   '2a98604b-8d01-4dda-8516-a3e99f564170',
   'c71f6380-0c26-479c-a220-463d1637844b',
@@ -33,7 +33,7 @@ export const AdminDashboardFinances = () => {
       });
 
       const customerNodes = nodes.filter(
-        (node) => !blockjoyOrgs.includes(node.orgId),
+        (node) => !blockvisorOrgs.includes(node.orgId),
       );
 
       const { hosts } = await hostClient.listHosts(undefined, undefined, {

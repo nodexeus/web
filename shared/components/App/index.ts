@@ -1,4 +1,4 @@
-export * from './BlockjoyLogo/BlockjoyLogo';
+export * from './BlockVisorLogo/BlockVisorLogo';
 export * from './Logo/Logo';
 export * from './QuoteBlock/QuoteBlock';
 export * from './EmptyColumn/EmptyColum';

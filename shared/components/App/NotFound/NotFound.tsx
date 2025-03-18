@@ -8,7 +8,7 @@ export const NotFound = () => (
   <main css={styles.page}>
     <QuoteBlock>
       <figure css={[spacing.bottom.large]}>
-        <Logo type="blockjoy-large" />
+        <Logo type="blockvisor-large" />
       </figure>
       <h2
         css={[

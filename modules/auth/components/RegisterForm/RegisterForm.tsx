@@ -14,7 +14,6 @@ import { handleTokenFromQueryString } from '@modules/auth/utils/handleTokenFromQ
 import { PasswordField } from '../PasswordField/PasswordField';
 import { usePasswordStrength } from '@modules/auth/hooks/usePasswordStrength';
 import { userClient } from '@modules/grpc';
-import { usePipedriveForm } from '@shared/index';
 import { styles } from './RegisterForm.styles';
 
 type RegisterForm = {
@@ -48,8 +47,6 @@ export function RegisterForm() {
 
   const { setPassword } = usePasswordStrength();
 
-  const { registerForm } = usePipedriveForm();
-
   const onSubmit = handleSubmit(
     async ({ email, password, firstName, lastName }) => {
       setIsLoading(true);
@@ -68,10 +65,6 @@ export function RegisterForm() {
         setIsLoading(false);
         return;
       }
-
-      registerForm({
-        user: { email, firstName, lastName } as User,
-      });
 
       setIsLoading(false);
       Router.push(Routes.verify);
@@ -96,7 +89,7 @@ export function RegisterForm() {
     <>
       {invited && (
         <Alert isSuccess>
-          You've been invited to a BlockJoy organization. Please create an
+          You've been invited to a BlockVisor organization. Please create an
           account to accept.
         </Alert>
       )}
@@ -165,14 +158,11 @@ export function RegisterForm() {
             Create Account
           </Button>
           <div css={styles.marketing}>
-            By creating an account, you agree to BlockJoy's{' '}
-            <a href="https://www.blockjoy.com/terms-of-use">
-              Terms & Conditions
-            </a>
+            By creating an account, you agree to BlockVisor's{' '}
+            <a href="#">Terms & Conditions</a>
             {` `}
             and{` `}
-            <a href="https://www.blockjoy.com/privacy-policy">Privacy Policy</a>
-            .
+            <a href="#">Privacy Policy</a>.
           </div>
           {registerError && (
             <p css={[typo.smaller, colors.warning, spacing.top.medium]}>

@@ -15,7 +15,6 @@ import {
   useInvitations,
 } from '@modules/organization';
 import { readToken } from '@shared/utils/readToken';
-import { Mixpanel } from '@shared/services/mixpanel';
 import { toast } from 'react-toastify';
 
 type SignInParams = {
@@ -49,8 +48,6 @@ export function useSignIn() {
 
     try {
       const userData = await userClient.getUser(userId);
-
-      Mixpanel.identify(userData.email);
 
       repository?.updateIdentity(userData);
       setUser((current: any) => ({
