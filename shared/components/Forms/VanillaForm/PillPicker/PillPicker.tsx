@@ -6,6 +6,7 @@ type PillPickerProps<T = any> = {
   items: T[];
   selectedItem?: T;
   isCompact?: boolean;
+  isDisabled?: boolean;
   noBottomMargin?: boolean;
   onChange: (item: T) => void;
 };
@@ -17,6 +18,7 @@ export const PillPicker = <
   items,
   selectedItem,
   isCompact,
+  isDisabled,
   noBottomMargin,
   onChange,
 }: PillPickerProps<T>) => {
@@ -37,7 +39,7 @@ export const PillPicker = <
             onKeyDown={(e) => handleKeyDown(e, item)}
             checked={item.id === selectedItem?.id}
             value={item.id}
-            disabled={item.isDisabled}
+            disabled={item.isDisabled || isDisabled}
           />
           <label
             htmlFor={name + item.name}

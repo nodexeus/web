@@ -3,18 +3,21 @@ import { PillPicker } from '@shared/components';
 import { kebabToCapitalized } from 'utils';
 
 type Props = {
+  isDisabled?: boolean;
   noBottomMargin?: boolean;
   propertyGroup: NodePropertyGroup;
   onPropertyChanged: (key: string, keyGroup: string, value: string) => void;
 };
 
 export const ImagePropertyEnum = ({
+  isDisabled,
   noBottomMargin,
   propertyGroup,
   onPropertyChanged,
 }: Props) => {
   return (
     <PillPicker
+      isDisabled={isDisabled}
       noBottomMargin={noBottomMargin}
       name={propertyGroup.keyGroup!}
       onChange={(item: { id: string | undefined; name: string }) => {

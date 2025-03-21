@@ -1,9 +1,10 @@
-import { ChangeEvent, KeyboardEvent, useEffect, useState } from 'react';
+import { ChangeEvent, KeyboardEvent, useState } from 'react';
 import { styles } from './Textbox.styles';
 
 type Props = {
   isRequired: boolean;
   isError?: boolean;
+  isDisabled?: boolean;
   defaultValue?: string;
   name: string;
   tabIndex?: number;
@@ -20,6 +21,7 @@ export const Textbox = ({
   name,
   isRequired,
   isError,
+  isDisabled,
   type = 'text',
   tabIndex,
   noBottomMargin = false,
@@ -45,6 +47,7 @@ export const Textbox = ({
         defaultValue={defaultValue}
         autoComplete={type === 'password' ? 'new-password' : 'off'}
         required={isRequired}
+        disabled={isDisabled}
         css={[
           styles.input(noBottomMargin),
           isRequired && styles.inputRequired,

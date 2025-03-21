@@ -5,6 +5,7 @@ import { Button, FormError, Input, Modal } from '@shared/components';
 import { display } from 'styles/utils.display.styles';
 import { spacing } from 'styles/utils.spacing.styles';
 import { styles } from './DeleteModal.styles';
+import { colors } from 'styles/utils.colors.styles';
 
 type Props = {
   portalId: string;
@@ -15,9 +16,10 @@ type Props = {
   entityName: string;
   isDisabled?: boolean;
   isDisabledMessage?: string | ReactNode;
+  error?: string;
+  warningMessage?: string;
   onHide: VoidFunction;
   onSubmit: VoidFunction;
-  error?: string;
 };
 
 export const DeleteModal = ({
@@ -29,9 +31,10 @@ export const DeleteModal = ({
   entityName,
   isDisabled,
   isDisabledMessage,
+  error,
+  warningMessage,
   onHide,
   onSubmit,
-  error,
 }: Props) => {
   const form = useForm<{ name: string }>({ mode: 'onChange' });
   const { isValid } = form.formState;
@@ -81,6 +84,11 @@ export const DeleteModal = ({
                   validate: (name) => doNamesMatch(name),
                 }}
               />
+            )}
+            {Boolean(warningMessage) && (
+              <div css={[colors.warning, spacing.top.medium]}>
+                {warningMessage}
+              </div>
             )}
             <div css={[styles.actions, spacing.top.medium]}>
               <Button

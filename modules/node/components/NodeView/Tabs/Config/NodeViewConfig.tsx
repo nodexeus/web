@@ -14,6 +14,7 @@ import { renderNodeConfigControl } from '@modules/node/utils/renderNodeConfigCon
 import {
   Button,
   ButtonGroup,
+  DeleteModal,
   FormLabelCaps,
   sort,
   Switch,
@@ -25,11 +26,14 @@ import {
   FirewallRule,
 } from '@modules/grpc/library/blockjoy/common/v1/config';
 import { authSelectors } from '@modules/auth';
+import { escapeHtml } from '@shared/utils/escapeHtml';
 
 export const NodeViewConfig = () => {
   const { node, nodeImage, isLoading, updateNode } = useNodeView();
 
   const isSuperUser = useRecoilValue(authSelectors.isSuperUser);
+
+  const [isConfirmingUpdate, setIsConfirmingUpdate] = useState(false);
 
   const [isLoadingConfig, setIsLoadingConfig] = useState(true);
 
@@ -80,7 +84,15 @@ export const NodeViewConfig = () => {
     });
   };
 
-  const handleSave = async () => {
+  const handleUpdate = () => {
+    if (isPropertiesDirty) {
+      setIsConfirmingUpdate(!isConfirmingUpdate);
+    } else {
+      handleUpdateConfirm();
+    }
+  };
+
+  const handleUpdateConfirm = async () => {
     if (!node?.config?.firewall) return;
 
     setIsSaving(true);
@@ -108,6 +120,8 @@ export const NodeViewConfig = () => {
     );
 
     setIsSaving(false);
+
+    setIsConfirmingUpdate(false);
   };
 
   const buildConfig = () => {
@@ -169,68 +183,97 @@ export const NodeViewConfig = () => {
     !nodeConfig?.properties ? [] : nodeConfig?.properties.map((p) => p.value),
   );
 
+  const isPropertiesDirty = !isEqual(
+    sort(editedValues),
+    sort(originalPropertyValues),
+  );
+
   const isDirty =
-    !isEqual(sort(editedValues), sort(originalPropertyValues)) ||
+    isPropertiesDirty ||
     !isEqual(nodeConfig?.firewall, originalFirewall) ||
     nodeConfig?.autoUpgrade !== node?.autoUpgrade;
 
   const isValid = nodeConfig?.properties?.every(
     (property) =>
-      property.uiType === UiType.UI_TYPE_TEXT ||
-      property.uiType === UiType.UI_TYPE_PASSWORD ||
-      property.value,
+      property.uiType === UiType.UI_TYPE_ENUM ||
+      property.uiType === UiType.UI_TYPE_SWITCH ||
+      ((property.uiType === UiType.UI_TYPE_TEXT ||
+        property.uiType === UiType.UI_TYPE_PASSWORD) &&
+        property.value),
   );
 
   return (isLoading && !node?.nodeId) || isLoadingConfig ? (
     <></>
   ) : (
-    <div css={styles.wrapper}>
-      <div css={styles.row}>
-        <FormLabelCaps noBottomMargin>Auto Upgrade</FormLabelCaps>
-        {isSuperUser ? (
-          <Switch
-            noBottomMargin
-            checked={nodeConfig?.autoUpgrade}
-            tooltip=""
-            disabled={false}
-            name="autoUpgrade"
-            onChange={(name: string, value: boolean) =>
-              handleAutoUpgradeChanged(value)
-            }
-          />
-        ) : (
-          <LockedSwitch isChecked={node!.autoUpgrade} />
-        )}
-      </div>
-
-      <div css={styles.row}>
-        <FormLabelCaps noBottomMargin>Firewall Rules</FormLabelCaps>
-        <NodeFirewallRules
-          onFirewallChanged={handleFirewallChanged}
-          rules={nodeConfig?.firewall}
+    <>
+      {isConfirmingUpdate && (
+        <DeleteModal
+          portalId="update-node-modal"
+          elementName={escapeHtml(node?.displayName! || node?.nodeName!)}
+          entityName="Node"
+          type="Update"
+          warningMessage="Warning: Updating node config properties will trigger a node restart."
+          onHide={() => setIsConfirmingUpdate(false)}
+          onSubmit={handleUpdateConfirm}
         />
-      </div>
-
-      {sortedProperties.map((propertyGroup) => (
-        <div css={styles.row} key={propertyGroup.keyGroup}>
-          <FormLabelCaps noBottomMargin>
-            {propertyGroup.displayGroup ||
-              kebabToCapitalized(propertyGroup.keyGroup || propertyGroup.key)}
-          </FormLabelCaps>
-          {renderNodeConfigControl(propertyGroup, handlePropertyChanged, true)}
+      )}
+      <div css={styles.wrapper}>
+        <div css={styles.row}>
+          <FormLabelCaps noBottomMargin>Auto Upgrade</FormLabelCaps>
+          {isSuperUser ? (
+            <Switch
+              noBottomMargin
+              checked={nodeConfig?.autoUpgrade}
+              tooltip=""
+              disabled={false}
+              name="autoUpgrade"
+              onChange={(name: string, value: boolean) =>
+                handleAutoUpgradeChanged(value)
+              }
+            />
+          ) : (
+            <LockedSwitch isChecked={node!.autoUpgrade} />
+          )}
         </div>
-      ))}
 
-      <ButtonGroup>
-        <Button
-          size="small"
-          loading={isSaving}
-          disabled={!isDirty || !isValid || isSaving}
-          onClick={handleSave}
-        >
-          Update
-        </Button>
-      </ButtonGroup>
-    </div>
+        <div css={styles.row}>
+          <FormLabelCaps noBottomMargin>Firewall Rules</FormLabelCaps>
+          <NodeFirewallRules
+            onFirewallChanged={handleFirewallChanged}
+            rules={nodeConfig?.firewall}
+          />
+        </div>
+
+        {sortedProperties.map((propertyGroup) => {
+          const displayName =
+            (propertyGroup.uiType !== UiType.UI_TYPE_ENUM &&
+              propertyGroup.properties?.[0].displayName) ||
+            propertyGroup.displayGroup ||
+            kebabToCapitalized(propertyGroup.keyGroup || propertyGroup.key);
+
+          return (
+            <div css={styles.row} key={propertyGroup.keyGroup}>
+              <FormLabelCaps noBottomMargin>{displayName}</FormLabelCaps>
+              {renderNodeConfigControl(
+                propertyGroup,
+                handlePropertyChanged,
+                true,
+              )}
+            </div>
+          );
+        })}
+
+        <ButtonGroup>
+          <Button
+            size="small"
+            loading={isSaving}
+            disabled={!isDirty || !isValid || isSaving}
+            onClick={handleUpdate}
+          >
+            Update
+          </Button>
+        </ButtonGroup>
+      </div>
+    </>
   );
 };
