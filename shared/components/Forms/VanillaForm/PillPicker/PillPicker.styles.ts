@@ -32,10 +32,15 @@ export const styles = {
       transition: none;
     }
 
-    :disabled + label span {
+    :disabled:not(:checked) + label span {
       color: rgb(255 255 255 / 25%);
       border-color: rgb(255 255 255 / 5%);
       background: transparent;
+      cursor: not-allowed;
+    }
+
+    :disabled:checked + label span {
+      opacity: 0.5;
       cursor: not-allowed;
     }
 

@@ -23,7 +23,7 @@ export const styles = {
       scale: 0;
 
       :disabled ~ .switch {
-        opacity: 0.4;
+        opacity: 0.5;
         cursor: not-allowed;
       }
 

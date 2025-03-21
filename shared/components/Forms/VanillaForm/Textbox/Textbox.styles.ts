@@ -30,6 +30,12 @@ export const styles = {
         ${!noBottomMargin && `margin-bottom: 20px;`};
         opacity: 0.8;
 
+        :disabled {
+          cursor: not-allowed;
+          opacity: 0.5;
+          color: ${theme.colorDefault};
+        }
+
         &,
         p,
         path {

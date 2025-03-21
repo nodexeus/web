@@ -2,12 +2,14 @@ import { NodePropertyGroup } from '@modules/node/types/common';
 import { Switch } from '@shared/components';
 
 type Props = {
+  isDisabled?: boolean;
   noBottomMargin?: boolean;
   propertyGroup: NodePropertyGroup;
   onPropertyChanged: (key: string, keyGroup: string, value: string) => void;
 };
 
 export const ImagePropertySwitch = ({
+  isDisabled,
   noBottomMargin,
   propertyGroup,
   onPropertyChanged,
@@ -28,6 +30,7 @@ export const ImagePropertySwitch = ({
 
   return (
     <Switch
+      disabled={isDisabled}
       checked={propertyGroup.value.includes('on')}
       name={propertyGroup.keyGroup!}
       onChange={handleChange}

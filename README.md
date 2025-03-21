@@ -62,10 +62,7 @@ Build an image
 
 ```
 docker build --build-arg NEXT_PUBLIC_VERCEL_ENV=production \
---build-arg NEXT_PUBLIC_SUPPORT_EMAIL=value \
---build-arg NEXT_PUBLIC_API_URL=value \
---build-arg NEXT_PUBLIC_ORG_ID=value \
---build-arg NEXT_PUBLIC_LOADING_DURATION=value -t someTag .
+--build-arg NEXT_PUBLIC_API_URL=value -t someTag .
 ```
 
 Run

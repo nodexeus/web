@@ -13,6 +13,8 @@ export const renderNodeConfigControl = (
 ) => {
   const property = propertyGroup.properties[0];
 
+  const isDisabled = !property.dynamicValue;
+
   const handleTextboxChanged = (name: string, value: string) => {
     onPropertyChanged(name, propertyGroup.keyGroup!, value);
   };
@@ -24,6 +26,7 @@ export const renderNodeConfigControl = (
           defaultValue={propertyGroup.value || property.defaultValue}
           type="password"
           isRequired
+          isDisabled={isDisabled}
           name={property.key}
           onChange={handleTextboxChanged}
           noBottomMargin={noBottomMargin}
@@ -35,6 +38,7 @@ export const renderNodeConfigControl = (
           defaultValue={propertyGroup.value || property.defaultValue}
           type="text"
           isRequired
+          isDisabled={isDisabled}
           name={property.key}
           onChange={handleTextboxChanged}
           noBottomMargin={noBottomMargin}
@@ -43,6 +47,7 @@ export const renderNodeConfigControl = (
     case UiType.UI_TYPE_ENUM:
       return (
         <ImagePropertyEnum
+          isDisabled={isDisabled}
           onPropertyChanged={onPropertyChanged}
           propertyGroup={propertyGroup}
           noBottomMargin={noBottomMargin}
@@ -51,6 +56,7 @@ export const renderNodeConfigControl = (
     case UiType.UI_TYPE_SWITCH:
       return (
         <ImagePropertySwitch
+          isDisabled={isDisabled}
           onPropertyChanged={onPropertyChanged}
           propertyGroup={propertyGroup}
           noBottomMargin={noBottomMargin}
