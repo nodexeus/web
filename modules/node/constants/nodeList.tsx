@@ -145,15 +145,13 @@ export const NODE_LIST_ITEMS: NodeListItem[] = [
     actions: LAYOUT_ACTIONS,
   },
   {
-    key: 'blockHeight',
-    label: 'Block Height',
+    key: 'apr',
+    label: 'APR',
     minWidth: '140px',
     width: '250px',
-    dataField: NodeSortField.NODE_SORT_FIELD_BLOCK_HEIGHT,
+    dataField: NodeSortField.NODE_SORT_FIELD_APR,
     isVisible: true,
-    component: (node: Node) => (
-      <NodeItems.BlockHeight blockHeight={node.blockHeight} />
-    ),
+    component: (node: Node) => <NodeItems.APR apr={node.apr} />,
     actions: ALL_ACTIONS,
   },
   {

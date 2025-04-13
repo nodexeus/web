@@ -85,10 +85,10 @@ const columns: AdminListColumn[] = [
     filterDropdownMinWidth: 220,
   },
   {
-    name: 'blockHeight',
+    name: 'apr',
     width: '190px',
     isVisible: false,
-    sortField: NodeSortField.NODE_SORT_FIELD_BLOCK_HEIGHT,
+    sortField: NodeSortField.NODE_SORT_FIELD_APR,
   },
   {
     name: 'protocolName',

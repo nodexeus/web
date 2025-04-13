@@ -23,17 +23,17 @@ export const styles = {
     font-size: 26px;
     font-style: normal;
   `,
-  blockheightWrapper: css`
+  aprWrapper: css`
     display: flex;
     align-items: center;
     padding: 0 0 20px;
   `,
-  blockheightLoader: css`
+  aprLoader: css`
     display: flex;
     gap: 8px;
     padding-top: 10px;
   `,
-  blockheightLoaderText: (theme: ITheme) => css`
+  aprLoaderText: (theme: ITheme) => css`
     color: ${theme.colorDefault};
     font-size: 16px;
   `,

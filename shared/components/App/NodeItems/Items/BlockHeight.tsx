@@ -6,14 +6,14 @@ import { NodeStatePresentationOptions } from '@modules/node';
 import IconBlockHeight from '@public/assets/icons/app/BlockHeight.svg';
 import IconCog from '@public/assets/icons/common/Cog.svg';
 
-type Props = Partial<Pick<Node, 'blockHeight'>> & {
+type Props = Partial<Pick<Node, 'apr'>> & {
   view?: NodeStatusView;
 };
 
-export const BlockHeight = ({ blockHeight, view = 'default' }: Props) => {
-  const Icon = blockHeight! > -1 ? IconBlockHeight : IconCog;
+export const Apr = ({ apr, view = 'default' }: Props) => {
+  const Icon = apr! > -1 ? IconBlockHeight : IconCog;
   const options: NodeStatePresentationOptions =
-    blockHeight! > -1 ? {} : { iconSpining: true };
+    apr! > -1 ? {} : { iconSpining: true };
 
   return (
     <NodePartials.NodeStatusTextWIcon
@@ -23,21 +23,21 @@ export const BlockHeight = ({ blockHeight, view = 'default' }: Props) => {
       {...(view === 'default' && {
         iconSize: '14px',
       })}
-      additionalTextStyles={[styles.text(view, blockHeight)]}
+      additionalTextStyles={[styles.text(view, apr)]}
     >
-      {blockHeight?.toLocaleString('en-US') ?? 'Syncing'}
+      {apr?.toLocaleString('en-US') ?? 'Syncing'}
     </NodePartials.NodeStatusTextWIcon>
   );
 };
 
 const styles = {
-  text: (view?: NodeStatusView, blockHeight?: number) => (theme: ITheme) =>
+  text: (view?: NodeStatusView, apr?: number) => (theme: ITheme) =>
     css`
       text-transform: capitalize;
       ${view === 'default' &&
       `
         font-size: 14px;
-        color: ${blockHeight! > -1 ? theme.colorText : theme.colorDefault};
+        color: ${apr! > -1 ? theme.colorText : theme.colorDefault};
         `}
       letter-spacing: 0;
     `,

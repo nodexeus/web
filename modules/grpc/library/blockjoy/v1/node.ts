@@ -22,7 +22,7 @@ export enum NodeSortField {
   NODE_SORT_FIELD_NEXT_STATE = 5,
   NODE_SORT_FIELD_PROTOCOL_STATE = 6,
   NODE_SORT_FIELD_PROTOCOL_HEALTH = 7,
-  NODE_SORT_FIELD_BLOCK_HEIGHT = 8,
+  NODE_SORT_FIELD_APR = 8,
   NODE_SORT_FIELD_CREATED_AT = 9,
   NODE_SORT_FIELD_UPDATED_AT = 10,
   UNRECOGNIZED = -1,
@@ -56,7 +56,7 @@ export interface Node {
   dnsName: string;
   p2pAddress?: string | undefined;
   dnsUrl?: string | undefined;
-  blockHeight?: number | undefined;
+  apr?: number | undefined;
   blockAge?: number | undefined;
   note?: string | undefined;
   nodeStatus: NodeStatus | undefined;
@@ -333,7 +333,7 @@ function createBaseNode(): Node {
     dnsName: "",
     p2pAddress: undefined,
     dnsUrl: undefined,
-    blockHeight: undefined,
+    apr: undefined,
     blockAge: undefined,
     note: undefined,
     nodeStatus: undefined,
@@ -431,8 +431,8 @@ export const Node = {
     if (message.dnsUrl !== undefined) {
       writer.uint32(218).string(message.dnsUrl);
     }
-    if (message.blockHeight !== undefined) {
-      writer.uint32(224).uint64(message.blockHeight);
+    if (message.apr !== undefined) {
+      writer.uint32(224).uint64(message.apr);
     }
     if (message.blockAge !== undefined) {
       writer.uint32(232).uint64(message.blockAge);
@@ -671,7 +671,7 @@ export const Node = {
             break;
           }
 
-          message.blockHeight = longToNumber(reader.uint64() as Long);
+          message.apr = longToNumber(reader.uint64() as Long);
           continue;
         case 29:
           if (tag !== 232) {
@@ -796,7 +796,7 @@ export const Node = {
     message.dnsName = object.dnsName ?? "";
     message.p2pAddress = object.p2pAddress ?? undefined;
     message.dnsUrl = object.dnsUrl ?? undefined;
-    message.blockHeight = object.blockHeight ?? undefined;
+    message.apr = object.apr ?? undefined;
     message.blockAge = object.blockAge ?? undefined;
     message.note = object.note ?? undefined;
     message.nodeStatus = (object.nodeStatus !== undefined && object.nodeStatus !== null)

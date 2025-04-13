@@ -27,7 +27,7 @@ const ignoreItems = [
   'placement',
   'protocolId',
   'protocolName',
-  'blockHeight',
+  'apr',
   'autoUpgrade',
   'nodeStatus',
   'reports',
@@ -220,9 +220,9 @@ export const AdminNode = () => {
         ),
       },
       {
-        id: 'blockheight',
-        label: 'Block Height',
-        data: node.blockHeight?.toLocaleString('en-US'),
+        id: 'apr',
+        label: 'APR',
+        data: node.apr?.toLocaleString('en-US'),
       },
       {
         id: 'orgName',
