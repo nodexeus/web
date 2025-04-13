@@ -151,7 +151,7 @@ export const NODE_LIST_ITEMS: NodeListItem[] = [
     width: '250px',
     dataField: NodeSortField.NODE_SORT_FIELD_APR,
     isVisible: true,
-    component: (node: Node) => <NodeItems.APR apr={node.apr} />,
+    component: (node: Node) => <NodeItems.Apr apr={node.apr} />,
     actions: ALL_ACTIONS,
   },
   {
