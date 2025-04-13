@@ -1,6 +1,6 @@
 type HostNode = {
   address?: string;
-  blockHeight?: number;
+  apr?: number;
   blockchainId?: string;
   createdAt?: {
     nanos: number;
