@@ -9,7 +9,7 @@ export const styles = {
     top: 0;
     display: flex;
     align-items: center;
-    background: #2a2c2b;
+    background: #1f1f1f;
     height: 72px;
     min-height: 72px;
     max-height: 72px;

@@ -9,8 +9,8 @@ const callback = (nextHost) => {
 };
 
 function loadScript() {
-  const netdataUrl = `https://netdata.blkjy.io`;
-  let host = `${netdataUrl}/host/${name}`;
+  const netdataUrl = `https://${host}`;
+  let host = `${netdataUrl}`;
   var url = `${host}/dashboard.js`;
   var script = document.createElement( "script" )
   script.type = "text/javascript";

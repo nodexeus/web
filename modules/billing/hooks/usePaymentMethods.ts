@@ -38,7 +38,7 @@ export const usePaymentMethods = (): IPaymentMethodsHook => {
         defaultOrganization?.orgId!,
       );
 
-      console.log('%cGetPaymentMethods', 'color: #bff589', data);
+      console.log('%cGetPaymentMethods', 'color: #e84326', data);
       setPaymentMethods(data);
 
       return data;

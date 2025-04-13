@@ -99,7 +99,7 @@ export const CARD_ELEMENT_OPTIONS:
   | StripeCardCvcElementOptions = {
   style: {
     base: {
-      color: '#f7faf5',
+      color: '#a3a3a3',
       fontSize: '16px',
       '::placeholder': {
         color: '#a5a8a3',

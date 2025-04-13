@@ -26,7 +26,7 @@ const charts = [
         dygraphValueRange: "[0, 100]",
         width: "100%",
         height: sidePanelSparklineHeight,
-        color: "#bff589",
+        color: "#e84326",
         decimalDigits: "-1",
         dimensions: "load1",
         dygraphSparkline: "sparkline"
@@ -49,7 +49,7 @@ const charts = [
         dygraphValueRange: "[0, 100]",
         width: "100%",
         height: sidePanelSparklineHeight,
-        color: "#5F615D #5F615D #5F615D #5F615D #5F615D #5F615D #bff589 #bff589",
+        color: "#5F615D #5F615D #5F615D #5F615D #5F615D #5F615D #e84326 #e84326",
         decimalDigits: "-1",
         dygraphSparkline: "sparkline"
       }
@@ -73,7 +73,7 @@ const charts = [
         width: "100%",
         height: sidePanelSparklineHeight,
         dimensions: "out",
-        color: "#bff589 #bff589",
+        color: "#e84326 #e84326",
         decimalDigits: "-1",
         dygraphSparkline: "sparkline"
       }
@@ -97,7 +97,7 @@ const charts = [
         width: "100%",
         height: sidePanelSparklineHeight,
         dimensions: "in",
-        color: "#bff589 #bff589",
+        color: "#e84326 #e84326",
         decimalDigits: "-1",
         dygraphSparkline: "sparkline"
       }
@@ -122,7 +122,7 @@ if (is_node) {
         netdata: "web_log_nginx.requests",
         width: "100%",
         height: sidePanelSparklineHeight,
-        color: "#bff589 #bff589",
+        color: "#e84326 #e84326",
         decimalDigits: "-1",
         dygraphSparkline: "sparkline"
       }
@@ -130,7 +130,7 @@ if (is_node) {
   },)
 }
 
-const colorPrimary = "#bff589";
+const colorPrimary = "#e84326";
 const size = "140px";
 const after = "-600";
 

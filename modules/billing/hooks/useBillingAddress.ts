@@ -24,7 +24,7 @@ export const useBillingAddress = () => {
 
       setBillingAddress(data);
 
-      console.log('%cGetBillingAddress', 'color: #bff589', data);
+      console.log('%cGetBillingAddress', 'color: #e84326', data);
     } catch (error) {
       setBillingAddress(null);
       console.log('Failed to get billing address', error);

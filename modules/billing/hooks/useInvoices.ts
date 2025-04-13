@@ -28,7 +28,7 @@ export const useInvoices = (): IInvoicesHook => {
         defaultOrganization?.orgId!,
       );
 
-      console.log('%cGetInvoices', 'color: #bff589', data);
+      console.log('%cGetInvoices', 'color: #e84326', data);
       setInvoices(data);
     } catch (error) {
       console.log('Failed to fetch Invoices', error);

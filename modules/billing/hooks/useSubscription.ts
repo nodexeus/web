@@ -48,7 +48,7 @@ export const useSubscription = (): ISubscriptionHook => {
         defaultOrganization?.orgId!,
       );
 
-      console.log('%cGetSubscription', 'color: #bff589', data);
+      console.log('%cGetSubscription', 'color: #e84326', data);
       if (!data.createdAt) setSubscription(null);
       else setSubscription(data);
     } catch (error) {

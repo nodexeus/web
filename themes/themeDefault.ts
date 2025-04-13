@@ -3,11 +3,11 @@ import { ITheme } from 'types/theme';
 export const themeDefault: ITheme = {
   fontPrimary:
     "'Styrene A LC',-apple-system,BlinkMacSystemFont,avenir next,avenir,segoe ui,helvetica neue,helvetica,Ubuntu,roboto,noto,arial,sans-serif;",
-  colorPrimary: '#bff589',
+  colorPrimary: '#e84326',
   colorPrimaryText: '#232524',
-  colorAccent: '#e9c09c',
+  colorAccent: '#da3d2f',
   colorBorder: '#363938',
-  colorBorderGrey: '#5e605c',
+  colorBorderGrey: '#1f1f1f',
   colorInput: '#313534',
   colorInputOutline: 'rgba(255 255 255 / 10%)',
   colorDarkGrey: '#232524',
@@ -22,7 +22,7 @@ export const themeDefault: ITheme = {
   colorPlaceholder: '#A5A8A3',
   colorBackground: '#222524',
   colorLightGrey: '#e7e7e7',
-  colorDanger: '#e66765',
+  colorDanger: '#da3d2f',
   colorNote: '#e9af3a',
   colorOverlay: '#363a39',
   colorSuccess: '#85F550',

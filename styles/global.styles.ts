@@ -12,14 +12,14 @@ export const globalStyles = (theme: ITheme) => css`
 
   :root {
     /* --- PRIMARY --- */
-    --color-primary: hsl(90, 84%, 75%);
+    --color-primary: hsl(9, 81%, 53%);
     --color-primary-o0: hsla(90, 84%, 75%, 0);
-    --color-primary-o30: hsla(90, 84%, 75%, 0.3);
+    --color-primary-o30: hsla(8, 89.20%, 60.00%, 0.30);
 
     /* --- SECONDARY --- */
-    --color-secondary: hsl(29, 82%, 80%);
+    --color-secondary: hsla(30, 15.40%, 94.90%, 0.69);
     --color-secondary-o0: hsla(29, 82%, 80%, 0);
-    --color-secondary-o30: hsla(29, 82%, 80%, 0.3);
+    --color-secondary-o30: hsla(30, 68.40%, 92.50%, 0.30);
 
     /* --- TERTIARY --- */
     --color-tertiary: hsl(60, 5%, 85%);

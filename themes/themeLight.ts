@@ -5,7 +5,7 @@ export const themeLight: ITheme = {
   ...themeDefault,
   id: 'light',
   colorPrimary: '#222524',
-  colorPrimaryText: '#bff589',
+  colorPrimaryText: '#e84326',
   colorAccent: '#13B555',
   colorBorder: '#e7e7e7',
   colorLabel: '#6d6e6c',

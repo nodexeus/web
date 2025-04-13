@@ -21,7 +21,7 @@ export const useEstimates = (): IEstimatesHook => {
     try {
       const data: Invoice = _UPCOMING_INVOICE;
 
-      console.log('%cGetEstimates', 'color: #bff589', data);
+      console.log('%cGetEstimates', 'color: #e84326', data);
       setEstimates(data);
     } catch (error) {
       console.error('Failed to fetch Estimates', error);
