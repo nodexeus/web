@@ -9,7 +9,7 @@ export const NodeViewSidePanel = () => {
       <div css={styles.form}>
         <h3 css={styles.formHeader}>APR</h3>
         <div css={styles.aprWrapper}>
-          <NodeItems.APR apr={node?.apr} view="card" />
+          <NodeItems.Apr apr={node?.apr} view="card" />
         </div>
       </div>
       {node?.apr! > -1 && (
