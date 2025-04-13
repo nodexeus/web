@@ -16,7 +16,7 @@ export const NodeViewStatus = () => {
       <div css={styles.wrapper}>
         {(isSuperUser || node.apr! > -1) && (
           <div css={styles.card}>
-            <NodeItems.APR apr={node.apr} view="card" />
+            <NodeItems.Apr apr={node.apr} view="card" />
             <h3 css={styles.cardLabel}>APR</h3>
           </div>
         )}
