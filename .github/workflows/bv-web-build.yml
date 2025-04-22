@@ -36,6 +36,15 @@ jobs:
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
+        env:
+          NODE_ENV: production
+          NEXT_PUBLIC_API_URL: 'https://api.nodexeus.io'
+          NEXT_PUBLIC_MQTT_USERNAME: 'nodexeus'
+          NEXT_PUBLIC_MQTT_PASSWORD: ${{ secrets.MQTT_PASSWORD }}
+          NEXT_PUBLIC_MQTT_URL: 'wss://mqtt.nodexeus.io:8084/mqtt'
+          NEXT_PUBLIC_VERCEL_ENV: 'production'
+          NEXT_PUBLIC_LOADING_DURATION: '200'
+          NEXT_PUBLIC_STRIPE_KEY: ${{ secrets.STRIPE_KEY }}
         with:
           context: .
           file: ./Dockerfile
