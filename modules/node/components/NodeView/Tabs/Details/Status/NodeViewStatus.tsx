@@ -14,10 +14,10 @@ export const NodeViewStatus = () => {
   return (
     <>
       <div css={styles.wrapper}>
-        {(isSuperUser || node.apr! > -1) && (
+        {(isSuperUser || node.blockHeight! > -1) && (
           <div css={styles.card}>
-            <NodeItems.Apr apr={node.apr} view="card" />
-            <h3 css={styles.cardLabel}>APR</h3>
+            <NodeItems.BlockHeight blockHeight={node.blockHeight} view="card" />
+            <h3 css={styles.cardLabel}>Block Height</h3>
           </div>
         )}
         {(!NODE_PROGRESS_STATUSES.includes(node.nodeStatus?.protocol?.state!) ||

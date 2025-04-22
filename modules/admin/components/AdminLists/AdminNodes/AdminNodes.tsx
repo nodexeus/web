@@ -17,7 +17,6 @@ import { AdminNodesOrgAssign } from './AdminNodesOrgAssign/AdminNodesOrgAssign';
 import { AdminNodesActions } from './AdminNodesActions/AdminNodesActions';
 import { pageSize } from '@modules/admin/constants/constants';
 import { Node, NodeSortField } from '@modules/grpc/library/blockjoy/v1/node';
-import { Host, HostSortField } from '@modules/grpc/library/blockjoy/v1/host';
 import { SortOrder } from '@modules/grpc/library/blockjoy/common/v1/search';
 import { capitalized, createAdminNodeFilters } from '@modules/admin';
 import { AdminListColumn } from '@modules/admin/types/AdminListColumn';
@@ -78,17 +77,17 @@ const columns: AdminListColumn[] = [
   {
     name: 'host',
     width: '200px',
-    sortField: HostSortField.HOST_SORT_FIELD_DISPLAY_NAME,
+    // sortField: NodeSortField.NODE_SORT_FIELD_HOST_NAME,
     isVisible: true,
     filterComponent: AdminNodesFilterHost,
     filterDropdownMaxWidth: 250,
     filterDropdownMinWidth: 220,
   },
   {
-    name: 'apr',
+    name: 'blockHeight',
     width: '190px',
     isVisible: false,
-    sortField: NodeSortField.NODE_SORT_FIELD_APR,
+    sortField: NodeSortField.NODE_SORT_FIELD_BLOCK_HEIGHT,
   },
   {
     name: 'protocolName',

@@ -7,12 +7,12 @@ export const NodeViewSidePanel = () => {
   return (
     <>
       <div css={styles.form}>
-        <h3 css={styles.formHeader}>APR</h3>
-        <div css={styles.aprWrapper}>
-          <NodeItems.Apr apr={node?.apr} view="card" />
+        <h3 css={styles.formHeader}>Block Height</h3>
+        <div css={styles.blockheightWrapper}>
+          <NodeItems.BlockHeight blockHeight={node?.blockHeight} view="card" />
         </div>
       </div>
-      {node?.apr! > -1 && (
+      {node?.blockHeight! > -1 && (
         <NetdataDashboard
           id={node?.nodeId!}
           name={node?.nodeName!}

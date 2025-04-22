@@ -1,7 +1,7 @@
 import { NodeStatusDownloader } from './Partials/NodeStatusDownloader';
 import { NodeStatusTextWIcon } from './Partials/NodeStatusTextWIcon';
 
-import { Apr } from './Items/Apr';
+import { BlockHeight } from './Items/BlockHeight';
 import { Cost } from './Items/Cost';
 import { CreatedAt } from './Items/CreatedAt';
 import { CreatedBy } from './Items/CreatedBy';
@@ -24,7 +24,7 @@ export const NodePartials = {
 };
 
 export const NodeItems = {
-  Apr,
+  BlockHeight,
   Cost,
   CreatedAt,
   CreatedBy,
