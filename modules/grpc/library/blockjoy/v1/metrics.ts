@@ -85,6 +85,8 @@ export interface NodeMetrics {
     | undefined;
   /** A list of jobs running on the node. */
   jobs: NodeJob[];
+  /** The APR of the node. */
+  apr?: number | undefined;
 }
 
 export interface MetricsServiceNodeResponse {
@@ -388,7 +390,7 @@ export const MetricsServiceNodeRequest = {
 };
 
 function createBaseNodeMetrics(): NodeMetrics {
-  return { nodeId: "", nodeStatus: undefined, height: undefined, blockAge: undefined, consensus: undefined, jobs: [] };
+  return { nodeId: "", nodeStatus: undefined, height: undefined, blockAge: undefined, consensus: undefined, jobs: [], apr: undefined };
 }
 
 export const NodeMetrics = {
@@ -410,6 +412,9 @@ export const NodeMetrics = {
     }
     for (const v of message.jobs) {
       NodeJob.encode(v!, writer.uint32(50).fork()).ldelim();
+    }
+    if (message.apr !== undefined) {
+      writer.uint32(57).double(message.apr);
     }
     return writer;
   },
@@ -463,6 +468,14 @@ export const NodeMetrics = {
 
           message.jobs.push(NodeJob.decode(reader, reader.uint32()));
           continue;
+        case 7: {
+          if (tag !== 57) {
+            break;
+          }
+
+          message.apr = reader.double();
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -486,6 +499,7 @@ export const NodeMetrics = {
     message.blockAge = object.blockAge ?? undefined;
     message.consensus = object.consensus ?? undefined;
     message.jobs = object.jobs?.map((e) => NodeJob.fromPartial(e)) || [];
+    message.apr = object.apr ?? undefined;
     return message;
   },
 };

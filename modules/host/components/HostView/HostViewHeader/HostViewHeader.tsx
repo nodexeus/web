@@ -8,7 +8,7 @@ import { useRouter } from 'next/router';
 import { ROUTES } from '@shared/constants/routes';
 import { toast } from 'react-toastify';
 import { HostViewHeaderActions } from './HostViewHeaderActions/HostViewHeaderActions';
-import formatDistanceToNow from 'date-fns/formatDistanceToNow';
+import formatDistanceToNow from 'date-fns/formatDistanceToNow/index.js';
 
 export const HostViewHeader = () => {
   const router = useRouter();

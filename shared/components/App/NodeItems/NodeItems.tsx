@@ -15,7 +15,8 @@ import { ProtocolStatus } from './Items/ProtocolStatus';
 import { Region } from './Items/Region';
 import { RPCUrl } from './Items/RPCUrl';
 import { Version } from './Items/Version';
-
+import { Apr } from './Items/Apr';
+import { P2pAddress } from './Items/P2pAddress';
 import { Info } from './Groups/Info';
 
 export const NodePartials = {
@@ -38,6 +39,8 @@ export const NodeItems = {
   Region,
   RPCUrl,
   Version,
+  Apr,
+  P2pAddress,
 };
 
 export const NodeGroups = {

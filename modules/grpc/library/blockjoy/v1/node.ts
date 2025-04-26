@@ -32,6 +32,7 @@ export enum NodeSortField {
   NODE_SORT_FIELD_BLOCK_HEIGHT = 8,
   NODE_SORT_FIELD_CREATED_AT = 9,
   NODE_SORT_FIELD_UPDATED_AT = 10,
+  NODE_SORT_FIELD_APR = 11,
   UNRECOGNIZED = -1,
 }
 
@@ -75,6 +76,7 @@ export interface Node {
   updatedAt: Date | undefined;
   cost?: BillingAmount | undefined;
   versionMetadata: VersionMetadata[];
+  apr?: number | undefined;
 }
 
 /** Create a new node for some image. */
@@ -307,6 +309,7 @@ function createBaseNode(): Node {
     updatedAt: undefined,
     cost: undefined,
     versionMetadata: [],
+    apr: undefined,
   };
 }
 
@@ -437,6 +440,9 @@ export const Node = {
     }
     for (const v of message.versionMetadata) {
       VersionMetadata.encode(v!, writer.uint32(314).fork()).ldelim();
+    }
+    if (message.apr !== undefined) {
+      writer.uint32(321).double(message.apr);
     }
     return writer;
   },
@@ -731,6 +737,13 @@ export const Node = {
             VersionMetadata.decode(reader, reader.uint32()),
           );
           continue;
+        case 40:
+          if (tag !== 321) {
+            break;
+          }
+
+          message.apr = reader.double();
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -805,6 +818,7 @@ export const Node = {
         : undefined;
     message.versionMetadata =
       object.versionMetadata?.map((e) => VersionMetadata.fromPartial(e)) || [];
+    message.apr = object.apr ?? undefined;
     return message;
   },
 };

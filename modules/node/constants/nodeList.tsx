@@ -81,31 +81,31 @@ export const NODE_LIST_ITEMS: NodeListItem[] = [
     ),
     actions: ALL_ACTIONS,
   },
-  {
-    key: 'tags',
-    label: 'Tags',
-    minWidth: '140px',
-    width: '200px',
-    isVisible: true,
-    component: (node: Node) => <NodeTags node={node} type="list" />,
-    actions: LAYOUT_ACTIONS,
-  },
-  {
-    key: 'createdAt',
-    label: 'Launched On',
-    minWidth: '135px',
-    width: '180px',
-    dataField: NodeSortField.NODE_SORT_FIELD_CREATED_AT,
-    isVisible: false,
-    component: (node: Node) => (
-      <NodeItems.CreatedAt createdAt={node.createdAt} />
-    ),
-    actions: ALL_ACTIONS,
-  },
+  // {
+  //   key: 'tags',
+  //   label: 'Tags',
+  //   minWidth: '140px',
+  //   width: '200px',
+  //   isVisible: false,
+  //   component: (node: Node) => <NodeTags node={node} type="list" />,
+  //   actions: LAYOUT_ACTIONS,
+  // },
+  // {
+  //   key: 'createdAt',
+  //   label: 'Launched On',
+  //   minWidth: '135px',
+  //   width: '180px',
+  //   dataField: NodeSortField.NODE_SORT_FIELD_CREATED_AT,
+  //   isVisible: false,
+  //   component: (node: Node) => (
+  //     <NodeItems.CreatedAt createdAt={node.createdAt} />
+  //   ),
+  //   actions: ALL_ACTIONS,
+  // },
   {
     key: 'nodeStatus',
     label: 'Status',
-    width: '200px',
+    width: '120px',
     dataField: NodeSortField.NODE_SORT_FIELD_NODE_STATE,
     isVisible: true,
     component: (node: Node) => {
@@ -137,7 +137,7 @@ export const NODE_LIST_ITEMS: NodeListItem[] = [
   {
     key: 'semanticVersion',
     label: 'Version',
-    width: '160px',
+    width: '120px',
     isVisible: false,
     component: (node: Node) => (
       <NodeItems.Version semanticVersion={node.semanticVersion} />
@@ -145,52 +145,75 @@ export const NODE_LIST_ITEMS: NodeListItem[] = [
     actions: LAYOUT_ACTIONS,
   },
   {
-    key: 'blockHeight',
-    label: 'Block Height',
-    minWidth: '140px',
-    width: '250px',
-    dataField: NodeSortField.NODE_SORT_FIELD_BLOCK_HEIGHT,
+    key: 'apr',
+    label: 'Apr',
+    minWidth: '70px',
+    width: '120px',
     isVisible: true,
+    dataField: NodeSortField.NODE_SORT_FIELD_APR,
     component: (node: Node) => (
-      <NodeItems.BlockHeight blockHeight={node.blockHeight} />
-    ),
-    actions: ALL_ACTIONS,
-  },
-  {
-    key: 'regionName',
-    label: 'Region',
-    width: '160px',
-    isVisible: true,
-    component: (node: Node) => (
-      <NodeItems.Region regionName={node.regionName} />
+      <NodeItems.Apr apr={node.apr !== undefined ? Number(node.apr.toFixed(2)) : undefined} />
     ),
     actions: LAYOUT_ACTIONS,
   },
   {
-    key: 'createdBy',
-    label: 'Launched By',
-    minWidth: '110px',
-    width: '160px',
+    key: 'p2pAddress',
+    label: 'Peer Id',
+    minWidth: '150px',
+    width: '420px',
     isVisible: true,
     component: (node: Node) => (
-      <NodeItems.CreatedBy
-        createdBy={node.createdBy}
-        hostId={node.hostId}
-        hostDisplayName={node.hostDisplayName}
-        hostNetworkName={node.hostNetworkName}
-      />
+      <NodeItems.P2pAddress p2pAddress={node.p2pAddress} />
     ),
     actions: LAYOUT_ACTIONS,
   },
-  {
-    key: 'dnsName',
-    label: 'RPC Url',
-    minWidth: '130px',
-    width: '160px',
-    isVisible: true,
-    component: (node: Node) => <NodeItems.RPCUrl dnsName={node.dnsName} />,
-    actions: LAYOUT_ACTIONS,
-  },
+  // {
+  //   key: 'blockHeight',
+  //   label: 'Block Height',
+  //   minWidth: '140px',
+  //   width: '250px',
+  //   dataField: NodeSortField.NODE_SORT_FIELD_BLOCK_HEIGHT,
+  //   isVisible: false,
+  //   component: (node: Node) => (
+  //     <NodeItems.BlockHeight blockHeight={node.blockHeight} />
+  //   ),
+  //   actions: ALL_ACTIONS,
+  // },
+  // {
+  //   key: 'regionName',
+  //   label: 'Region',
+  //   width: '160px',
+  //   isVisible: false,
+  //   component: (node: Node) => (
+  //     <NodeItems.Region regionName={node.regionName} />
+  //   ),
+  //   actions: LAYOUT_ACTIONS,
+  // },
+  // {
+  //   key: 'createdBy',
+  //   label: 'Launched By',
+  //   minWidth: '110px',
+  //   width: '160px',
+  //   isVisible: false,
+  //   component: (node: Node) => (
+  //     <NodeItems.CreatedBy
+  //       createdBy={node.createdBy}
+  //       hostId={node.hostId}
+  //       hostDisplayName={node.hostDisplayName}
+  //       hostNetworkName={node.hostNetworkName}
+  //     />
+  //   ),
+  //   actions: LAYOUT_ACTIONS,
+  // },
+  // {
+  //   key: 'dnsName',
+  //   label: 'RPC Url',
+  //   minWidth: '130px',
+  //   width: '160px',
+  //   isVisible: false,
+  //   component: (node: Node) => <NodeItems.RPCUrl dnsName={node.dnsName} />,
+  //   actions: LAYOUT_ACTIONS,
+  // },
 ];
 
 export const NODE_LIST_TAGS_PER_VIEW = 3;

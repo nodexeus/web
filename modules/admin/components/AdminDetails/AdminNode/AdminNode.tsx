@@ -181,6 +181,11 @@ export const AdminNode = () => {
         copyValue: node.semanticVersion,
       },
       {
+        id: 'apr',
+        label: 'Apr',
+        data: node.apr !== undefined ? Number(node.apr).toFixed(4) + '%' : node.apr,
+      },
+      {
         id: 'cost',
         label: 'Cost',
         data: <Currency cents={node.cost?.amount?.amountMinorUnits} />,

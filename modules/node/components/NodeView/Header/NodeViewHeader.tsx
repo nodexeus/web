@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
-import formatDistanceToNow from 'date-fns/formatDistanceToNow';
+import formatDistanceToNow from 'date-fns/formatDistanceToNow/index.js';
 import { DeleteModal, Skeleton, SkeletonGrid } from '@shared/components';
 import { NodeServiceCreateRequest } from '@modules/grpc/library/blockjoy/v1/node';
 import { colors } from 'styles/utils.colors.styles';

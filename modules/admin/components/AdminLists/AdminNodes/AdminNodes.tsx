@@ -70,6 +70,13 @@ const columns: AdminListColumn[] = [
     isVisible: true,
   },
   {
+    name: 'apr',
+    displayName: 'Apr',
+    width: '160px',
+    sortField: NodeSortField.NODE_SORT_FIELD_APR,
+    isVisible: true,
+  },
+  {
     name: 'cost',
     width: '100px',
     isRowClickDisabled: true,
@@ -133,10 +140,10 @@ const columns: AdminListColumn[] = [
     isVisible: true,
   },
   {
-    name: 'address',
+    name: 'p2pAddress',
     width: '140px',
-    displayName: 'Node Address',
-    isVisible: false,
+    displayName: 'Peer Id',
+    isVisible: true,
   },
   {
     name: 'orgName',
@@ -246,6 +253,7 @@ export const AdminNodes = () => {
         createdAt: <DateTime date={node.createdAt!} />,
         createdBy,
         host: node.hostDisplayName || node.hostNetworkName,
+        apr: node.apr !== undefined ? `${Number(node.apr).toFixed(2)}%` : 'Calculating',
         cost: (
           <AdminListEditCost
             id={node.nodeId}
