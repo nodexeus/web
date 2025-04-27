@@ -41,7 +41,7 @@ export const DropdownSearch = ({
         if (e.key === 'Enter') {
           if (!isValid) return;
 
-          handleSubmit?.(e.target.value);
+          handleSubmit?.((e.target as HTMLInputElement).value);
         }
       }
     : null;

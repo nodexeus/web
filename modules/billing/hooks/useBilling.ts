@@ -25,7 +25,7 @@ export const useBilling = () => {
   const { getInvoices } = useInvoices();
   // const { getEstimates } = useEstimates();
 
-  const currentOrgId = useRef<string>();
+  const currentOrgId = useRef<string | undefined>(undefined);
 
   useEffect(() => {
     if (

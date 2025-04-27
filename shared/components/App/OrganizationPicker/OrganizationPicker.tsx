@@ -27,7 +27,7 @@ export const OrganizationPicker = ({
   isRightAligned = false,
   maxWidth,
 }: Props) => {
-  const selectedOrg = useRef<Org>();
+  const selectedOrg = useRef<Org | undefined>(undefined);
 
   const router = useRouter();
   const { pathname } = router;

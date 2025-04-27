@@ -12,7 +12,7 @@ export const OrganizationInvitationsResend = ({ invitation }: Props) => {
   const { resendInvitation } = useResendInvitation();
   const [isSent, setIsSent] = useState(false);
   const [isSending, setIsSending] = useState(false);
-  const timeoutRef = useRef<NodeJS.Timeout>();
+  const timeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   const handleClick = async () => {
     if (!isSending) {
@@ -28,7 +28,11 @@ export const OrganizationInvitationsResend = ({ invitation }: Props) => {
   };
 
   useEffect(() => {
-    return () => clearTimeout(timeoutRef.current);
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
   }, []);
 
   return (

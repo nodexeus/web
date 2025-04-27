@@ -85,7 +85,7 @@ const EditControl = ({
   );
 
   const handleInput = (e: KeyboardEvent<HTMLInputElement>) =>
-    setNextValue(e.target.value);
+    setNextValue((e.target as HTMLInputElement).value);
 
   const handleUpdate = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.code === 'Enter') {

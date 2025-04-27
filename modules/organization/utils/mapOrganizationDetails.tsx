@@ -1,6 +1,6 @@
 import { Org } from '@modules/grpc/library/blockjoy/v1/org';
 import { ROUTES } from '@shared/constants/routes';
-import { EmotionJSX } from '@emotion/react/types/jsx-namespace';
+// import { EmotionJSX } from '@emotion/react/types/jsx-namespace';
 import { NextLink, sort, SvgIcon } from '@shared/components';
 import IconInfo from '@public/assets/icons/common/Info.svg';
 import { display } from 'styles/utils.display.styles';
@@ -11,7 +11,7 @@ import { SortOrder } from '@modules/grpc/library/blockjoy/common/v1/search';
 
 type Details = {
   label: string | React.ReactNode;
-  data: string | number | EmotionJSX.Element | undefined;
+  data: string | number | React.ReactNode | undefined;
 };
 
 export function mapOrganizationDetails(org: Org | null, userId: string) {

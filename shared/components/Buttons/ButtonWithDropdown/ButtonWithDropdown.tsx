@@ -12,7 +12,7 @@ import { DropdownMenu } from '@shared/components';
 
 type Props = {
   children?: ReactNode;
-  button: ReactNode;
+  button: React.ReactElement<{ onClick?: () => void }>;
 };
 
 export function ButtonWithDropdown({ children, button }: Props) {
@@ -25,8 +25,7 @@ export function ButtonWithDropdown({ children, button }: Props) {
 
   return (
     <div ref={dropdownRef} css={[styles.base]}>
-      {isValidElement<HTMLButtonElement>(button) &&
-        cloneElement(button as ReactElement, { onClick: handleClick })}
+      {cloneElement(button, { onClick: handleClick })}
       <DropdownMenu isOpen={isOpen} additionalStyles={styles.dropdown}>
         {children}
       </DropdownMenu>

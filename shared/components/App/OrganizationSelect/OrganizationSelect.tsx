@@ -10,7 +10,7 @@ type Props = {
 };
 
 export const OrganizationSelect = ({ disabled = false }: Props) => {
-  const selectedOrg = useRef<Org>();
+  const selectedOrg = useRef<Org | undefined>(undefined);
 
   const allOrganizations = useRecoilValue(
     organizationSelectors.allOrganizationsSorted,
