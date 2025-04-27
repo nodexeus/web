@@ -5,6 +5,8 @@ interface Config {
   apiUrl?: string;
   mqttUrl?: string;
   stripeKey?: string;
+  mqttUsername?: string;
+  mqttPassword?: string;
   [key: string]: string | undefined;
 }
 
@@ -23,11 +25,46 @@ export function ConfigProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     async function loadConfig() {
       try {
+        // Attempt to fetch runtime config
         const response = await fetch('/api/runtime-config');
+        
+        // Check if the response is ok before parsing JSON
+        if (!response.ok) {
+          throw new Error(`API returned ${response.status}: ${response.statusText}`);
+        }
+        
         const data = await response.json();
-        setConfig(data);
+        
+        // Merge with compile-time fallbacks
+        const configWithFallbacks = {
+          // Fallback to compile-time values
+          apiUrl: data.apiUrl || process.env.NEXT_PUBLIC_API_URL,
+          mqttUrl: data.mqttUrl || process.env.NEXT_PUBLIC_MQTT_URL,
+          stripeKey: data.stripeKey || process.env.NEXT_PUBLIC_STRIPE_KEY,
+          // Add any other config values here
+        };
+        
+        console.log('Runtime config loaded:', {
+          ...configWithFallbacks,
+          stripeKey: configWithFallbacks.stripeKey ? '[REDACTED]' : undefined,
+        });
+        setConfig(configWithFallbacks);
       } catch (error) {
         console.error('Failed to load runtime config:', error);
+        
+        // Fall back to compile-time values
+        const fallbackConfig = {
+          apiUrl: process.env.NEXT_PUBLIC_API_URL,
+          mqttUrl: process.env.NEXT_PUBLIC_MQTT_URL,
+          stripeKey: process.env.NEXT_PUBLIC_STRIPE_KEY,
+          // Add any other config values here
+        };
+        
+        console.log('Using fallback config:', {
+          ...fallbackConfig,
+          stripeKey: fallbackConfig.stripeKey ? '[REDACTED]' : undefined,
+        });
+        setConfig(fallbackConfig);
       } finally {
         setIsLoading(false);
       }
