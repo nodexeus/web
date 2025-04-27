@@ -10,7 +10,7 @@ export type ItemsPerPage = {
 export const itemsPerPage: ItemsPerPage = {
   sm: 18,
   lg: 36,
-  xl: 48,
+  xl: 50,
   xxl: 100,
 };
 
