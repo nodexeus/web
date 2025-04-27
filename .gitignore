@@ -29,6 +29,7 @@ yarn-error.log*
 .env*.local
 .env.development
 .env.production
+.env
 
 # vercel
 .vercel
@@ -42,3 +43,7 @@ yarn-error.log*
 
 #npm lock
 package-lock.json
+
+#protobufs
+generated/
+protobufs/

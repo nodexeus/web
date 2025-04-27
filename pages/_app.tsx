@@ -1,5 +1,6 @@
 import { NextPage } from 'next';
 import { AppProps } from 'next/app';
+import { ConfigProvider } from '@shared/context/ConfigProvider';
 import { ReactElement, ReactNode, useEffect, useState } from 'react';
 import { ToastContainer } from 'react-toastify';
 import { RecoilRoot } from 'recoil';
@@ -31,18 +32,20 @@ function MyApp({ Component, pageProps, router }: AppPropsWithLayout) {
 
   return (
     <RecoilRoot>
-      <Global styles={globalStyles} />
-      <ThemeProvider>
-        <PrivateRoute router={router}>
-          {getLayout(<Component {...pageProps} />)}
-        </PrivateRoute>
-        <ToastContainer
-          hideProgressBar
-          autoClose={3000}
-          position="bottom-right"
-        />
-        <PortalContainer />
-      </ThemeProvider>
+      <ConfigProvider>
+        <Global styles={globalStyles} />
+        <ThemeProvider>
+          <PrivateRoute router={router}>
+            {getLayout(<Component {...pageProps} />)}
+          </PrivateRoute>
+          <ToastContainer
+            hideProgressBar
+            autoClose={3000}
+            position="bottom-right"
+          />
+          <PortalContainer />
+        </ThemeProvider>
+      </ConfigProvider>
     </RecoilRoot>
   );
 }

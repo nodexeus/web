@@ -1,3 +1,4 @@
+import { useConfig } from '@shared/context/ConfigProvider';
 import {
   Node,
   NodeServiceCreateRequest,
@@ -57,12 +58,33 @@ export type UIPagination = {
 
 export type CustomNodeReport = NodeReport & { node: Node };
 
+export const useNodeClient = () => {
+  const { config } = useConfig();
+  
+  // Create the client only when config is available
+  const getClient = () => {
+    if (!config.apiUrl) {
+      console.warn('API URL not available in config');
+      return null;
+    }
+    const channel = createChannel(config.apiUrl);
+    const client = createClient(NodeServiceDefinition, channel);
+    return new NodeClient(client);
+  };
+  
+  return { getClient };
+};
+
 class NodeClient {
   private client: NodeServiceClient;
 
-  constructor() {
-    const channel = createChannel(process.env.NEXT_PUBLIC_API_URL!);
-    this.client = createClient(NodeServiceDefinition, channel);
+  constructor(client?: NodeServiceClient) {
+    if (client) {
+      this.client = client;
+    } else {
+      const channel = createChannel(process.env.NEXT_PUBLIC_API_URL!);
+      this.client = createClient(NodeServiceDefinition, channel);
+    }
   }
 
   async listNodes(
