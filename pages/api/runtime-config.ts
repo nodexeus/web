@@ -8,12 +8,13 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     const { serverRuntimeConfig, publicRuntimeConfig } = getConfig();
     
     // These environment variables are set in each environment
+    // Prioritize non-NEXT_PUBLIC_ variables, fall back to NEXT_PUBLIC_ variables
     const config = {
-      apiUrl: serverRuntimeConfig.apiUrl || publicRuntimeConfig.apiUrl,
-      mqttUrl: serverRuntimeConfig.mqttUrl || publicRuntimeConfig.mqttUrl,
-      stripeKey: serverRuntimeConfig.stripeKey || publicRuntimeConfig.stripeKey,
+      apiUrl: process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || publicRuntimeConfig.apiUrl,
+      mqttUrl: process.env.MQTT_URL || process.env.NEXT_PUBLIC_MQTT_URL || publicRuntimeConfig.mqttUrl,
+      stripeKey: process.env.STRIPE_KEY || process.env.NEXT_PUBLIC_STRIPE_KEY || publicRuntimeConfig.stripeKey,
       // Include environment name for debugging
-      environment: publicRuntimeConfig.environment,
+      environment: process.env.NODE_ENV || publicRuntimeConfig.environment,
     };
     
     // Log the config being returned (excluding sensitive values)
@@ -27,6 +28,9 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     res.status(200).json(config);
   } catch (error) {
     console.error('Error in runtime-config API:', error);
-    res.status(500).json({ error: 'Failed to load configuration' });
+    res.status(500).json({ 
+      error: 'Failed to load configuration',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
   }
 }

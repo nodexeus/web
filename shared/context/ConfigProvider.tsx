@@ -21,7 +21,7 @@ declare global {
   }
 }
 
-const ConfigContext = createContext<{
+export const ConfigContext = createContext<{
   config: Config;
   isLoading: boolean;
 }>({

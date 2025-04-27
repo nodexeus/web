@@ -10,6 +10,7 @@ const nextConfig = {
   },
   publicRuntimeConfig: {
     // Will be available on both server and client
+    // Prioritize non-NEXT_PUBLIC_ variables, fall back to NEXT_PUBLIC_ variables
     apiUrl: process.env.API_URL || process.env.NEXT_PUBLIC_API_URL,
     mqttUrl: process.env.MQTT_URL || process.env.NEXT_PUBLIC_MQTT_URL,
     stripeKey: process.env.STRIPE_KEY || process.env.NEXT_PUBLIC_STRIPE_KEY,

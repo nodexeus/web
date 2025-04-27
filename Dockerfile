@@ -15,6 +15,7 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
+# Build-time arguments for compile-time configuration
 ARG NEXT_PUBLIC_VERCEL_ENV
 ARG NEXT_PUBLIC_SUPPORT_EMAIL
 ARG NEXT_PUBLIC_API_URL
@@ -39,6 +40,16 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/node_modules ./node_modules
+
+# Runtime environment variables
+# These will be set when running the container
+# Prioritize non-NEXT_PUBLIC_ variables, fall back to NEXT_PUBLIC_ variables
+ENV API_URL=${API_URL}
+ENV MQTT_URL=${MQTT_URL}
+ENV STRIPE_KEY=${STRIPE_KEY}
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+ENV NEXT_PUBLIC_MQTT_URL=${NEXT_PUBLIC_MQTT_URL}
+ENV NEXT_PUBLIC_STRIPE_KEY=${NEXT_PUBLIC_STRIPE_KEY}
 
 USER node
 
