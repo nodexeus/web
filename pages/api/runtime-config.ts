@@ -1,15 +1,19 @@
 // pages/api/runtime-config.ts
 import { NextApiRequest, NextApiResponse } from 'next';
+import getConfig from 'next/config';
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
+    // Get runtime config from Next.js
+    const { serverRuntimeConfig, publicRuntimeConfig } = getConfig();
+    
     // These environment variables are set in each environment
     const config = {
-      apiUrl: process.env.API_URL || process.env.NEXT_PUBLIC_API_URL,
-      mqttUrl: process.env.MQTT_URL || process.env.NEXT_PUBLIC_MQTT_URL,
-      stripeKey: process.env.STRIPE_KEY || process.env.NEXT_PUBLIC_STRIPE_KEY,
+      apiUrl: serverRuntimeConfig.apiUrl || publicRuntimeConfig.apiUrl,
+      mqttUrl: serverRuntimeConfig.mqttUrl || publicRuntimeConfig.mqttUrl,
+      stripeKey: serverRuntimeConfig.stripeKey || publicRuntimeConfig.stripeKey,
       // Include environment name for debugging
-      environment: process.env.NODE_ENV,
+      environment: publicRuntimeConfig.environment,
     };
     
     // Log the config being returned (excluding sensitive values)

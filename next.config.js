@@ -1,7 +1,20 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: false,
-  // output: 'standalone',
+  // Make server-side environment variables available to the API routes
+  serverRuntimeConfig: {
+    // Will only be available on the server side
+    apiUrl: process.env.API_URL,
+    mqttUrl: process.env.MQTT_URL,
+    stripeKey: process.env.STRIPE_KEY,
+  },
+  publicRuntimeConfig: {
+    // Will be available on both server and client
+    apiUrl: process.env.API_URL || process.env.NEXT_PUBLIC_API_URL,
+    mqttUrl: process.env.MQTT_URL || process.env.NEXT_PUBLIC_MQTT_URL,
+    stripeKey: process.env.STRIPE_KEY || process.env.NEXT_PUBLIC_STRIPE_KEY,
+    environment: process.env.NODE_ENV,
+  },
   webpack(config) {
     config.module.rules.push({
       test: /\.svg$/i,

@@ -1,12 +1,11 @@
 // shared/context/ConfigProvider.tsx
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import getConfig from 'next/config';
 
 interface Config {
   apiUrl?: string;
   mqttUrl?: string;
   stripeKey?: string;
-  mqttUsername?: string;
-  mqttPassword?: string;
   [key: string]: string | undefined;
 }
 
@@ -37,6 +36,9 @@ export function ConfigProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     async function loadConfig() {
       try {
+        // Get Next.js runtime config
+        const { publicRuntimeConfig } = getConfig() || { publicRuntimeConfig: {} };
+        
         // First try to get config from window.__RUNTIME_CONFIG__
         if (typeof window !== 'undefined' && window.__RUNTIME_CONFIG__) {
           console.log('Using injected runtime config:', {
@@ -61,10 +63,10 @@ export function ConfigProvider({ children }: { children: React.ReactNode }) {
         
         // Merge with compile-time fallbacks
         const configWithFallbacks = {
-          // Fallback to compile-time values
-          apiUrl: data.apiUrl || process.env.NEXT_PUBLIC_API_URL,
-          mqttUrl: data.mqttUrl || process.env.NEXT_PUBLIC_MQTT_URL,
-          stripeKey: data.stripeKey || process.env.NEXT_PUBLIC_STRIPE_KEY,
+          // Fallback to compile-time values from publicRuntimeConfig
+          apiUrl: data.apiUrl || publicRuntimeConfig.apiUrl,
+          mqttUrl: data.mqttUrl || publicRuntimeConfig.mqttUrl,
+          stripeKey: data.stripeKey || publicRuntimeConfig.stripeKey,
           // Add any other config values here
         };
         
@@ -76,11 +78,13 @@ export function ConfigProvider({ children }: { children: React.ReactNode }) {
       } catch (error) {
         console.error('Failed to load runtime config:', error);
         
-        // Fall back to compile-time values
+        // Fall back to Next.js runtime config
+        const { publicRuntimeConfig } = getConfig() || { publicRuntimeConfig: {} };
+        
         const fallbackConfig = {
-          apiUrl: process.env.NEXT_PUBLIC_API_URL,
-          mqttUrl: process.env.NEXT_PUBLIC_MQTT_URL,
-          stripeKey: process.env.NEXT_PUBLIC_STRIPE_KEY,
+          apiUrl: publicRuntimeConfig.apiUrl,
+          mqttUrl: publicRuntimeConfig.mqttUrl,
+          stripeKey: publicRuntimeConfig.stripeKey,
           // Add any other config values here
         };
         

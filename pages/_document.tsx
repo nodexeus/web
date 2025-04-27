@@ -5,20 +5,14 @@ class MyDocument extends Document {
   static async getInitialProps(ctx: DocumentContext) {
     const initialProps = await Document.getInitialProps(ctx);
     
-    // Get environment variables at runtime
+    // Get runtime config from environment variables
     const runtimeConfig = {
       apiUrl: process.env.API_URL || process.env.NEXT_PUBLIC_API_URL,
       mqttUrl: process.env.MQTT_URL || process.env.NEXT_PUBLIC_MQTT_URL,
       stripeKey: process.env.STRIPE_KEY || process.env.NEXT_PUBLIC_STRIPE_KEY,
       environment: process.env.NODE_ENV,
     };
-
-    // Log the config being used (excluding sensitive values)
-    console.log('Server runtime config:', {
-      ...runtimeConfig,
-      stripeKey: runtimeConfig.stripeKey ? '[REDACTED]' : undefined,
-    });
-
+    
     return { 
       ...initialProps,
       runtimeConfig,
@@ -32,15 +26,17 @@ class MyDocument extends Document {
       <Html>
         <Head />
         <body>
-          {/* Inject runtime config directly into the HTML */}
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `window.__RUNTIME_CONFIG__ = ${JSON.stringify({
-                ...runtimeConfig,
-                stripeKey: runtimeConfig?.stripeKey ? runtimeConfig.stripeKey : undefined,
-              })};`,
-            }}
-          />
+          {/* Inject runtime config into the window object */}
+          {runtimeConfig && (
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `window.__RUNTIME_CONFIG__ = ${JSON.stringify({
+                  ...runtimeConfig,
+                  stripeKey: runtimeConfig.stripeKey ? runtimeConfig.stripeKey : undefined,
+                })};`,
+              }}
+            />
+          )}
           <Main />
           <NextScript />
         </body>
