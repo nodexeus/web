@@ -46,8 +46,12 @@ export const AdminListEditCost = ({ id, defaultValue, onUpdate }: Props) => {
   };
 
   const handleInput = (e: KeyboardEvent<HTMLInputElement>) => {
-    setIsValid(!isNaN(+e.target.value.replaceAll('$', '').replaceAll(',', '')));
-    setValue(e.target.value);
+    setIsValid(
+      !isNaN(
+        +((e.target as HTMLInputElement).value.replaceAll('$', '').replaceAll(',', '')),
+      ),
+    );
+    setValue((e.target as HTMLInputElement).value);
   };
 
   const handleFocus = () => setPlaceholder('Add cost');

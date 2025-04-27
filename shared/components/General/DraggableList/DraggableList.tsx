@@ -45,7 +45,11 @@ export const DraggableList = <T extends { key: string }, I>({
         return (
           <li
             key={item.key}
-            ref={(el) => (itemRefs.current[index] = el)}
+            ref={(el) => {
+              if (el) {
+                itemRefs.current[index] = el;
+              }
+            }}
             onMouseDown={(e) => handleMouseDown(e, index)}
             onTouchStart={(e) => handleMouseDown(e, index)}
             style={

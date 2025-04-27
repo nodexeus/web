@@ -29,7 +29,7 @@ const Layout = ({ children, isPageFlex, pageTitle }: LayoutProps) => {
   const repository = useIdentityRepository();
   const user = repository?.getIdentity();
 
-  const currentOrg = useRef<string>();
+  const currentOrg = useRef<string | undefined>(undefined);
 
   const defaultOrganization = useRecoilValue(
     organizationSelectors.defaultOrganization,

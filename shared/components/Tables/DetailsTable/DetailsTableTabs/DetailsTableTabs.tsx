@@ -58,7 +58,11 @@ export const DetailsTableTabs = ({ tabs, showTabHeader = true }: Props) => {
         {tabs.map((tab, index) => (
           <div
             key={tab.name}
-            ref={(element) => (tabContentRefs.current[index] = element)}
+            ref={(element) => {
+              if (element) {
+                tabContentRefs.current[index] = element;
+              }
+            }}
             css={[
               styles.tabContentItem,
               index === activeIndex && styles.tabContentItemVisible,

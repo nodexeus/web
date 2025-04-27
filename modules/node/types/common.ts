@@ -1,4 +1,4 @@
-import { EmotionJSX } from '@emotion/react/types/jsx-namespace';
+// import { EmotionJSX } from '@emotion/react/types/jsx-namespace';
 import { UINodeFilterCriteria } from '@modules/grpc';
 import {
   Host,
@@ -115,7 +115,7 @@ export type NodeListLayoutInputItem = {
 } & React.InputHTMLAttributes<HTMLInputElement>;
 
 export type NodeListItem = TableHeader<NodeListColumnKey> & {
-  component: (node: Node) => EmotionJSX.Element;
+  component: (node: Node) => React.ReactNode;
   isDisabled?: boolean;
 };
 
