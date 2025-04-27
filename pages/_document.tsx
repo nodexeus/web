@@ -1,23 +1,31 @@
 // _document.tsx
-import Document, { Head, Html, Main, NextScript } from 'next/document';
+import { Html, Head, Main, NextScript } from 'next/document';
 
-class MyDocument extends Document {
-  static async getInitialProps(ctx: any) {
-    const initialProps = await Document.getInitialProps(ctx);
-    return { ...initialProps };
-  }
+export default function Document() {
+  // Get environment variables at render time on the server
+  const runtimeConfig = {
+    apiUrl: process.env.API_URL || process.env.NEXT_PUBLIC_API_URL,
+    mqttUrl: process.env.MQTT_URL || process.env.NEXT_PUBLIC_MQTT_URL,
+    stripeKey: process.env.STRIPE_KEY || process.env.NEXT_PUBLIC_STRIPE_KEY,
+    environment: process.env.NODE_ENV,
+  };
 
-  render() {
-    return (
-      <Html>
-        <Head />
-        <body>
-          <Main />
-          <NextScript />
-        </body>
-      </Html>
-    );
-  }
+  return (
+    <Html>
+      <Head />
+      <body>
+        {/* Inject runtime config directly into the HTML */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `window.__RUNTIME_CONFIG__ = ${JSON.stringify({
+              ...runtimeConfig,
+              stripeKey: runtimeConfig.stripeKey ? runtimeConfig.stripeKey : undefined,
+            })};`,
+          }}
+        />
+        <Main />
+        <NextScript />
+      </body>
+    </Html>
+  );
 }
-
-export default MyDocument;

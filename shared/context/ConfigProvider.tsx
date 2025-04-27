@@ -10,6 +10,18 @@ interface Config {
   [key: string]: string | undefined;
 }
 
+// Define the window runtime config type
+declare global {
+  interface Window {
+    __RUNTIME_CONFIG__?: {
+      apiUrl?: string;
+      mqttUrl?: string;
+      stripeKey?: string;
+      environment?: string;
+    };
+  }
+}
+
 const ConfigContext = createContext<{
   config: Config;
   isLoading: boolean;
@@ -25,6 +37,18 @@ export function ConfigProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     async function loadConfig() {
       try {
+        // First try to get config from window.__RUNTIME_CONFIG__
+        if (typeof window !== 'undefined' && window.__RUNTIME_CONFIG__) {
+          console.log('Using injected runtime config:', {
+            ...window.__RUNTIME_CONFIG__,
+            stripeKey: window.__RUNTIME_CONFIG__.stripeKey ? '[REDACTED]' : undefined,
+          });
+          setConfig(window.__RUNTIME_CONFIG__);
+          setIsLoading(false);
+          return;
+        }
+
+        // Fall back to API if window config is not available
         // Attempt to fetch runtime config
         const response = await fetch('/api/runtime-config');
         
