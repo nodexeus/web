@@ -1,8 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: false,
-  // Explicitly set target to server to ensure API routes are included
-  target: 'server',
   // Enforce consistent URL handling
   trailingSlash: false,
   // Make server-side environment variables available to the API routes
