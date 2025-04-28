@@ -16,22 +16,19 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       hasPublicConfig: Object.keys(publicRuntimeConfig || {}).length > 0
     });
     
-    // These environment variables are set in each environment
+    // Only return non-sensitive configuration values
+    // The Stripe key will be loaded directly by components that need it
     const config = {
       apiUrl: process.env.NEXT_PUBLIC_API_URL || publicRuntimeConfig.apiUrl,
       mqttUrl: process.env.NEXT_PUBLIC_MQTT_URL || publicRuntimeConfig.mqttUrl,
-      stripeKey: process.env.NEXT_PUBLIC_STRIPE_KEY || publicRuntimeConfig.stripeKey,
-      // Include environment name for debugging
       environment: process.env.NODE_ENV || publicRuntimeConfig.environment,
     };
     
-    // Log the config being returned (excluding sensitive values)
+    // Log the config being returned
     console.log('runtime-config API: Returning config with values:', {
       ...config,
-      stripeKey: config.stripeKey ? '[REDACTED]' : undefined,
       hasApiUrl: !!config.apiUrl,
       hasMqttUrl: !!config.mqttUrl,
-      hasStripeKey: !!config.stripeKey,
       environment: config.environment
     });
     
