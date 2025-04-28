@@ -41,6 +41,9 @@ COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/node_modules ./node_modules
 
+# Fix permissions before switching to node user
+RUN chown -R node:node .
+
 # Runtime environment variables
 # These will be set when running the container
 # Prioritize non-NEXT_PUBLIC_ variables, fall back to NEXT_PUBLIC_ variables
@@ -51,7 +54,7 @@ ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 ENV NEXT_PUBLIC_MQTT_URL=${NEXT_PUBLIC_MQTT_URL}
 ENV NEXT_PUBLIC_STRIPE_KEY=${NEXT_PUBLIC_STRIPE_KEY}
 
-USER root
+USER node
 
 EXPOSE 3000
 
