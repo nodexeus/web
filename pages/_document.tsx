@@ -30,10 +30,7 @@ class MyDocument extends Document {
           {runtimeConfig && (
             <script
               dangerouslySetInnerHTML={{
-                __html: `window.__RUNTIME_CONFIG__ = ${JSON.stringify({
-                  ...runtimeConfig,
-                  stripeKey: runtimeConfig.stripeKey ? runtimeConfig.stripeKey : undefined,
-                })};`,
+                __html: `window.__RUNTIME_CONFIG__ = ${JSON.stringify(runtimeConfig)};`,
               }}
             />
           )}
