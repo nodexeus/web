@@ -87,6 +87,12 @@ export interface NodeMetrics {
   jobs: NodeJob[];
   /** The APR of the node. */
   apr?: number | undefined;
+  /** Whether the node is jailed. */
+  jailed?: boolean | undefined;
+  /** The reason for the node being jailed. */
+  jailedReason?: string | undefined;
+  /** The sqd name of the node. */
+  sqd_name?: string | undefined;
 }
 
 export interface MetricsServiceNodeResponse {
@@ -390,7 +396,7 @@ export const MetricsServiceNodeRequest = {
 };
 
 function createBaseNodeMetrics(): NodeMetrics {
-  return { nodeId: "", nodeStatus: undefined, height: undefined, blockAge: undefined, consensus: undefined, jobs: [], apr: undefined };
+  return { nodeId: "", nodeStatus: undefined, height: undefined, blockAge: undefined, consensus: undefined, jobs: [], apr: undefined, jailed: undefined, jailedReason: undefined };
 }
 
 export const NodeMetrics = {
@@ -415,6 +421,12 @@ export const NodeMetrics = {
     }
     if (message.apr !== undefined) {
       writer.uint32(57).double(message.apr);
+    }
+    if (message.jailed !== undefined) {
+      writer.uint32(64).bool(message.jailed);
+    }
+    if (message.jailedReason !== undefined) {
+      writer.uint32(74).string(message.jailedReason);
     }
     return writer;
   },
@@ -476,6 +488,20 @@ export const NodeMetrics = {
           message.apr = reader.double();
           continue;
         }
+        case 8:
+          if (tag !== 64) {
+            break;
+          }
+
+          message.jailed = reader.bool();
+          continue;
+        case 9:
+          if (tag !== 74) {
+            break;
+          }
+
+          message.jailedReason = reader.string();
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -500,6 +526,8 @@ export const NodeMetrics = {
     message.consensus = object.consensus ?? undefined;
     message.jobs = object.jobs?.map((e) => NodeJob.fromPartial(e)) || [];
     message.apr = object.apr ?? undefined;
+    message.jailed = object.jailed ?? undefined;
+    message.jailedReason = object.jailedReason ?? undefined;
     return message;
   },
 };

@@ -15,11 +15,11 @@ const styles = {
     margin: 2px 0 10px;
     line-height: 1.6;
   `,
-  tags: (hasTags?: boolean) => css`
-    padding: 2px 0 4px;
-    min-width: ${hasTags ? '200px' : '30px'};
-    width: ${hasTags ? '100%' : 'auto'};
-  `,
+  // tags: (hasTags?: boolean) => css`
+  //   padding: 2px 0 4px;
+  //   min-width: ${hasTags ? '200px' : '30px'};
+  //   width: ${hasTags ? '100%' : 'auto'};
+  // `,
   header: css`
     max-width: calc(100% - 38px);
     h2 {
@@ -42,8 +42,8 @@ export const mapNodeListToGrid = (
         <TableGridCell
           key={node.nodeId}
           onCellClick={() => onCellClick(node.nodeId)}
-          titleText={escapeHtml(node.displayName! || node.nodeName)}
-          {...(hasTags && { titleStyle: styles.header })}
+          titleText={escapeHtml(node.sqd_name! || node.displayName! || node.nodeName)}
+          {...({ titleStyle: styles.header })}
           titleStyle={styles.header}
           titleIcon={
             <ProtocolIcon
@@ -64,11 +64,11 @@ export const mapNodeListToGrid = (
           }
           middleRow={
             <>
-              <NodeTags autoHide={false} node={node} itemsPerView={3} />
+              <NodeTags autoHide={false} node={node} itemsPerView={1} />
               <p css={styles.blockchainNetwork}>
-                {node.protocolName}
-                {' | '}
-                {getNodeMetadataString(node.versionMetadata, node.versionKey!)}
+                {node.semanticVersion}
+                {/* {' | '}
+                {getNodeMetadataString(node.versionMetadata, node.versionKey!)} */}
               </p>
             </>
           }

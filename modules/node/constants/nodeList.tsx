@@ -26,28 +26,28 @@ export const NODE_LIST_ITEMS: NodeListItem[] = [
     alwaysVisible: true,
     component: (node: Node) => (
       <NodeGroups.Info
-        displayName={node.displayName}
-        versionKey={node.versionKey}
+        displayName={node.sqd_name || node.displayName}
         createdAt={node.createdAt}
+        semanticVersion={node.semanticVersion}
       />
     ),
     actions: ALL_ACTIONS,
   },
-  {
-    key: 'versionKey',
-    label: 'Type',
-    minWidth: '110px',
-    width: '180px',
-    isVisible: false,
-    component: (node: Node) => (
-      <NodeItems.ProtocolName
-        versionKey={node.versionKey}
-        versionMetadata={node.versionMetadata}
-        showName={true}
-      />
-    ),
-    actions: LAYOUT_ACTIONS,
-  },
+  // {
+  //   key: 'versionKey',
+  //   label: 'Type',
+  //   minWidth: '110px',
+  //   width: '180px',
+  //   isVisible: false,
+  //   component: (node: Node) => (
+  //     <NodeItems.ProtocolName
+  //       versionKey={node.versionKey}
+  //       versionMetadata={node.versionMetadata}
+  //       showName={true}
+  //     />
+  //   ),
+  //   actions: LAYOUT_ACTIONS,
+  // },
   {
     key: 'customProtocolStatus',
     label: 'Protocol Status',
@@ -75,8 +75,8 @@ export const NODE_LIST_ITEMS: NodeListItem[] = [
     isVisible: false,
     component: (node: Node) => (
       <NodeItems.DisplayName
-        displayName={node.displayName}
-        nodeName={node.nodeName}
+        displayName={node.sqd_name ? node.sqd_name : node.displayName}
+        nodeName={node.sqd_name ? node.sqd_name : node.displayName}
       />
     ),
     actions: ALL_ACTIONS,
@@ -124,7 +124,7 @@ export const NODE_LIST_ITEMS: NodeListItem[] = [
   },
   {
     key: 'customNodeHealth',
-    label: 'Protocol Health',
+    label: 'Online Health',
     minWidth: '170px',
     width: '170px',
     dataField: NodeSortField.NODE_SORT_FIELD_PROTOCOL_HEALTH,
@@ -156,6 +156,28 @@ export const NODE_LIST_ITEMS: NodeListItem[] = [
     ),
     actions: LAYOUT_ACTIONS,
   },
+  {
+    key: 'jailed',
+    label: 'Jailed',
+    minWidth: '60px',
+    width: '120px',
+    isVisible: true,
+    component: (node: Node) => (
+      <NodeItems.Jailed jailed={node.jailed} />
+    ),
+    actions: LAYOUT_ACTIONS,
+  },
+  // {
+  //   key: 'jailedReason',
+  //   label: 'Jailed Reason',
+  //   minWidth: '150px',
+  //   width: '420px',
+  //   isVisible: true,
+  //   component: (node: Node) => (
+  //     <NodeItems.JailedReason jailedReason={node.jailedReason} />
+  //   ),
+  //   actions: LAYOUT_ACTIONS,
+  // },
   {
     key: 'p2pAddress',
     label: 'Peer Id',

@@ -164,15 +164,15 @@ export const NodeViewHeader = () => {
                 <div css={styles.name}>
                   <div css={styles.title}>
                     <EditableTitle
-                      initialValue={node.displayName}
+                      initialValue={node.sqd_name || node.displayName}
                       isLoading={isLoading}
                       isSaving={isSaving!}
                       additionalContentRight={
-                        <Copy value={node.displayName!} />
+                        <Copy value={(node.sqd_name || node.displayName)!} />
                       }
                       onSaveClicked={handleUpdateNode}
                       onEditClicked={handleEditClicked}
-                      canUpdate
+                      canUpdate={!node.sqd_name}
                     />
                   </div>
                   <div css={styles.content}>

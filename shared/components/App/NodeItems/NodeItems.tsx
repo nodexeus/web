@@ -16,6 +16,7 @@ import { Region } from './Items/Region';
 import { RPCUrl } from './Items/RPCUrl';
 import { Version } from './Items/Version';
 import { Apr } from './Items/Apr';
+import { Jailed } from './Items/Jailed';
 import { P2pAddress } from './Items/P2pAddress';
 import { Info } from './Groups/Info';
 
@@ -40,6 +41,7 @@ export const NodeItems = {
   RPCUrl,
   Version,
   Apr,
+  Jailed,
   P2pAddress,
 };
 

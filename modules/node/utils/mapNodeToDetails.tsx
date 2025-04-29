@@ -2,6 +2,7 @@ import { Node } from '@modules/grpc/library/blockjoy/v1/node';
 import { Copy } from '@shared/components';
 import { styles } from '@shared/components/Buttons/NextLink/NextLink.styles';
 import { getNodeRpcUrl } from './getNodeRpcUrl';
+import { styles as CopyStyles } from '@shared/components/General/Copy/Copy.styles';
 
 export const mapNodeToDetails = (node: Node) => {
   const rpcUrl = getNodeRpcUrl(node.dnsName);
@@ -23,54 +24,107 @@ export const mapNodeToDetails = (node: Node) => {
     data: any | undefined;
   }[] = [
     {
+      label: "SQD Name",
+      data: node.sqd_name || '-',
+    },
+    {
+      label: "Peer ID",
+      data: (
+        <>
+        <a
+          css={CopyStyles.text}
+          >
+          {node.p2pAddress}
+          <span css={CopyStyles.copyButton}>
+            <Copy value={node.p2pAddress} />
+          </span>
+          </a>
+        </>
+      ) || '-',
+    },
+    {
+      label: 'Jailed',
+      data: node.jailed ? 'Yes' : 'No',
+    },
+    ...(node.jailed ? [
+      {
+        label: 'Jailed Reason',
+        data: node.jailedReason || '-',
+      },
+    ] : []),
+    {
+      label: 'Current APR',
+      data: node.apr?.toFixed(2) + '%' || '-',
+    },
+    {
+      label: "Dashboard URL",
+      data: (
+        <>
+          <a
+            css={styles.link}
+            target="_blank"
+            rel="noopener noreferrer"
+            href={`https://network.subsquid.io/workers/${node.p2pAddress}?backPath=/dashboard`}
+          >
+            SQD Dashboard
+
+            <span css={styles.copyButton}>
+              <Copy value={`https://network.subsquid.io/workers/${node.p2pAddress}?backPath=/dashboard`} />
+            </span>
+          </a>
+        </>
+      ) || '-',
+    },
+    {
       label: 'Version',
       data: node.semanticVersion || 'Latest',
     },
   ];
 
-  if (client) {
-    details.unshift({
-      label: 'Client',
-      data: client,
-    });
-  }
+  // if (client) {
+  //   details.unshift({
+  //     label: 'Client',
+  //     data: client,
+  //   });
+  // }
 
   if (network) {
-    details.unshift({
+    details.push({
       label: 'Network',
-      data: network,
+      data: network.charAt(0).toUpperCase() + network.slice(1),
     });
   }
 
-  if (nodeType) {
-    details.unshift({
-      label: 'Node Type',
-      data: nodeType,
-    });
-  }
+  // if (nodeType) {
+  //   details.unshift({
+  //     label: 'Node Type',
+  //     data: nodeType,
+  //   });
+  // }
 
-  if (rpcUrl) {
-    details.unshift({
-      label: 'RPC URL',
-      data:
-        (
-          <>
-            <a
-              css={styles.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              href={rpcUrl}
-            >
-              {rpcUrl}
+  
+  // if (rpcUrl) {
+  //   details.unshift({
+  //     label: 'RPC URL',
+  //     data:
+  //       (
+  //         <>
+  //           <a
+  //             css={styles.link}
+  //             target="_blank"
+  //             rel="noopener noreferrer"
+  //             href={rpcUrl}
+  //           >
+  //             {rpcUrl}
 
-              <span css={styles.copyButton}>
-                <Copy value={rpcUrl} />
-              </span>
-            </a>
-          </>
-        ) || '-',
-    });
-  }
+  //             <span css={styles.copyButton}>
+  //               <Copy value={rpcUrl} />
+  //             </span>
+  //           </a>
+  //         </>
+  //       ) || '-',
+  //   });
+  // }
 
   return details;
 };

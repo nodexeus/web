@@ -27,6 +27,7 @@ export const themeDefault: ITheme = {
   colorOverlay: '#363a39',
   colorSuccess: '#85F550',
   colorTertiary: '#DBDBD7',
+  colorWarning: '#cf7a0a',
   colorDark: '#000000',
   screenXs: '500px',
   screenSm: '768px',

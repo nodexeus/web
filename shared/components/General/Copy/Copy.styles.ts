@@ -32,4 +32,9 @@ export const styles = {
       max-width: 100%;
     }
   `,
+  copyButton: css`
+    position: absolute;
+    bottom: -8px;
+    right: -40px;
+  `,
 };

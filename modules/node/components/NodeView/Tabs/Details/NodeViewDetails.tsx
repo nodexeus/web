@@ -19,12 +19,14 @@ export const NodeViewDetails = () => {
       <section css={styles.section}>
         <DetailsTable bodyElements={mapNodeToDetails(node!)} />
       </section>
-      <section css={styles.section}>
-        <FormHeaderCaps noBottomMargin>Launch Details</FormHeaderCaps>
-        <DetailsTable
-          bodyElements={mapNodeToLaunchDetails(node!, isSuperUser)}
-        />
-      </section>
+      {isSuperUser && (
+        <section css={styles.section}>
+          <FormHeaderCaps noBottomMargin>Launch Details</FormHeaderCaps>
+          <DetailsTable
+            bodyElements={mapNodeToLaunchDetails(node!, isSuperUser)}
+          />
+        </section>
+      )}
     </>
   );
 };

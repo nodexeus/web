@@ -29,10 +29,17 @@ import { ResourceType } from '@modules/grpc/library/blockjoy/common/v1/resource'
 
 const columns: AdminListColumn[] = [
   {
+    name: 'sqd_name',
+    displayName: 'Sqd Name',
+    width: '200px',
+    sortField: NodeSortField.NODE_SORT_FIELD_SQD_NAME,
+    isVisible: true,
+  },
+  {
     name: 'displayName',
     width: '200px',
     sortField: NodeSortField.NODE_SORT_FIELD_DISPLAY_NAME,
-    isVisible: true,
+   isVisible: true,
   },
   {
     name: 'nodeName',
@@ -74,6 +81,19 @@ const columns: AdminListColumn[] = [
     displayName: 'Apr',
     width: '160px',
     sortField: NodeSortField.NODE_SORT_FIELD_APR,
+    isVisible: true,
+  },
+  {
+    name: 'jailed',
+    displayName: 'Jailed',
+    width: '160px',
+    sortField: NodeSortField.NODE_SORT_FIELD_JAILED,
+    isVisible: true,
+  },
+  {
+    name: 'jailedReason',
+    displayName: 'Jailed Reason',
+    width: '160px',
     isVisible: true,
   },
   {
@@ -254,6 +274,9 @@ export const AdminNodes = () => {
         createdBy,
         host: node.hostDisplayName || node.hostNetworkName,
         apr: node.apr !== undefined ? `${Number(node.apr).toFixed(2)}%` : 'Calculating',
+        jailed: node.jailed ? 'Yes' : 'No',
+        jailedReason: node.jailedReason,
+        sqd_name: node.sqd_name,
         cost: (
           <AdminListEditCost
             id={node.nodeId}

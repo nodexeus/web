@@ -22,6 +22,8 @@ import IconRemoving from '@public/assets/icons/nodeStatus/Removing.svg';
 import IconSynced from '@public/assets/icons/nodeStatus/Synced.svg';
 import IconSyncing from '@public/assets/icons/nodeStatus/Syncing.svg';
 import IconHeart from '@public/assets/icons/common/Heart.svg';
+import IconHeartBroken from '@public/assets/icons/common/HeartBroken.svg';
+import IconJailed from '@public/assets/icons/nodeStatus/Jailed.svg';
 
 export const NODE_STATE_PRESENTATION: Record<string, NodeStatePresentation> = {
   deleted: {
@@ -49,6 +51,10 @@ export const NODE_STATE_PRESENTATION: Record<string, NodeStatePresentation> = {
   upgrading: {
     Icon: IconCog,
     options: { iconSpining: true },
+  },
+  jailed: {
+    Icon: IconJailed,
+    options: { iconSpining: false },
   },
 };
 
@@ -146,7 +152,7 @@ export const PROTOCOL_HEALTH_PRESENTATION: Record<
   },
   unhealthy: {
     color: 'colorDanger',
-    Icon: IconHeart,
+    Icon: IconHeartBroken,
   },
 };
 

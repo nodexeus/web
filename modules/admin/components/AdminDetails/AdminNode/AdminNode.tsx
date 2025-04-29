@@ -186,6 +186,21 @@ export const AdminNode = () => {
         data: node.apr !== undefined ? Number(node.apr).toFixed(4) + '%' : node.apr,
       },
       {
+        id: 'jailed',
+        label: 'Jailed',
+        data: node.jailed ? 'Yes' : 'No',
+      },
+      {
+        id: 'jailedReason',
+        label: 'Jailed Reason',
+        data: node.jailedReason,
+      },
+      {
+        id: 'sqd_name',
+        label: 'SQD Name',
+        data: node.sqd_name,
+      },
+      {
         id: 'cost',
         label: 'Cost',
         data: <Currency cents={node.cost?.amount?.amountMinorUnits} />,

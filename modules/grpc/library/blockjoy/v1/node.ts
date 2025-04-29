@@ -33,6 +33,8 @@ export enum NodeSortField {
   NODE_SORT_FIELD_CREATED_AT = 9,
   NODE_SORT_FIELD_UPDATED_AT = 10,
   NODE_SORT_FIELD_APR = 11,
+  NODE_SORT_FIELD_JAILED = 12,
+  NODE_SORT_FIELD_SQD_NAME = 13,
   UNRECOGNIZED = -1,
 }
 
@@ -77,6 +79,9 @@ export interface Node {
   cost?: BillingAmount | undefined;
   versionMetadata: VersionMetadata[];
   apr?: number | undefined;
+  jailed?: boolean | undefined;
+  jailedReason?: string | undefined;
+  sqd_name?: string | undefined;
 }
 
 /** Create a new node for some image. */
@@ -310,6 +315,9 @@ function createBaseNode(): Node {
     cost: undefined,
     versionMetadata: [],
     apr: undefined,
+    jailed: undefined,
+    jailedReason: undefined,
+    sqd_name: undefined,
   };
 }
 
@@ -443,6 +451,15 @@ export const Node = {
     }
     if (message.apr !== undefined) {
       writer.uint32(321).double(message.apr);
+    }
+    if (message.jailed !== undefined) {
+      writer.uint32(328).bool(message.jailed);
+    }
+    if (message.jailedReason !== undefined) {
+      writer.uint32(338).string(message.jailedReason);
+    }
+    if (message.sqd_name !== undefined) {
+      writer.uint32(346).string(message.sqd_name);
     }
     return writer;
   },
@@ -744,6 +761,27 @@ export const Node = {
 
           message.apr = reader.double();
           continue;
+        case 41:
+          if (tag !== 328) {
+            break;
+          }
+
+          message.jailed = reader.bool();
+          continue;
+        case 42:
+          if (tag !== 338) {
+            break;
+          }
+
+          message.jailedReason = reader.string();
+          continue;
+        case 43:
+          if (tag !== 346) {
+            break;
+          }
+
+          message.sqd_name = reader.string();
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -819,6 +857,9 @@ export const Node = {
     message.versionMetadata =
       object.versionMetadata?.map((e) => VersionMetadata.fromPartial(e)) || [];
     message.apr = object.apr ?? undefined;
+    message.jailed = object.jailed ?? undefined;
+    message.jailedReason = object.jailedReason ?? undefined;
+    message.sqd_name = object.sqd_name ?? undefined;
     return message;
   },
 };
@@ -1443,6 +1484,7 @@ function createBaseNodeSearch(): NodeSearch {
     protocolState: undefined,
     protocolHealth: undefined,
     ip: undefined,
+    sqd_name: undefined,
   };
 }
 

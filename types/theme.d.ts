@@ -29,6 +29,7 @@ export type ITheme = {
   colorOverlay: string;
   colorSuccess: string;
   colorTertiary: string;
+  colorWarning: string;
   colorDark: string;
   screenXs: string;
   screenSm: string;
