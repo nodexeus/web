@@ -1484,7 +1484,6 @@ function createBaseNodeSearch(): NodeSearch {
     protocolState: undefined,
     protocolHealth: undefined,
     ip: undefined,
-    sqd_name: undefined,
   };
 }
 
