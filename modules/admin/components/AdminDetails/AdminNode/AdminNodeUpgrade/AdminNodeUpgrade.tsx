@@ -1,5 +1,5 @@
 import { AdminHeaderButton } from '@modules/admin/components';
-import { protocolClient, nodeClient } from '@modules/grpc';
+import { protocolClient, nodeClient, imageClient } from '@modules/grpc';
 import {
   DropdownItem,
   DropdownMenu,
@@ -25,7 +25,17 @@ export const AdminNodeUpgrade = () => {
 
   const handleUpgrade = async (version: string) => {
     try {
-      await nodeClient.upgradeNode([id as string], version);
+      // Get the node to retrieve its version key
+      const node = await nodeClient.getNode(id as string);
+      
+      // Get the correct image for this version
+      const imageResponse = await imageClient.getImage({
+        versionKey: node.versionKey,
+        semanticVersion: version,
+      });
+      
+      // Use the proper image ID from the response
+      await nodeClient.upgradeNode([id as string], imageResponse.image?.imageId!);
       toast.success('Upgrade Command Sent');
     } catch (err) {
       toast.error('Error Upgrading');
