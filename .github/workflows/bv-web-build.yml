@@ -2,7 +2,7 @@ name: Web Build and Push
 
 on:
   push:
-    branches: [develop]
+    branches: [develop, main]
   workflow_dispatch:
 
 jobs:
