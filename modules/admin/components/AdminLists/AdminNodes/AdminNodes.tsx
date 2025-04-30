@@ -198,9 +198,10 @@ export const AdminNodes = () => {
   const getList = async (
     keyword?: string,
     page?: number,
-    sortField?: number,
+    sortField?: NodeSortField,
     sortOrder?: SortOrder,
     filters?: AdminListColumn[],
+    pageSize?: number,
   ) => {
     if (!users.length) {
       const usersResponse = await userClient.listUsers();
@@ -212,19 +213,23 @@ export const AdminNodes = () => {
       setProtocols(protocolsResponse.protocols);
     }
 
-    const sort =
-      page === -1 ? undefined : [{ field: sortField!, order: sortOrder! }];
+    const sort = page === -1 ? undefined : [
+      {
+        field: sortField!,
+        order: sortOrder!,
+      },
+    ];
 
     try {
       const response = await nodeClient.listNodes(
-        undefined,
+        keyword,
         {
           keyword,
           ...createAdminNodeFilters(filters!),
         },
         {
           currentPage: page === -1 ? 0 : page!,
-          itemsPerPage: page === -1 ? 50000 : pageSize,
+          itemsPerPage: page === -1 ? 50000 : pageSize || pageSize,
         },
         sort,
       );

@@ -9,6 +9,7 @@ type Props = {
   maxPagesToDisplay?: number;
   pageCount?: number;
   totalRowCount: number;
+  currentPageSize?: number;
   onPageChanged: (page: number) => void;
 };
 
@@ -106,7 +107,7 @@ export const AdminListPagination = ({
         type="button"
         css={styles.paginationButton}
         onClick={() => handlePageChanged(listPage + 1)}
-        disabled={listPage === pageCount}
+        disabled={listPage === pageCount || pageCount === 0}
       >
         <SvgIcon size="10px" isDefaultColor>
           <IconChevronRight />

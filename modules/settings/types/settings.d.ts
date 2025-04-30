@@ -71,6 +71,7 @@ type AdminSettingsSort = {
 type AdminSettingsItem = {
   sort?: AdminSettingsSort;
   columns?: AdminListColumn[];
+  pageSize?: number;
 };
 
 type AdminSettings = {

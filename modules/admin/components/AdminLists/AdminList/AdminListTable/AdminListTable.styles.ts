@@ -222,12 +222,64 @@ export const styles = {
   paginationWrapper: (theme: ITheme) => css`
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    width: 100%;
     gap: 20px;
     height: 56px;
 
     @media ${breakpoints.toSml} {
       transform: scale(0.875);
       justify-content: center;
+      flex-direction: column;
+    }
+  `,
+  paginationControls: css`
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    @media ${breakpoints.toSml} {
+      flex-direction: column;
+    }
+  `,
+  pageSizeSelector: css`
+    display: flex;
+    align-items: center;
+  `,
+  pageSizeLabel: css`
+    margin-right: 8px;
+    font-size: 12px;
+    white-space: nowrap;
+  `,
+  selectWrapper: css`
+    position: relative;
+    display: inline-block;
+  `,
+  pageSizeSelect: (theme: ITheme) => css`
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    padding: 4px 24px 4px 8px;
+    border-radius: 4px;
+    border: 1px solid ${theme.colorBorder};
+    background-color: ${theme.colorBackground};
+    color: ${theme.colorDefault};
+    cursor: pointer;
+    font-size: 12px;
+
+    &:focus {
+      outline: none;
+      border-color: ${theme.colorPrimary};
+    }
+
+    /* Custom dropdown arrow */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='4' viewBox='0 0 8 4'%3E%3Cpath fill='%235F615D' d='M0 0h8L4 4z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+
+    option {
+      background-color: ${theme.colorBackground};
+      color: ${theme.colorDefault};
     }
   `,
   checkboxButton: css`

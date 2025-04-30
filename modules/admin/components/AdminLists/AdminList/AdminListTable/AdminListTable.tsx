@@ -2,7 +2,10 @@ import { styles } from './AdminListTable.styles';
 import { spacing } from 'styles/utils.spacing.styles';
 import { useRouter } from 'next/router';
 import { Checkbox, Copy, TableSkeleton } from '@shared/components';
-import { pageSize } from '@modules/admin/constants/constants';
+import {
+  defaultPageSize,
+  pageSizeOptions,
+} from '@modules/admin/constants/constants';
 import { SortOrder } from '@modules/grpc/library/blockjoy/common/v1/search';
 import { AdminListPagination } from './AdminListPagination/AdminListPagination';
 import { AdminListRowCount } from './AdminListRowCount/AdminListRowCount';
@@ -41,6 +44,7 @@ type Props = {
   onSortChanged: (sortField: number, sortOrder: SortOrder) => void;
   onFiltersChanged: (nextFilters: AdminListColumn[]) => void;
   onColumnsChanged: (nextColumns: AdminListColumn[]) => void;
+  onPageSizeChanged?: (pageSize: number) => void;
 };
 
 export const AdminListTable = ({
@@ -64,6 +68,7 @@ export const AdminListTable = ({
   onSortChanged,
   onFiltersChanged,
   onColumnsChanged,
+  onPageSizeChanged,
 }: Props) => {
   const router = useRouter();
 
@@ -79,11 +84,16 @@ export const AdminListTable = ({
   const [resizeLineLeft, setResizeLineLeft] = useState(0);
   const [isSelectingCheckboxes, setIsSelectingCheckboxes] = useState(false);
   const [isChecking, setIsChecking] = useState(false);
+  const [currentPageSize, setCurrentPageSize] = useState(defaultPageSize);
 
   const wrapperRef = useRef<HTMLDivElement>(null);
   const activeIndex = useRef<number>(0);
 
-  const pageCount = Math.ceil(listTotal! / pageSize);
+  // Calculate pageCount, ensuring it's at least 1 for UI rendering, but 0 if no items exist
+  const pageCount =
+    listTotal && listTotal > 0
+      ? Math.max(1, Math.ceil(listTotal / currentPageSize))
+      : 0;
 
   const gotoDetails = (id: string) => {
     const query: any = {
@@ -235,6 +245,22 @@ export const AdminListTable = ({
     };
   }, [columnsVisible.length]);
 
+  useEffect(() => {
+    if (onPageSizeChanged) {
+      // Apply the current page size when the component mounts
+      onPageSizeChanged(currentPageSize);
+    }
+  }, []);
+
+  const handlePageSizeChange = (newPageSize: number) => {
+    setCurrentPageSize(newPageSize);
+    if (onPageSizeChanged) {
+      onPageSizeChanged(newPageSize);
+    }
+    // When changing page size, go back to first page to avoid out-of-bounds issues
+    onPageChanged(1);
+  };
+
   if (isLoading)
     return (
       <div css={spacing.top.medium}>
@@ -246,7 +272,7 @@ export const AdminListTable = ({
     <>
       <div
         ref={wrapperRef}
-        css={styles.tableWrapper(listAll?.length > pageSize)}
+        css={styles.tableWrapper(listAll?.length > defaultPageSize)}
         onScroll={handleBodyScroll}
         onMouseLeave={() => setIsSelectingCheckboxes(false)}
       >
@@ -407,13 +433,41 @@ export const AdminListTable = ({
       <div css={styles.bottomRow}>
         {listTotal! > 0 && !hidePagination && (
           <div css={styles.paginationWrapper}>
-            <AdminListPagination
-              listPage={listPage}
-              totalRowCount={listTotal!}
-              pageCount={pageCount}
-              onPageChanged={onPageChanged}
+            <div css={styles.paginationControls}>
+              {onPageSizeChanged && (
+                <div css={styles.pageSizeSelector}>
+                  <span css={styles.pageSizeLabel}>Items per page:</span>
+                  <div css={styles.selectWrapper}>
+                    <select
+                      id="page-size-selector"
+                      value={currentPageSize}
+                      onChange={(e) =>
+                        handlePageSizeChange(Number(e.target.value))
+                      }
+                      css={styles.pageSizeSelect}
+                    >
+                      {pageSizeOptions.map((size) => (
+                        <option key={size} value={size}>
+                          {size}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              )}
+              <AdminListPagination
+                listPage={listPage}
+                totalRowCount={listTotal || 0}
+                pageCount={pageCount}
+                currentPageSize={currentPageSize}
+                onPageChanged={onPageChanged}
+              />
+            </div>
+            <AdminListRowCount
+              total={listTotal!}
+              page={listPage}
+              pageSize={currentPageSize}
             />
-            <AdminListRowCount total={listTotal!} page={listPage} />
           </div>
         )}
       </div>

@@ -17,6 +17,7 @@ import { AdminListHeader } from './AdminListHeader/AdminListHeader';
 import { AdminListTable } from './AdminListTable/AdminListTable';
 import { Protocol } from '@modules/grpc/library/blockjoy/v1/protocol';
 import { User } from '@modules/grpc/library/blockjoy/v1/user';
+import { pageSize as defaultPageSize } from '@modules/admin/constants/constants';
 
 type Props = {
   name: keyof AdminSettings;
@@ -46,6 +47,7 @@ type Props = {
     sortField?: number,
     sortOrder?: number,
     filters?: AdminListColumn[],
+    pageSize?: number,
   ) => Promise<{
     total: number;
     list: any[];
@@ -58,6 +60,7 @@ type ListSettings = {
   sortField: number;
   sortOrder: number;
   filters: AdminListColumn[];
+  pageSize: number;
 };
 
 export const AdminList = ({
@@ -102,9 +105,10 @@ export const AdminList = ({
     sortField: settings[name]?.sort?.field || defaultSortField,
     sortOrder: settings[name]?.sort?.order || defaultSortOrder,
     filters: settingsColumns.filter((column) => !!column.filterComponent),
+    pageSize: settings[name]?.pageSize || defaultPageSize,
   });
 
-  const { listSearch, listPage, sortField, sortOrder, filters } = listSettings;
+  const { listSearch, listPage, sortField, sortOrder, filters, pageSize } = listSettings;
 
   const { updateSettings } = useSettings();
 
@@ -114,6 +118,7 @@ export const AdminList = ({
     sortField: number,
     sortOrder: SortOrder,
     filters?: AdminListColumn[],
+    pageSize?: number,
   ) => {
     const response = await getList(
       keyword,
@@ -121,6 +126,7 @@ export const AdminList = ({
       sortField,
       sortOrder,
       filters,
+      pageSize,
     );
 
     setList(response.list);
@@ -134,6 +140,7 @@ export const AdminList = ({
         undefined,
         undefined,
         undefined,
+        pageSize,
       );
 
       setListAll(everythingResponse.list);
@@ -151,7 +158,7 @@ export const AdminList = ({
       listPage: 1,
     });
 
-    handleGetList(nextSearch, 1, sortField, sortOrder, filters);
+    handleGetList(nextSearch, 1, sortField, sortOrder, filters, pageSize);
   };
 
   const handleSortChanged = (nextSortField: number) => {
@@ -196,7 +203,24 @@ export const AdminList = ({
 
     updateQueryString(nextPage, search as string);
 
-    handleGetList(listSearch, nextPage, sortField, sortOrder, filters);
+    handleGetList(listSearch, nextPage, sortField, sortOrder, filters, pageSize);
+  };
+
+  const handlePageSizeChanged = (nextPageSize: number) => {
+    setListSettings({
+      ...listSettings,
+      pageSize: nextPageSize,
+    });
+
+    updateSettings('admin', {
+      [name]: {
+        ...settings[name],
+        pageSize: nextPageSize,
+      },
+    });
+
+    // Refetch data with the new page size
+    handleGetList(listSearch, listPage, sortField, sortOrder, filters, nextPageSize);
   };
 
   const handleColumnsChanged = (nextColumns: AdminListColumn[]) => {
@@ -262,7 +286,7 @@ export const AdminList = ({
   useEffect(() => {
     initSettingsColumns();
     if (columnsState.length) {
-      handleGetList(listSearch, listPage, sortField, sortOrder, filters);
+      handleGetList(listSearch, listPage, sortField, sortOrder, filters, pageSize);
     }
   }, [listSettings]);
 
@@ -349,6 +373,7 @@ export const AdminList = ({
         onSortChanged={handleSortChanged}
         onFiltersChanged={handleFiltersChanged}
         onColumnsChanged={handleColumnsChanged}
+        onPageSizeChanged={handlePageSizeChanged}
       />
     </article>
   );

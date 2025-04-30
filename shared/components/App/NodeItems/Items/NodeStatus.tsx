@@ -16,12 +16,11 @@ export const NodeStatus = ({ nodeStatus, view = 'default' }: Props) => {
     .replace('NODE_STATE_', '')
     ?.toLowerCase();
 
-  const { color, Icon, options } = NODE_STATE_PRESENTATION[nodeState];
+  const { Icon, options } = NODE_STATE_PRESENTATION[nodeState];
 
   return (
     <NodePartials.NodeStatusTextWIcon
-      // color={color}
-      color={nodeState === 'RUNNING' ? 'colorDanger' : 'colorSuccess'}
+      color={nodeState === 'failed' ? 'colorDanger' : 'colorSuccess'}
       Icon={Icon}
       options={options}
       view={view}
@@ -39,7 +38,7 @@ const styles = {
   text: (view?: NodeStatusView, nodeState?: string) => (theme: ITheme) =>
     css`
       text-transform: capitalize;
-      color: ${nodeState === 'RUNNING' ? theme.colorDanger : theme.colorSuccess};
+      color: ${nodeState === 'failed' ? theme.colorDanger : theme.colorSuccess};
       ${view === 'default' &&
       `
         font-size: 14px;
@@ -47,4 +46,3 @@ const styles = {
       letter-spacing: 0;
     `,
 };
-
