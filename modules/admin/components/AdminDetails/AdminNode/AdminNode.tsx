@@ -153,19 +153,19 @@ export const AdminNode = () => {
       {
         id: 'nodeType',
         label: 'Node Type',
-        data: node.versionMetadata.find((m) => m.metadataKey === 'node-type')
+        data: node.versionMetadata.find((m) => m.metadataKey === 'client')
           ?.value,
       },
       {
         id: 'network',
         label: 'Network',
-        data: node.versionMetadata.find((m) => m.metadataKey === 'network')
+        data: node.versionMetadata.find((m) => m.metadataKey === 'node-type')
           ?.value,
       },
       {
         id: 'client',
         label: 'Client',
-        data: node.versionMetadata.find((m) => m.metadataKey === 'client')
+        data: node.versionMetadata.find((m) => m.metadataKey === 'network')
           ?.value,
       },
       {
@@ -183,7 +183,8 @@ export const AdminNode = () => {
       {
         id: 'apr',
         label: 'Apr',
-        data: node.apr !== undefined ? Number(node.apr).toFixed(4) + '%' : node.apr,
+        data:
+          node.apr !== undefined ? Number(node.apr).toFixed(4) + '%' : node.apr,
       },
       {
         id: 'jailed',

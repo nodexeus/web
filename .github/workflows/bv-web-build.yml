@@ -26,6 +26,10 @@ jobs:
         id: date
         run: echo "date=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_OUTPUT
 
+      - name: Get short SHA
+        id: sha
+        run: echo "sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
@@ -41,6 +45,7 @@ jobs:
             NEXT_PUBLIC_VERCEL_ENV=production
             NEXT_PUBLIC_LOADING_DURATION=200
             NEXT_PUBLIC_STRIPE_KEY=${{ secrets.STRIPE_KEY }}
+            NEXT_PUBLIC_SHORT_SHA=${{ steps.sha.outputs.sha }}
           cache-from: type=registry,ref=nodexeus/bv-web-dev:latest
           cache-to: type=inline
 
@@ -64,6 +69,10 @@ jobs:
         id: date
         run: echo "date=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_OUTPUT
 
+      - name: Get short SHA
+        id: sha
+        run: echo "sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
@@ -79,5 +88,6 @@ jobs:
             NEXT_PUBLIC_VERCEL_ENV=production
             NEXT_PUBLIC_LOADING_DURATION=200
             NEXT_PUBLIC_STRIPE_KEY=${{ secrets.STRIPE_KEY }}
+            NEXT_PUBLIC_SHORT_SHA=${{ steps.sha.outputs.sha }}
           cache-from: type=registry,ref=nodexeus/bv-web:latest
           cache-to: type=inline

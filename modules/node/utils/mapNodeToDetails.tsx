@@ -24,56 +24,71 @@ export const mapNodeToDetails = (node: Node) => {
     data: any | undefined;
   }[] = [
     {
-      label: "SQD Name",
+      label: 'SQD Name',
       data: node.sqd_name || '-',
     },
     {
-      label: "Peer ID",
-      data: (
-        <>
-        <a
-          css={CopyStyles.text}
-          >
-          {node.p2pAddress}
-          <span css={CopyStyles.copyButton}>
-            <Copy value={node.p2pAddress} />
-          </span>
-          </a>
-        </>
-      ) || '-',
+      label: 'Peer ID',
+      data:
+        (
+          <>
+            <a css={CopyStyles.text}>
+              {node.p2pAddress}
+              <span css={CopyStyles.copyButton}>
+                <Copy value={node.p2pAddress} />
+              </span>
+            </a>
+          </>
+        ) || '-',
     },
     {
       label: 'Jailed',
       data: node.jailed ? 'Yes' : 'No',
     },
-    ...(node.jailed ? [
-      {
-        label: 'Jailed Reason',
-        data: node.jailedReason || '-',
-      },
-    ] : []),
+    ...(node.jailed
+      ? [
+          {
+            label: 'Jailed Reason',
+            data: node.jailedReason || '-',
+          },
+        ]
+      : []),
     {
       label: 'Current APR',
       data: node.apr?.toFixed(2) + '%' || '-',
     },
     {
-      label: "Dashboard URL",
-      data: (
-        <>
-          <a
-            css={styles.link}
-            target="_blank"
-            rel="noopener noreferrer"
-            href={`https://network.subsquid.io/workers/${node.p2pAddress}?backPath=/dashboard`}
-          >
-            SQD Dashboard
-
-            <span css={styles.copyButton}>
-              <Copy value={`https://network.subsquid.io/workers/${node.p2pAddress}?backPath=/dashboard`} />
-            </span>
-          </a>
-        </>
-      ) || '-',
+      label: 'Dashboard URL',
+      data:
+        (
+          <>
+            <a
+              css={styles.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              href={
+                node.versionKey?.variantKey?.includes('mainnet')
+                  ? `https://network.subsquid.io/workers/${node.p2pAddress}?backPath=/dashboard`
+                  : node.versionKey?.variantKey?.includes('tethys')
+                  ? `https://tethys.subsquid.io/workers/${node.p2pAddress}?backPath=/dashboard`
+                  : `https://network.subsquid.io/workers/${node.p2pAddress}?backPath=/dashboard`
+              }
+            >
+              SQD Dashboard
+              <span css={styles.copyButton}>
+                <Copy
+                  value={
+                    node.versionKey?.variantKey?.includes('mainnet')
+                      ? `https://network.subsquid.io/workers/${node.p2pAddress}?backPath=/dashboard`
+                      : node.versionKey?.variantKey?.includes('tethys')
+                      ? `https://tethys.subsquid.io/workers/${node.p2pAddress}?backPath=/dashboard`
+                      : `https://network.subsquid.io/workers/${node.p2pAddress}?backPath=/dashboard`
+                  }
+                />
+              </span>
+            </a>
+          </>
+        ) || '-',
     },
     {
       label: 'Version',
@@ -88,10 +103,10 @@ export const mapNodeToDetails = (node: Node) => {
   //   });
   // }
 
-  if (network) {
+  if (nodeType) {
     details.push({
       label: 'Network',
-      data: network.charAt(0).toUpperCase() + network.slice(1),
+      data: nodeType.charAt(0).toUpperCase() + nodeType.slice(1),
     });
   }
 
@@ -102,7 +117,6 @@ export const mapNodeToDetails = (node: Node) => {
   //   });
   // }
 
-  
   // if (rpcUrl) {
   //   details.unshift({
   //     label: 'RPC URL',

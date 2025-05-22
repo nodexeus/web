@@ -20,7 +20,7 @@ export const NodeStatus = ({ nodeStatus, view = 'default' }: Props) => {
 
   return (
     <NodePartials.NodeStatusTextWIcon
-      color={nodeState === 'failed' ? 'colorDanger' : 'colorSuccess'}
+      color={NODE_STATE_PRESENTATION[nodeState].color}
       Icon={Icon}
       options={options}
       view={view}
@@ -38,7 +38,7 @@ const styles = {
   text: (view?: NodeStatusView, nodeState?: string) => (theme: ITheme) =>
     css`
       text-transform: capitalize;
-      color: ${nodeState === 'failed' ? theme.colorDanger : theme.colorSuccess};
+      color: ${NODE_STATE_PRESENTATION[nodeState].color};
       ${view === 'default' &&
       `
         font-size: 14px;

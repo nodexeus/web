@@ -38,7 +38,7 @@ export const NODE_STATE_PRESENTATION: Record<string, NodeStatePresentation> = {
     Icon: IconDelinquent,
   },
   running: {
-    color: 'colorPrimary',
+    color: 'colorSuccess',
     Icon: IconRunning,
   },
   starting: {
@@ -47,6 +47,7 @@ export const NODE_STATE_PRESENTATION: Record<string, NodeStatePresentation> = {
   },
   stopped: {
     Icon: IconStopped,
+    color: 'colorWarning',
   },
   upgrading: {
     Icon: IconCog,
