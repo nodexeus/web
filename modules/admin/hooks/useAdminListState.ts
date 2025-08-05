@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import { useRecoilValue } from 'recoil';
-import { SortOrder } from '../../../generated/blockjoy/common/v1/search';
+import { SortOrder } from '@modules/grpc/library/blockjoy/common/v1/search';
 import { adminSelectors } from '../store/adminSelectors';
 import {
   usePerformanceMonitor,

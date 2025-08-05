@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
-import { SortOrder } from '../../../generated/blockjoy/common/v1/search';
+import { SortOrder } from '@modules/grpc/library/blockjoy/common/v1/search';
 
 // Type imports
 type AdminListState = import('../types/AdminListState').AdminListState;
