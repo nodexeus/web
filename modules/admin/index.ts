@@ -2,6 +2,7 @@
 export { useAdminListState } from './hooks/useAdminListState';
 export { useAdminListErrorHandling } from './hooks/useAdminListErrorHandling';
 export { useUpdateQueryString } from './hooks/useUpdateQueryString';
+export { useAdminGetTotals } from './hooks/useAdminGetTotals';
 
 // Essential utils
 export { capitalized } from './utils/capitalized';
