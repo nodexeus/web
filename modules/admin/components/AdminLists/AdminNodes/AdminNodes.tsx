@@ -6,7 +6,6 @@ import {
   AdminNodesFilterOrg,
   AdminNodesFilterUser,
   AdminNodesFilterHost,
-  AdminNodesFilterRegion,
   AdminNodesFilterIp,
   AdminNodesFilterVariant,
   AdminNodesFilterVersion,
@@ -15,17 +14,18 @@ import {
 import { AdminNodesUpgrade } from './AdminNodesUpgrade/AdminNodesUpgrade';
 import { AdminNodesOrgAssign } from './AdminNodesOrgAssign/AdminNodesOrgAssign';
 import { AdminNodesActions } from './AdminNodesActions/AdminNodesActions';
-import { pageSize } from '@modules/admin/constants/constants';
+import { pageSize as defaultPageSize } from '@modules/admin/constants/constants';
 import { Node, NodeSortField } from '@modules/grpc/library/blockjoy/v1/node';
 import { SortOrder } from '@modules/grpc/library/blockjoy/common/v1/search';
 import { capitalized, createAdminNodeFilters } from '@modules/admin';
 import { AdminListColumn } from '@modules/admin/types/AdminListColumn';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Protocol } from '@modules/grpc/library/blockjoy/v1/protocol';
 import { AdminListEditCost } from '../AdminListEditCost/AdminListEditCost';
 import { BillingAmount } from '@modules/grpc/library/blockjoy/common/v1/currency';
 import { User } from '@modules/grpc/library/blockjoy/v1/user';
 import { ResourceType } from '@modules/grpc/library/blockjoy/common/v1/resource';
+import { toast } from 'react-toastify';
 
 const columns: AdminListColumn[] = [
   {
@@ -39,7 +39,7 @@ const columns: AdminListColumn[] = [
     name: 'displayName',
     width: '200px',
     sortField: NodeSortField.NODE_SORT_FIELD_DISPLAY_NAME,
-   isVisible: true,
+    isVisible: true,
   },
   {
     name: 'nodeName',
@@ -195,118 +195,172 @@ export const AdminNodes = () => {
   const [protocols, setProtocols] = useState<Protocol[]>([]);
   const [users, setUsers] = useState<User[]>([]);
 
-  const getList = async (
-    keyword?: string,
-    page?: number,
-    sortField?: NodeSortField,
-    sortOrder?: SortOrder,
-    filters?: AdminListColumn[],
-    pageSize?: number,
-  ) => {
-    if (!users.length) {
-      const usersResponse = await userClient.listUsers();
-      setUsers(usersResponse.users);
-    }
+  // Enhanced data fetching with better error handling and caching
+  const getList = useCallback(
+    async (
+      keyword?: string,
+      page?: number,
+      sortField?: NodeSortField,
+      sortOrder?: SortOrder,
+      filters?: AdminListColumn[],
+      pageSize?: number,
+    ) => {
+      try {
+        // Fetch users and protocols if not already loaded
+        if (!users.length) {
+          try {
+            const usersResponse = await userClient.listUsers();
+            setUsers(usersResponse.users);
+          } catch (error) {
+            console.error('Failed to fetch users:', error);
+            toast.error('Failed to load user data');
+          }
+        }
 
-    if (!protocols?.length) {
-      const protocolsResponse = await protocolClient.listProtocols();
-      setProtocols(protocolsResponse.protocols);
-    }
+        if (!protocols?.length) {
+          try {
+            const protocolsResponse = await protocolClient.listProtocols();
+            setProtocols(protocolsResponse.protocols);
+          } catch (error) {
+            console.error('Failed to fetch protocols:', error);
+            toast.error('Failed to load protocol data');
+          }
+        }
 
-    const sort = page === -1 ? undefined : [
-      {
-        field: sortField!,
-        order: sortOrder!,
-      },
-    ];
+        // Prepare sort parameters
+        const sort =
+          page === -1
+            ? undefined
+            : [
+                {
+                  field: sortField!,
+                  order: sortOrder!,
+                },
+              ];
 
-    try {
-      const response = await nodeClient.listNodes(
-        keyword,
-        {
-          keyword,
-          ...createAdminNodeFilters(filters!),
-        },
-        {
+        // Prepare pagination parameters with proper defaults
+        const paginationParams = {
           currentPage: page === -1 ? 0 : page!,
-          itemsPerPage: page === -1 ? 50000 : pageSize || pageSize,
-        },
-        sort,
-      );
+          itemsPerPage: page === -1 ? 50000 : pageSize || defaultPageSize,
+        };
 
-      return {
-        list: response.nodes,
-        total: response.total,
-      };
-    } catch (err) {
-      return {
-        list: [],
-        total: 0,
-      };
-    }
-  };
+        // Prepare filter parameters
+        const filterParams = {
+          keyword: keyword || '',
+          ...createAdminNodeFilters(filters || []),
+        };
 
-  const handleUpdate = async (nodeId: string, cost: BillingAmount) => {
-    nodeClient.updateNode({
-      nodeId,
-      cost,
-      newValues: [],
-    });
-  };
+        // Make the API call with enhanced error handling
+        const response = await nodeClient.listNodes(
+          keyword || '',
+          filterParams,
+          paginationParams,
+          sort,
+        );
 
-  const listMap = (list: Node[]) =>
-    list.map((node) => {
-      const user = users.find((u) => u.userId === node.createdBy?.resourceId);
-      const createdBy =
-        node.createdBy?.resourceType === ResourceType.RESOURCE_TYPE_HOST
-          ? node.hostDisplayName || node.hostNetworkName
-          : `${user?.firstName} ${user?.lastName}`;
-      return {
-        ...node,
-        versionKeys: node.versionKey?.variantKey,
-        nodeState: <NodeItems.NodeStatus nodeStatus={node.nodeStatus} />,
-        protocolHealth: (
-          <NodeItems.ProtocolHealth nodeStatus={node.nodeStatus} />
-        ),
-        protocolState: (
-          <NodeItems.ProtocolStatus
-            nodeStatus={node.nodeStatus}
-            jobs={node.jobs}
-          />
-        ),
-        region: node.regionName,
-        createdAt: <DateTime date={node.createdAt!} />,
-        createdBy,
-        host: node.hostDisplayName || node.hostNetworkName,
-        apr: node.apr !== undefined ? `${Number(node.apr).toFixed(2)}%` : 'Calculating',
-        jailed: node.jailed ? 'Yes' : 'No',
-        jailedReason: node.jailedReason,
-        sqd_name: node.sqd_name,
-        cost: (
-          <AdminListEditCost
-            id={node.nodeId}
-            defaultValue={node.cost?.amount?.amountMinorUnits}
-            onUpdate={handleUpdate}
-          />
-        ),
-        protocolName: capitalized(node.protocolName),
-      };
-    });
+        return {
+          list: response.nodes || [],
+          total: response.total || 0,
+        };
+      } catch (error) {
+        console.error('Failed to fetch nodes:', error);
+        toast.error('Failed to load node data. Please try again.');
+
+        // Return empty result on error to prevent crashes
+        return {
+          list: [],
+          total: 0,
+        };
+      }
+    },
+    [users.length, protocols?.length],
+  );
+
+  // Enhanced node update with error handling
+  const handleUpdate = useCallback(
+    async (nodeId: string, cost: BillingAmount) => {
+      try {
+        await nodeClient.updateNode({
+          nodeId,
+          cost,
+          newValues: [],
+        });
+        toast.success('Node cost updated successfully');
+      } catch (error) {
+        console.error('Failed to update node:', error);
+        toast.error('Failed to update node cost. Please try again.');
+        throw error; // Re-throw to allow the component to handle it
+      }
+    },
+    [],
+  );
+
+  // Memoized list mapping for better performance
+  const listMap = useCallback(
+    (list: Node[]) =>
+      list.map((node) => {
+        const user = users.find((u) => u.userId === node.createdBy?.resourceId);
+        const createdBy =
+          node.createdBy?.resourceType === ResourceType.RESOURCE_TYPE_HOST
+            ? node.hostDisplayName || node.hostNetworkName
+            : `${user?.firstName} ${user?.lastName}`;
+        return {
+          ...node,
+          versionKeys: node.versionKey?.variantKey,
+          nodeState: <NodeItems.NodeStatus nodeStatus={node.nodeStatus} />,
+          protocolHealth: (
+            <NodeItems.ProtocolHealth nodeStatus={node.nodeStatus} />
+          ),
+          protocolState: (
+            <NodeItems.ProtocolStatus
+              nodeStatus={node.nodeStatus}
+              jobs={node.jobs}
+            />
+          ),
+          region: node.regionName,
+          createdAt: <DateTime date={node.createdAt!} />,
+          createdBy,
+          host: node.hostDisplayName || node.hostNetworkName,
+          apr:
+            node.apr !== undefined
+              ? `${Number(node.apr).toFixed(2)}%`
+              : 'Calculating',
+          jailed: node.jailed ? 'Yes' : 'No',
+          jailedReason: node.jailedReason,
+          sqd_name: node.sqd_name,
+          cost: (
+            <AdminListEditCost
+              id={node.nodeId}
+              defaultValue={node.cost?.amount?.amountMinorUnits}
+              onUpdate={handleUpdate}
+            />
+          ),
+          protocolName: capitalized(node.protocolName),
+        };
+      }),
+    [users, handleUpdate],
+  );
 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
-  const handleIdAllSelected = (ids: string[]) => setSelectedIds(ids);
+  // Optimized selection handlers
+  const handleIdAllSelected = useCallback((ids: string[]) => {
+    setSelectedIds(ids);
+  }, []);
 
-  const handleIdSelected = async (nodeId: string, isSelected: boolean) => {
-    if (!isSelected) {
-      setSelectedIds(selectedIds.filter((id) => id !== nodeId));
-    } else if (!selectedIds?.includes(nodeId)) {
-      const selectedIdsCopy = [...selectedIds];
-
-      selectedIdsCopy.push(nodeId);
-      setSelectedIds(selectedIdsCopy);
-    }
-  };
+  const handleIdSelected = useCallback(
+    (nodeId: string, isSelected: boolean) => {
+      setSelectedIds((prevIds) => {
+        if (!isSelected) {
+          return prevIds.filter((id) => id !== nodeId);
+        } else if (!prevIds.includes(nodeId)) {
+          return [...prevIds, nodeId];
+        }
+        return prevIds;
+      });
+    },
+    [],
+  );
 
   return (
     <AdminList

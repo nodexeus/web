@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { styles } from './AdminDashboardCard.styles';
 import { Search, Skeleton, SvgIcon } from '@shared/components';
+import { AdminQuery } from '@modules/admin/types/AdminQuery';
 
 type Props = {
   name: string;

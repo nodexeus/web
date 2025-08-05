@@ -10,12 +10,16 @@ type Props = {
   pageCount?: number;
   totalRowCount: number;
   currentPageSize?: number;
+  isLoading?: boolean;
   onPageChanged: (page: number) => void;
 };
 
 export const AdminListPagination = ({
   listPage,
   pageCount = 10,
+  totalRowCount,
+  currentPageSize,
+  isLoading = false,
   onPageChanged,
 }: Props) => {
   const allPages = Array.from({ length: pageCount }, (v, k) => k + 1);
@@ -46,6 +50,15 @@ export const AdminListPagination = ({
 
   const handlePageChanged = (nextPage: number) => {
     if (nextPage === listPage) return;
+
+    // Validate page boundaries before changing
+    if (nextPage < 1 || (pageCount > 0 && nextPage > pageCount)) {
+      console.warn(
+        `Invalid page number: ${nextPage}. Valid range: 1-${pageCount}`,
+      );
+      return;
+    }
+
     onPageChanged(nextPage);
   };
 
@@ -61,7 +74,8 @@ export const AdminListPagination = ({
         type="button"
         css={styles.paginationButton}
         onClick={() => handlePageChanged(listPage - 1)}
-        disabled={listPage === 1}
+        disabled={listPage === 1 || isLoading}
+        aria-label="Go to previous page"
       >
         <SvgIcon size="10px" isDefaultColor>
           <IconChevronLeft />
@@ -72,6 +86,8 @@ export const AdminListPagination = ({
           onClick={() => handlePageChanged(1)}
           type="button"
           css={styles.paginationButton}
+          disabled={isLoading}
+          aria-label="Go to first page"
         >
           1
         </button>
@@ -86,6 +102,9 @@ export const AdminListPagination = ({
           onClick={() => handlePageChanged(page)}
           key={page}
           type="button"
+          disabled={isLoading}
+          aria-label={`Go to page ${page}`}
+          aria-current={listPage === page ? 'page' : undefined}
         >
           {page}
         </button>
@@ -99,6 +118,9 @@ export const AdminListPagination = ({
           onClick={() => handlePageChanged(pageCount)}
           type="button"
           css={styles.paginationButton}
+          disabled={isLoading}
+          aria-label="Go to last page"
+          aria-current={listPage === pageCount ? 'page' : undefined}
         >
           {pageCount}
         </button>
@@ -107,7 +129,8 @@ export const AdminListPagination = ({
         type="button"
         css={styles.paginationButton}
         onClick={() => handlePageChanged(listPage + 1)}
-        disabled={listPage === pageCount || pageCount === 0}
+        disabled={listPage === pageCount || pageCount === 0 || isLoading}
+        aria-label="Go to next page"
       >
         <SvgIcon size="10px" isDefaultColor>
           <IconChevronRight />
