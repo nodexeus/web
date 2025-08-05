@@ -15,6 +15,7 @@ export { loadAdminColumns } from './utils/loadAdminColumns';
 // Core components (only the most commonly used ones)
 export { AdminListFilterControl } from './components/AdminLists/AdminList/AdminListTable/AdminListTableHeader/AdminListFilter/AdminListFilterControl/AdminListFilterControl';
 export { AdminListFilterControlEnhanced } from './components/AdminLists/AdminList/AdminListTable/AdminListTableHeader/AdminListFilter/AdminListFilterControl/AdminListFilterControlEnhanced';
+export { AdminDetailHeaderDelete } from './components/AdminDetails/AdminDetail/AdminDetailHeader/AdminDetailHeaderDelete/AdminDetailHeaderDelete';
 
 // Node filters (commonly used)
 export { AdminNodesFilterProtocol } from './components/AdminLists/AdminNodes/AdminNodesFilter/AdminNodesFilterProtocol/AdminNodesFilterProtocol';
