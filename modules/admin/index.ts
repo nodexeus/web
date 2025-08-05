@@ -9,6 +9,7 @@ export { capitalized } from './utils/capitalized';
 export { createAdminNodeFilters } from './utils/createAdminNodeFilters';
 export { createAdminFilterList } from './utils/createAdminFilterList';
 export { createAdminUpdateRequest } from './utils/createAdminUpdateRequest';
+export { createDropdownValuesFromEnum } from './utils/createDropdownValuesFromEnum';
 export { dedupedAdminDropdownList } from './utils/dedupedAdminDropdownList';
 export { loadAdminColumns } from './utils/loadAdminColumns';
 
