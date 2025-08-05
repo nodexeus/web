@@ -337,10 +337,15 @@ export function createEnhancedDebounce<T extends (...args: any[]) => any>(
       clearTimeout(maxTimeoutId);
     }
 
-    // Reject all pending promises
-    pendingPromises.forEach(({ reject }) =>
-      reject(new Error('Debounced function was cancelled')),
-    );
+    // Resolve all pending promises with undefined instead of rejecting
+    // This prevents uncaught promise rejections during component unmount
+    pendingPromises.forEach(({ resolve }) => {
+      try {
+        resolve(undefined as any);
+      } catch (error) {
+        // Silently ignore any errors during cancellation cleanup
+      }
+    });
     pendingPromises = [];
 
     lastInvokeTime = 0;
