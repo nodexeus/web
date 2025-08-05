@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { SortOrder } from '../../../generated/blockjoy/common/v1/search';
+import { SortOrder } from '@modules/grpc/library/blockjoy/common/v1/search';
 import { useAdminListState } from '../hooks/useAdminListState';
 
 // Example configuration for a nodes list
