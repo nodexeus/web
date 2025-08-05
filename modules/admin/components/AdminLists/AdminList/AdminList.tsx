@@ -14,15 +14,15 @@ import { useAdminListState } from '@modules/admin/hooks';
 import { useAdminListErrorHandling } from '@modules/admin/hooks/useAdminListErrorHandling';
 import { adminSelectors, loadAdminColumns } from '@modules/admin';
 import { AdminListColumn } from '@modules/admin/types/AdminListColumn';
-import { SortOrder } from '../../../../../generated/blockjoy/common/v1/search';
+import { SortOrder } from '@modules/grpc/library/blockjoy/common/v1/search';
 import { styles } from './AdminList.styles';
 import { AdminListHeader } from './AdminListHeader/AdminListHeader';
 import { AdminListTable } from './AdminListTable/AdminListTable';
 import { AdminListErrorBoundary } from './AdminListErrorBoundary';
 import { AdminListErrorHandler } from './AdminListErrorHandler';
 import { ErrorBoundaryHelpers } from '../../../utils/errorHandling';
-import { Protocol } from '../../../../../generated/blockjoy/v1/protocol';
-import { User } from '../../../../../generated/blockjoy/v1/user';
+import { Protocol } from '@modules/grpc/library/blockjoy/v1/protocol';
+import { User } from '@modules/grpc/library/blockjoy/v1/user';
 import { pageSize as defaultPageSize } from '@modules/admin/constants/constants';
 import {
   usePerformanceMonitor,
