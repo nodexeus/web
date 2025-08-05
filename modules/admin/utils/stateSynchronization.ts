@@ -1,4 +1,4 @@
-import { SortOrder } from '../../../generated/blockjoy/common/v1/search';
+import { SortOrder } from '@modules/grpc/library/blockjoy/common/v1/search';
 import {
   createMemoizedFunction,
   PerformanceMonitor,

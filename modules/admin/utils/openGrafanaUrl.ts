@@ -3,5 +3,5 @@ export const openGrafanaUrl = (
   folder: 'nodes' | 'node-logs' = 'nodes',
 ) =>
   window.open(
-    `https://blockjoy.grafana.net/d/${folder}/linux-node-overview?var-instance=${key}`,
+    `https://grafana.nodexeus.io/d/${folder}/linux-node-overview?var-instance=${key}`,
   );
