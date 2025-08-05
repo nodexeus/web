@@ -111,7 +111,7 @@ export const AdminListTable = ({
     if (order) query.order = order;
 
     router.push({
-      pathname: '',
+      pathname: router.pathname,
       query,
     });
   };

@@ -2,7 +2,7 @@ name: Web Build and Push
 
 on:
   push:
-    branches: [develop, main]
+    branches: [develop, main, fix/*]
   pull_request:
     branches: [fix/*]
   workflow_dispatch:
@@ -55,7 +55,7 @@ jobs:
   build-and-push-production:
     runs-on: web
     environment: production
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    if: github.ref != 'refs/heads/fix/*'
 
     steps:
       - name: Checkout Code
