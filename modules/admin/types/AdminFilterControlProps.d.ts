@@ -10,4 +10,17 @@ type AdminFilterControlProps<T = any> = {
   protocols?: Protocol[];
   users?: User[];
   onFilterChange: (item: AdminFilterDropdownItem) => void;
+  onReset?: (columnName: string) => void;
+  isLoading?: boolean;
+  error?: string | null;
+  onRetry?: () => void;
+  // Enhanced state handling props
+  isApplyingFilter?: boolean;
+  filterOperationId?: string;
+  showSuccessFeedback?: boolean;
+  successMessage?: string;
+  onClearAll?: () => void;
+  maxSelections?: number;
+  allowedValues?: string[];
+  validationErrors?: string[];
 };

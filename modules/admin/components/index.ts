@@ -1,5 +1,6 @@
 export * from './AdminDropdownHeader/AdminDropdownHeader';
 export * from './AdminLists/AdminList/AdminListTable/AdminListTableHeader/AdminListFilter/AdminListFilterControl/AdminListFilterControl';
+export * from './AdminLists/AdminList/AdminListTable/AdminListTableHeader/AdminListFilter/AdminListFilterControl/AdminListFilterControlEnhanced';
 export * from './AdminLists/AdminNodes/AdminNodesFilter/AdminNodesFilterProtocol/AdminNodesFilterProtocol';
 export * from './AdminLists/AdminNodes/AdminNodesFilter/AdminNodesFilterHost/AdminNodesFilterHost';
 export * from './AdminLists/AdminNodes/AdminNodesFilter/AdminNodesFilterOrg/AdminNodesFilterOrg';

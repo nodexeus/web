@@ -32,6 +32,7 @@ type Props = {
   list: IAdminItem[];
   listTotal?: number;
   listPage: number;
+  listPageSize: number; // Add explicit page size prop
   listAll: any[];
   activeSortField: number;
   activeSortOrder: SortOrder;
@@ -56,6 +57,7 @@ export const AdminListTable = ({
   list,
   listTotal,
   listPage,
+  listPageSize,
   listAll,
   activeSortField,
   activeSortOrder,
@@ -84,10 +86,12 @@ export const AdminListTable = ({
   const [resizeLineLeft, setResizeLineLeft] = useState(0);
   const [isSelectingCheckboxes, setIsSelectingCheckboxes] = useState(false);
   const [isChecking, setIsChecking] = useState(false);
-  const [currentPageSize, setCurrentPageSize] = useState(defaultPageSize);
 
   const wrapperRef = useRef<HTMLDivElement>(null);
   const activeIndex = useRef<number>(0);
+
+  // Use the page size from props (centralized state) instead of local state
+  const currentPageSize = listPageSize || defaultPageSize;
 
   // Calculate pageCount, ensuring it's at least 1 for UI rendering, but 0 if no items exist
   const pageCount =
@@ -245,20 +249,13 @@ export const AdminListTable = ({
     };
   }, [columnsVisible.length]);
 
-  useEffect(() => {
-    if (onPageSizeChanged) {
-      // Apply the current page size when the component mounts
-      onPageSizeChanged(currentPageSize);
-    }
-  }, []);
-
+  // Enhanced page size change handler that properly triggers state updates
   const handlePageSizeChange = (newPageSize: number) => {
-    setCurrentPageSize(newPageSize);
     if (onPageSizeChanged) {
+      // Trigger the centralized state management update
       onPageSizeChanged(newPageSize);
     }
-    // When changing page size, go back to first page to avoid out-of-bounds issues
-    onPageChanged(1);
+    // Note: Page reset is handled by the centralized state management
   };
 
   if (isLoading)
@@ -441,10 +438,15 @@ export const AdminListTable = ({
                     <select
                       id="page-size-selector"
                       value={currentPageSize}
-                      onChange={(e) =>
-                        handlePageSizeChange(Number(e.target.value))
-                      }
+                      onChange={(e) => {
+                        const newPageSize = Number(e.target.value);
+                        if (!isNaN(newPageSize) && newPageSize > 0) {
+                          handlePageSizeChange(newPageSize);
+                        }
+                      }}
                       css={styles.pageSizeSelect}
+                      disabled={isLoading}
+                      aria-label="Select number of items per page"
                     >
                       {pageSizeOptions.map((size) => (
                         <option key={size} value={size}>
@@ -460,6 +462,7 @@ export const AdminListTable = ({
                 totalRowCount={listTotal || 0}
                 pageCount={pageCount}
                 currentPageSize={currentPageSize}
+                isLoading={isLoading}
                 onPageChanged={onPageChanged}
               />
             </div>
