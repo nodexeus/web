@@ -33,14 +33,17 @@ export const handleError = (error: any, shouldRedirect: boolean = true) => {
   throw new Error(error?.toString());
 };
 
-export const setTokenValue = (token: string) => {
+export const setTokenValue = (token: string, refreshToken?: string) => {
   localStorage.setItem('accessTokenExpiry', readToken(token).exp);
-  const identity = getIdentity();
-  if (identity) {
-    identity.accessToken = token;
-    const updatedIdentityString = JSON.stringify(identity);
-    window.localStorage.setItem('identity', updatedIdentityString);
+  const identity = getIdentity() || {}; // Use empty object if no identity exists
+  
+  identity.accessToken = token;
+  if (refreshToken) {
+    identity.refreshToken = refreshToken;
   }
+  
+  const updatedIdentityString = JSON.stringify(identity);
+  window.localStorage.setItem('identity', updatedIdentityString);
 };
 
 export const callWithTokenRefresh = async (
