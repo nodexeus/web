@@ -20,6 +20,35 @@ import {
 import { organizationSelectors } from '@modules/organization';
 import { useRecoilValue } from 'recoil';
 
+const formatDiskSize = (sizeValue: number): string => {
+  // Storage uses decimal units (1000), not binary (1024)
+  // Convert from bytes to appropriate storage units
+  let gbValue: number;
+  
+  if (sizeValue < 10000) {
+    // Values under 10,000 are likely already in GB
+    gbValue = sizeValue;
+  } else {
+    // Values over 10,000 are likely in bytes, convert to GB using decimal (1000)
+    gbValue = sizeValue / Math.pow(1000, 3);
+  }
+  
+  // Format with friendly units using decimal conversion
+  if (gbValue >= 1000) {
+    const tbValue = gbValue / 1000;
+    if (tbValue >= 10) {
+      return `${Math.round(tbValue)} TB`;
+    } else {
+      return `${tbValue.toFixed(1)} TB`;
+    }
+  } else if (gbValue >= 1) {
+    return `${Math.round(gbValue)} GB`;
+  } else {
+    const mbValue = gbValue * 1000;
+    return `${Math.round(mbValue)} MB`;
+  }
+};
+
 export const AdminImage = () => {
   const router = useRouter();
   const { id } = router.query;
@@ -135,7 +164,7 @@ export const AdminImage = () => {
             Memory: {formatters.formatSize(image.minMemoryBytes || 0, 'bytes')}
           </div>
           <div>
-            Disk: {formatters.formatSize(image.minDiskBytes || 0, 'bytes')}
+            Disk: {formatDiskSize(image.minDiskBytes || 0)}
           </div>
         </div>
       ),
