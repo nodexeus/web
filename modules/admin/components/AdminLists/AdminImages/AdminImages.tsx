@@ -107,7 +107,7 @@ export const AdminImages = () => {
       console.error('Error loading images:', err);
 
       // TEMPORARY: Mock data for development when backend is not available
-      if (err.message?.includes('UNIMPLEMENTED')) {
+      if (err instanceof Error && err.message?.includes('UNIMPLEMENTED')) {
         console.warn(
           'Backend API server needs to be restarted with new image management endpoints',
         );
