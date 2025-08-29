@@ -281,7 +281,7 @@ export const AdminNodes = () => {
         apr: node.apr !== undefined ? `${Number(node.apr).toFixed(2)}%` : 'Calculating',
         jailed: node.jailed ? 'Yes' : 'No',
         jailedReason: node.jailedReason,
-        sqd_name: node.sqd_name,
+        sqd_name: node.sqdName,
         cost: (
           <AdminListEditCost
             id={node.nodeId}

@@ -199,7 +199,7 @@ export const AdminNode = () => {
       {
         id: 'sqd_name',
         label: 'SQD Name',
-        data: node.sqd_name,
+        data: node.sqdName,
       },
       {
         id: 'cost',
