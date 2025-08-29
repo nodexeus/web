@@ -25,7 +25,7 @@ export const mapNodeToDetails = (node: Node) => {
   }[] = [
     {
       label: 'SQD Name',
-      data: node.sqd_name || '-',
+      data: node.sqdName || '-',
     },
     {
       label: 'Peer ID',

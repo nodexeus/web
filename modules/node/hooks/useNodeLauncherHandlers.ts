@@ -185,50 +185,58 @@ export const useNodeLauncherHandlers = ({
     if (!selectedImage) return;
 
     const properties: NodePropertyGroup[] = [];
+    const processedKeys = new Set<string>();
 
+    // First, process properties without keyGroup (individual properties like switches, text inputs)
+    const propertiesWithoutKeyGroup: NodePropertyGroup[] =
+      selectedImage?.properties
+        .filter((property) => !property.keyGroup)
+        .map((property) => {
+          processedKeys.add(property.key);
+          return {
+            key: property.key,
+            uiType: property.uiType,
+            value: property.defaultValue || '',
+            properties: [property],
+            displayName: property.displayName!,
+            displayGroup: property.displayGroup,
+          };
+        }) ?? [];
+
+    properties.push(...propertiesWithoutKeyGroup);
+
+    // Then, process keyGroups (for enum-like properties that have multiple options)
     const keyGroups = Array.from(
       new Set(
         selectedImage?.properties
-          ?.filter((property) => property.keyGroup)
+          ?.filter((property) => property.keyGroup && !processedKeys.has(property.key))
           ?.map((property) => property.keyGroup),
       ),
     );
 
-    const propertiesWithoutKeyGroup: NodePropertyGroup[] =
-      selectedImage?.properties
-        .filter((property) => !property.keyGroup)
-        .map((property) => ({
-          key: property.key,
-          uiType: property.uiType,
-          value: property.defaultValue || '',
-          properties: [property],
-          displayName: property.displayName!,
-          displayGroup: property.displayGroup,
-        })) ?? [];
-
-    properties.push(...propertiesWithoutKeyGroup!);
-
     for (let keyGroup of keyGroups) {
       const keyGroupProperties = selectedImage?.properties.filter(
-        (property) => property.keyGroup === keyGroup,
+        (property) => property.keyGroup === keyGroup && !processedKeys.has(property.key),
       );
 
       const firstProperty = keyGroupProperties?.[0];
-
-      if (!firstProperty) return;
+      if (!firstProperty) continue;
 
       const defaultProperty = selectedImage?.properties.find(
         (property) => property.keyGroup === keyGroup && property.isGroupDefault,
       );
 
+      // Mark all properties in this group as processed
+      keyGroupProperties.forEach(prop => processedKeys.add(prop.key));
+
       properties.push({
-        key: defaultProperty?.key!,
+        key: defaultProperty?.key || firstProperty.key,
         keyGroup: keyGroup!,
         uiType: firstProperty.uiType,
-        value: defaultProperty?.key!,
+        value: defaultProperty?.defaultValue || firstProperty.defaultValue || '',
         properties: keyGroupProperties!,
         displayName: firstProperty.displayName!,
-        displayGroup: defaultProperty?.displayGroup,
+        displayGroup: defaultProperty?.displayGroup || firstProperty.displayGroup,
       });
     }
 
@@ -413,16 +421,33 @@ export const useNodeLauncherHandlers = ({
 
     const propertiesCopy = [...nodeLauncherState.properties!];
 
-    const propertyIndex = propertiesCopy.findIndex(
-      (property) => property.keyGroup === keyGroup,
-    );
+    // Find the exact property to update
+    const propertyIndex = propertiesCopy.findIndex((property) => {
+      // For keyGroup properties (enums), match by keyGroup
+      if (keyGroup && keyGroup !== '' && property.keyGroup === keyGroup) {
+        return true;
+      }
+      // For individual properties (switches, text inputs), match by key when no keyGroup
+      if ((!keyGroup || keyGroup === '') && (!property.keyGroup || property.keyGroup === '') && property.key === key) {
+        return true;
+      }
+      return false;
+    });
 
     if (propertyIndex === -1) return;
 
+    const currentProperty = propertiesCopy[propertyIndex];
+    const newValue = value?.toString();
+    
+    // Only update if the value has actually changed
+    if (currentProperty.key === key && currentProperty.value === newValue) {
+      return;
+    }
+    
     const updatedProperty = {
-      ...propertiesCopy[propertyIndex],
+      ...currentProperty,
       key,
-      value: value?.toString(),
+      value: newValue,
     };
 
     propertiesCopy[propertyIndex] = updatedProperty;

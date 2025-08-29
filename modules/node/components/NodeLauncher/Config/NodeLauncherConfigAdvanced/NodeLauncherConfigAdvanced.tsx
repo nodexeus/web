@@ -50,7 +50,8 @@ export const NodeLauncherConfigAdvanced = ({
   const handleFirewallChanged = (nextFirewall: FirewallRule[]) =>
     onNodePropertyChanged('firewall', nextFirewall);
 
-  const sortedProperties = sort(properties ?? [], { field: 'key' });
+  // Don't sort properties to maintain consistent ordering
+  const stableProperties = properties ?? [];
 
   return (
     <div css={[styles.advancedConfig, isOpen && styles.advancedConfigOpen]}>
@@ -72,14 +73,17 @@ export const NodeLauncherConfigAdvanced = ({
         onFirewallChanged={handleFirewallChanged}
       />
 
-      {sortedProperties?.map((propertyGroup: NodePropertyGroup, index) => {
+      {stableProperties?.map((propertyGroup: NodePropertyGroup, index) => {
         const isRequired =
           (propertyGroup.uiType === UiType.UI_TYPE_TEXT ||
             propertyGroup.uiType === UiType.UI_TYPE_PASSWORD) &&
           propertyGroup.value === '';
 
+        // Use a stable key that doesn't include index to prevent remounting
+        const stableKey = propertyGroup.keyGroup || propertyGroup.key || `property-${index}`;
+
         return (
-          <Fragment key={propertyGroup.keyGroup! + index!}>
+          <Fragment key={stableKey}>
             <FormLabel isCapitalized isRequired={isRequired}>
               {propertyGroup.displayGroup ||
                 kebabToCapitalized(propertyGroup.keyGroup || propertyGroup.key)}

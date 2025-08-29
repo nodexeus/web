@@ -26,7 +26,7 @@ export const NODE_LIST_ITEMS: NodeListItem[] = [
     alwaysVisible: true,
     component: (node: Node) => (
       <NodeGroups.Info
-        displayName={node.sqd_name || node.displayName}
+        displayName={node.sqdName || node.displayName}
         createdAt={node.createdAt}
         semanticVersion={node.semanticVersion}
       />
@@ -75,8 +75,8 @@ export const NODE_LIST_ITEMS: NodeListItem[] = [
     isVisible: false,
     component: (node: Node) => (
       <NodeItems.DisplayName
-        displayName={node.sqd_name ? node.sqd_name : node.displayName}
-        nodeName={node.sqd_name ? node.sqd_name : node.displayName}
+        displayName={node.sqdName ? node.sqdName : node.displayName}
+        nodeName={node.sqdName ? node.sqdName : node.displayName}
       />
     ),
     actions: ALL_ACTIONS,
