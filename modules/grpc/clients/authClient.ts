@@ -32,14 +32,14 @@ class AuthClient {
     this.client = createClient(AuthServiceDefinition, channel);
   }
 
-  async login(email: string, password: string): Promise<string> {
+  async login(email: string, password: string): Promise<{token: string, refresh: string}> {
     try {
       const response = await this.client.login({
         email,
         password,
       });
-      setTokenValue(response.token);
-      return response.token;
+      setTokenValue(response.token, response.refresh);
+      return { token: response.token, refresh: response.refresh };
     } catch (err) {
       return handleError(err);
     }
@@ -53,6 +53,7 @@ class AuthClient {
     };
     try {
       const response = await this.client.confirm({}, authHeader);
+      setTokenValue(response.token, response.refresh);
       return response.token;
     } catch (err) {
       return handleError(err);
@@ -110,18 +111,26 @@ class AuthClient {
 
   async refreshToken(): Promise<string | null> {
     const currentDateTimestamp = Math.round(new Date().getTime() / 1000);
-    const accessToken = getIdentity().accessToken;
+    const identity = getIdentity();
+    const accessToken = identity.accessToken;
+    const refreshToken = identity.refreshToken;
     const accessTokenExpiry = localStorage.getItem('accessTokenExpiry');
 
     if (
       !!accessTokenExpiry &&
       currentDateTimestamp > +accessTokenExpiry! - 30
     ) {
+      if (!refreshToken) {
+        console.error('No refresh token available');
+        return null;
+      }
+
       try {
         const refreshTokenResponse = await this.client.refresh({
           token: accessToken,
+          refresh: refreshToken,
         });
-        setTokenValue(refreshTokenResponse.token);
+        setTokenValue(refreshTokenResponse.token, refreshTokenResponse.refresh);
         return refreshTokenResponse.token;
       } catch (err) {
         console.log('refreshTokenError', err);
