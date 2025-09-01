@@ -3,6 +3,22 @@ name: Web Build and Push
 on:
   push:
     branches: [develop, main]
+    paths:
+      - '.github/workflows/bv-web-build.yml'
+      - 'modules/**'
+      - 'pages/**'
+      - 'public/**'
+      - 'shared/**'
+      - 'themes/**'
+      - 'types/**'
+      - 'utils/**'
+      - '.babelrc'
+      - '.babelrc'
+      - 'next.config.js'
+      - 'next-env.d.ts'
+      - 'package.json'
+      - 'yarn.lock'
+      - 'Dockerfile'
   workflow_dispatch:
 
 jobs:
