@@ -25,6 +25,8 @@ jobs:
   build-and-push-development:
     runs-on: web
     environment: development
+    needs:
+      - build-and-push-demo
 
     steps:
       - name: Checkout Code
@@ -68,6 +70,9 @@ jobs:
   build-and-push-production:
     runs-on: web
     environment: production
+    needs:
+      - build-and-push-demo
+      - build-and-push-development
 
     steps:
       - name: Checkout Code
