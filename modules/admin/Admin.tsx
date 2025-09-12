@@ -13,12 +13,6 @@ const Sidebar = dynamic<{}>(() =>
   ),
 );
 
-const Burger = dynamic<{}>(() =>
-  import(`../../modules/layout/components/burger/Burger`).then(
-    (module) => module.Burger,
-  ),
-);
-
 const Page = dynamic<PageLayoutType>(() =>
   import(`../../modules/layout/components/page/Page`).then((module) => module),
 );
@@ -27,7 +21,6 @@ export const Admin = () => {
   return (
     <>
       <Sidebar />
-      <Burger />
       <Page>
         <AdminLayout />
       </Page>

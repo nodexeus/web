@@ -285,7 +285,7 @@ export const AdminImageProperties = ({ imageId, protocolName, semanticVersion }:
             </div>
           )}
         </div>
-        <div style={{ display: 'flex', gap: '8px' }}>
+        {/* <div style={{ display: 'flex', gap: '8px' }}>
           <Button
             size="small"
             style="secondary"
@@ -304,7 +304,7 @@ export const AdminImageProperties = ({ imageId, protocolName, semanticVersion }:
           >
             Add Property
           </Button>
-        </div>
+        </div> */}
       </div>
       
       <AdminImagePropertiesList

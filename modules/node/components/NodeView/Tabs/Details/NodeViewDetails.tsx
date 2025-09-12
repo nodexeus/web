@@ -6,6 +6,7 @@ import { useNodeView } from '@modules/node';
 import { FormHeaderCaps } from '@shared/components';
 import { styles } from './NodeViewDetails.styles';
 import { NodeViewStatus } from './Status/NodeViewStatus';
+import { NodeViewRuntimeConfig } from './RuntimeConfig/NodeViewRuntimeConfig';
 import { authSelectors } from '@modules/auth';
 
 export const NodeViewDetails = () => {
@@ -19,6 +20,7 @@ export const NodeViewDetails = () => {
       <section css={styles.section}>
         <DetailsTable bodyElements={mapNodeToDetails(node!)} />
       </section>
+      <NodeViewRuntimeConfig />
       {isSuperUser && (
         <section css={styles.section}>
           <FormHeaderCaps noBottomMargin>Launch Details</FormHeaderCaps>

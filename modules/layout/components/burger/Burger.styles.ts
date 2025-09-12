@@ -2,14 +2,11 @@ import { css } from '@emotion/react';
 
 export const styles = {
   button: css`
-    position: fixed;
-    z-index: 11;
     display: grid;
     place-items: center;
     background: transparent;
-    width: 64px;
-    height: 72px;
-    top: 0;
+    width: 48px;
+    height: 48px;
     border: 0;
     padding: 0;
     cursor: pointer;

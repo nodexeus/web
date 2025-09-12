@@ -174,7 +174,7 @@ export const AdminImagePropertiesList = ({
                         </div>
                       </div>
                       
-                      <div css={styles.propertyActions}>
+                      {/* <div css={styles.propertyActions}>
                         <Button
                           size="small"
                           style="secondary"
@@ -191,7 +191,7 @@ export const AdminImagePropertiesList = ({
                         >
                           Delete
                         </Button>
-                      </div>
+                      </div> */}
                     </div>
                   </div>
                 ))}

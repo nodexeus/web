@@ -23,28 +23,52 @@ export const mapNodeToDetails = (node: Node) => {
     label: string | any;
     data: any | undefined;
   }[] = [
-    {
+    ...(node.sqdName ? [{
       label: 'SQD Name',
       data: node.sqdName || '-',
-    },
-    {
+    }] : [{
+      label: 'Node URL',
+      data: (
+        <>
+          <a
+            css={styles.link}
+            target="_blank"
+            rel="noopener noreferrer"
+            href={rpcUrl}
+          >
+            {rpcUrl}
+
+            <span css={styles.copyButton}>
+              <Copy value={rpcUrl} />
+            </span>
+          </a>
+        </>
+      ) || '-',
+    }]),
+    ...(node.p2pAddress ? [{
       label: 'Peer ID',
       data:
         (
           <>
-            <a css={CopyStyles.text}>
+            <a css={styles.link}>
               {node.p2pAddress}
-              <span css={CopyStyles.copyButton}>
+              <span css={styles.copyButton}>
                 <Copy value={node.p2pAddress} />
               </span>
             </a>
           </>
         ) || '-',
-    },
-    {
+    }] : [{
+      label: 'Protocol',
+      data: node.versionKey?.protocolKey || '-',
+    }]),
+    ...(node.protocolName === 'SQD' ? [{
       label: 'Jailed',
       data: node.jailed ? 'Yes' : 'No',
-    },
+    }] : [{
+      label: 'Node Type',
+      data: nodeType.charAt(0).toUpperCase() + nodeType.slice(1) || '-',
+    }]),
     ...(node.jailed
       ? [
           {
@@ -53,11 +77,11 @@ export const mapNodeToDetails = (node: Node) => {
           },
         ]
       : []),
-    {
+    ...(node.apr ? [{
       label: 'Current APR',
       data: node.apr?.toFixed(2) + '%' || '-',
-    },
-    {
+    }] : []),
+    ...(node.protocolName === 'SQD' ? [{
       label: 'Dashboard URL',
       data:
         (
@@ -89,7 +113,14 @@ export const mapNodeToDetails = (node: Node) => {
             </a>
           </>
         ) || '-',
-    },
+    }] : []),
+    ...(node.protocolName === 'SQD' ? [{
+      label: 'Network',
+      data: nodeType.charAt(0).toUpperCase() + nodeType.slice(1) || '-',
+    }] : [{
+      label: 'Network',
+      data: network.charAt(0).toUpperCase() + network.slice(1) || '-',
+    }]),
     {
       label: 'Version',
       data: node.semanticVersion || 'Latest',
@@ -103,12 +134,12 @@ export const mapNodeToDetails = (node: Node) => {
   //   });
   // }
 
-  if (nodeType) {
-    details.push({
-      label: 'Network',
-      data: nodeType.charAt(0).toUpperCase() + nodeType.slice(1),
-    });
-  }
+  // if (nodeType) {
+  //   details.push({
+  //     label: 'Network',
+  //     data: nodeType.charAt(0).toUpperCase() + nodeType.slice(1),
+  //   });
+  // }
 
   // if (nodeType) {
   //   details.unshift({

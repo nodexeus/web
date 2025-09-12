@@ -4,8 +4,15 @@ import { TabNavigation } from '@shared/components';
 import { wrapper } from 'styles/wrapper.styles';
 import { useRecoilValue } from 'recoil';
 import { authSelectors } from '@modules/auth';
+import { Node } from '@modules/grpc/library/blockjoy/v1/node';
+import { useNodeView } from '@modules/node/hooks/useNodeView';
 
+export const mapNodeToDetails = (node: Node) => {
+  const protocol = node.protocolName;
+}
 export const NodeViewTabs = () => {
+  const { node } = useNodeView();
+  const protocol = node?.protocolName;
   const { query, asPath } = useRouter();
   const { id } = query;
 
@@ -16,9 +23,9 @@ export const NodeViewTabs = () => {
 
   const tabs: { href: string; name: string; className?: string }[] = [
     { href: createPath(''), name: 'Details' },
-    // isSuperUser ? { href: createPath('config'), name: 'Config' } : null,
-    // isSuperUser ? { href: createPath('jobs'), name: 'Jobs' } : null,
-    // isSuperUser ? { href: createPath('commands'), name: 'Commands' } : null,
+    { href: createPath('config'), name: 'Config' },
+    ...(protocol != 'SQD' ? [{ href: createPath('jobs'), name: 'Jobs' }] : []),
+    ...(protocol != 'SQD' ? [isSuperUser ? { href: createPath('commands'), name: 'Commands' } : null] : []),
   ];
 
   const isActive = (href: string) => {

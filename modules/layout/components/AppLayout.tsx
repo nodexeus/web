@@ -3,7 +3,6 @@ import Head from 'next/head';
 import { useRecoilValue } from 'recoil';
 import { Elements } from '@stripe/react-stripe-js';
 import Sidebar from './sidebar/Sidebar';
-import { Burger } from './burger/Burger';
 import Page from './page/Page';
 import { useIdentityRepository } from '@modules/auth';
 import {
@@ -89,7 +88,6 @@ const Layout = ({ children, isPageFlex, pageTitle }: LayoutProps) => {
         <title>{pageTitle}</title>
       </Head>
       <ProgressBar />
-      <Burger />
       <Sidebar />
       <Page isFlex={isPageFlex}>{children}</Page>
     </>

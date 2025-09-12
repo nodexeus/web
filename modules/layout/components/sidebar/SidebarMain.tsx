@@ -108,6 +108,7 @@ export default () => {
     blocks.unshift({
       id: 'admin',
       title: 'SUPER USER',
+      
       items: [
         {
           name: 'Admin',
