@@ -1,7 +1,4 @@
-// Get host info early from URL params
-const params = new Proxy(new URLSearchParams(window.location.search), {
-  get: (searchParams, prop) => searchParams.get(prop),
-});
+// Use the params already declared in node.js
 const { name } = params;
 const targetHost = `https://${name}`;
 
