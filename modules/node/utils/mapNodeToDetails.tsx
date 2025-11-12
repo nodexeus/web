@@ -92,10 +92,10 @@ export const mapNodeToDetails = (node: Node) => {
               rel="noopener noreferrer"
               href={
                 node.versionKey?.variantKey?.includes('mainnet')
-                  ? `https://network.subsquid.io/workers/${node.p2pAddress}?backPath=/dashboard`
+                  ? `https://network.subsquid.io/worker/${node.p2pAddress}?backPath=/dashboard`
                   : node.versionKey?.variantKey?.includes('tethys')
-                  ? `https://tethys.subsquid.io/workers/${node.p2pAddress}?backPath=/dashboard`
-                  : `https://network.subsquid.io/workers/${node.p2pAddress}?backPath=/dashboard`
+                  ? `https://tethys.subsquid.io/worker/${node.p2pAddress}?backPath=/dashboard`
+                  : `https://network.subsquid.io/worker/${node.p2pAddress}?backPath=/dashboard`
               }
             >
               SQD Dashboard
@@ -103,10 +103,10 @@ export const mapNodeToDetails = (node: Node) => {
                 <Copy
                   value={
                     node.versionKey?.variantKey?.includes('mainnet')
-                      ? `https://network.subsquid.io/workers/${node.p2pAddress}?backPath=/dashboard`
+                      ? `https://network.subsquid.io/worker/${node.p2pAddress}?backPath=/dashboard`
                       : node.versionKey?.variantKey?.includes('tethys')
-                      ? `https://tethys.subsquid.io/workers/${node.p2pAddress}?backPath=/dashboard`
-                      : `https://network.subsquid.io/workers/${node.p2pAddress}?backPath=/dashboard`
+                      ? `https://tethys.subsquid.io/worker/${node.p2pAddress}?backPath=/dashboard`
+                      : `https://network.subsquid.io/worker/${node.p2pAddress}?backPath=/dashboard`
                   }
                 />
               </span>
