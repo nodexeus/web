@@ -2,33 +2,23 @@ import {
   Dispatch,
   FunctionComponent,
   SetStateAction,
-  useCallback,
   useEffect,
-  useMemo,
+  useRef,
   useState,
-  memo,
 } from 'react';
+import { useRouter } from 'next/router';
 import { useRecoilValue } from 'recoil';
 import { useSettings } from '@modules/settings';
-import { useAdminListState } from '@modules/admin/hooks';
-import { useAdminListErrorHandling } from '@modules/admin/hooks/useAdminListErrorHandling';
+import { useUpdateQueryString } from '@modules/admin/hooks';
 import { adminSelectors, loadAdminColumns } from '@modules/admin';
 import { AdminListColumn } from '@modules/admin/types/AdminListColumn';
 import { SortOrder } from '@modules/grpc/library/blockjoy/common/v1/search';
 import { styles } from './AdminList.styles';
 import { AdminListHeader } from './AdminListHeader/AdminListHeader';
 import { AdminListTable } from './AdminListTable/AdminListTable';
-import { AdminListErrorBoundary } from './AdminListErrorBoundary';
-import { AdminListErrorHandler } from './AdminListErrorHandler';
-import { ErrorBoundaryHelpers } from '../../../utils/errorHandling';
 import { Protocol } from '@modules/grpc/library/blockjoy/v1/protocol';
 import { User } from '@modules/grpc/library/blockjoy/v1/user';
 import { pageSize as defaultPageSize } from '@modules/admin/constants/constants';
-import {
-  usePerformanceMonitor,
-  useMemoizedCallback,
-  useEnhancedDebounce,
-} from '../../../utils/performanceOptimization';
 
 type Props = {
   name: keyof AdminSettings;
@@ -65,26 +55,16 @@ type Props = {
   }>;
 };
 
-// Legacy error boundary component - kept for backward compatibility
-const LegacyAdminListErrorBoundary: FunctionComponent<{
-  error: string | null;
-  onRetry: () => void;
-  children: React.ReactNode;
-}> = ({ error, onRetry, children }) => {
-  if (error) {
-    return (
-      <div css={styles.errorContainer}>
-        <p css={styles.errorMessage}>Error loading data: {error}</p>
-        <button css={styles.retryButton} onClick={onRetry}>
-          Retry
-        </button>
-      </div>
-    );
-  }
-  return <>{children}</>;
+type ListSettings = {
+  listSearch: string;
+  listPage: number;
+  sortField: number;
+  sortOrder: number;
+  filters: AdminListColumn[];
+  pageSize: number;
 };
 
-const AdminListComponent = ({
+export const AdminList = ({
   name,
   idPropertyName,
   columns,
@@ -104,401 +84,225 @@ const AdminListComponent = ({
   listMap,
   getList,
 }: Props) => {
-  // Performance monitoring
-  const performanceMonitor = usePerformanceMonitor({
-    enableMonitoring: true,
-    logMetrics: process.env.NODE_ENV === 'development',
-    slowOperationThreshold: 100,
-    maxMetricsHistory: 30,
-  });
+  const router = useRouter();
 
-  // Data state
+  const { search, page } = router.query;
+
+  const [isLoading, setIsLoading] = useState(true);
   const [list, setList] = useState<any[]>([]);
   const [listAll, setListAll] = useState<any[]>([]);
-  const [listTotal, setListTotal] = useState<number>(0);
+  const [listTotal, setListTotal] = useState<number>();
 
-  // Settings and columns state
+  const { updateQueryString } = useUpdateQueryString(name);
+
   const settings = useRecoilValue(adminSelectors.settings);
   const settingsColumns = settings[name]?.columns ?? [];
+
   const [columnsState, setColumnsState] = useState<AdminListColumn[]>([]);
+
+  const [listSettings, setListSettings] = useState<ListSettings>({
+    listSearch: (search as string) || '',
+    listPage: page ? +page?.toString()! : 1,
+    sortField: settings[name]?.sort?.field || defaultSortField,
+    sortOrder: settings[name]?.sort?.order || defaultSortOrder,
+    filters: [],
+    pageSize: settings[name]?.pageSize || defaultPageSize,
+  });
+
+  const { listSearch, listPage, sortField, sortOrder, filters, pageSize } =
+    listSettings;
 
   const { updateSettings } = useSettings();
 
-  // Initialize centralized state management
-  const stateConfig = useMemo(
-    () => ({
-      defaultPageSize: settings[name]?.pageSize || defaultPageSize,
-      defaultSortField,
-      defaultSortOrder,
-      initialFilters: {},
-    }),
-    [settings, name, defaultSortField, defaultSortOrder],
-  );
+  // Fetch counter: incremented before every fetch. When the async call
+  // resolves we check whether the counter still matches — if it doesn't,
+  // a newer fetch was started and we discard the stale result.
+  const fetchCounter = useRef(0);
 
-  const syncOptions = useMemo(
-    () => ({
-      syncToUrl: true,
-      syncToSettings: true,
-      urlDebounceMs: 300,
-      settingsDebounceMs: 1000,
-    }),
-    [],
-  );
+  // Whether the initialisation effect has already triggered the first fetch.
+  // While this is false the [listSettings] watcher will not fetch, because
+  // the init effect is responsible for the first load (it has the correct
+  // merged filters, whereas listSettings.filters starts as []).
+  const initFetchDone = useRef(false);
 
-  const { state, actions, helpers } = useAdminListState(
-    name,
-    stateConfig,
-    syncOptions,
-  );
+  const handleGetList = async (
+    keyword: string,
+    page: number,
+    sortField: number,
+    sortOrder: SortOrder,
+    filtersToApply?: AdminListColumn[],
+    pageSizeToApply?: number,
+  ) => {
+    const thisFetch = ++fetchCounter.current;
 
-  // Enhanced error handling
-  const {
-    handleApiCall,
-    handleFilterError,
-    handlePaginationError,
-    handleStateSyncError,
-    errors,
-    hasErrors,
-    clearErrors,
-  } = useAdminListErrorHandling({
-    showToasts: true,
-    logErrors: true,
-    autoRetry: false,
-  });
-
-  // Extract current state values for easier access
-  const {
-    search,
-    page,
-    pageSize,
-    sortField,
-    sortOrder,
-    filters,
-    isLoading,
-    error,
-  } = state;
-
-  // Enhanced data fetching with performance monitoring and memoization
-  const memoizedGetList = useMemoizedCallback(getList, [getList], {
-    maxSize: 5,
-    ttl: 30000, // Cache API responses for 30 seconds
-    keyGenerator: (
-      search,
-      page,
+    const response = await getList(
+      keyword,
+      page - 1,
       sortField,
       sortOrder,
-      filterColumns,
+      filtersToApply,
+      pageSizeToApply,
+    );
+
+    // Another fetch was started after this one — discard stale results.
+    if (thisFetch !== fetchCounter.current) return;
+
+    setList(response.list);
+    setListTotal(response.total);
+    setIsLoading(false);
+
+    if (columns.some((column) => !!column.filterComponent)) {
+      const everythingResponse = await getList(
+        keyword,
+        -1,
+        undefined,
+        undefined,
+        undefined,
+        pageSizeToApply,
+      );
+
+      // Check again after the second await.
+      if (thisFetch !== fetchCounter.current) return;
+
+      setListAll(everythingResponse.list);
+    }
+  };
+
+  const handleSearch = async (nextSearch: string) => {
+    if (nextSearch === undefined) return;
+
+    updateQueryString(1, nextSearch);
+
+    setListSettings((prev) => ({
+      ...prev,
+      listSearch: nextSearch,
+      listPage: 1,
+    }));
+
+    handleGetList(nextSearch, 1, sortField, sortOrder, filters, pageSize);
+  };
+
+  const handleSortChanged = (nextSortField: number) => {
+    const nextSortOrder =
+      sortField !== nextSortField
+        ? SortOrder.SORT_ORDER_ASCENDING
+        : sortOrder === SortOrder.SORT_ORDER_ASCENDING
+          ? SortOrder.SORT_ORDER_DESCENDING
+          : SortOrder.SORT_ORDER_ASCENDING!;
+
+    setListSettings((prev) => ({
+      ...prev,
+      sortField: nextSortField,
+      sortOrder: nextSortOrder,
+    }));
+
+    const nextColumns = [...columnsState];
+    const foundColumn = nextColumns.find(
+      (column) => column.sortField === nextSortField,
+    );
+
+    updateSettings('admin', {
+      [name]: {
+        columns: foundColumn ? nextColumns : settings[name]?.columns,
+        sort: {
+          field: nextSortField,
+          order: nextSortOrder,
+        },
+      },
+    });
+
+    if (!foundColumn) return;
+
+    setColumnsState(nextColumns);
+  };
+
+  const handlePageChanged = (nextPage: number) => {
+    setListSettings((prev) => ({
+      ...prev,
+      listPage: nextPage,
+    }));
+
+    updateQueryString(nextPage, search as string);
+
+    handleGetList(
+      listSearch,
+      nextPage,
+      sortField,
+      sortOrder,
+      filters,
       pageSize,
-    ) =>
-      JSON.stringify({
-        search,
-        page,
-        sortField,
-        sortOrder,
-        filterColumns: filterColumns?.map((c) => ({
-          name: c.name,
-          values: c.filterSettings?.values,
-        })),
-        pageSize,
-      }),
-  });
+    );
+  };
 
-  const debouncedGetList = useEnhancedDebounce(
-    async () => {
-      await performanceMonitor.timeAsyncOperation(
-        'fetchAdminListData',
-        async () => {
-          const result = await handleApiCall(
-            async () => {
-              actions.setLoading(true);
-              actions.setError(null);
+  const handlePageSizeChanged = (nextPageSize: number) => {
+    setListSettings((prev) => ({
+      ...prev,
+      pageSize: nextPageSize,
+      listPage: 1,
+    }));
 
-              // Convert filters from state format to column format for API
-              const filterColumns = performanceMonitor.timeOperation(
-                'prepareFilterColumns',
-                () =>
-                  columnsState
-                    .filter((column) => {
-                      const filterValues = filters[column.name];
-                      return filterValues && filterValues.length > 0;
-                    })
-                    .map((column) => ({
-                      ...column,
-                      filterSettings: {
-                        ...column.filterSettings,
-                        values: filters[column.name] || [],
-                      },
-                    })),
-                {
-                  columnCount: columnsState.length,
-                  activeFilters: Object.keys(filters).length,
-                },
-              );
+    updateQueryString(1, search as string);
 
-              const response = await memoizedGetList(
-                search,
-                page - 1, // API expects 0-based page
-                sortField,
-                sortOrder,
-                filterColumns,
-                pageSize,
-              );
+    updateSettings('admin', {
+      [name]: {
+        ...settings[name],
+        pageSize: nextPageSize,
+      },
+    });
 
-              setList(response.list);
-              setListTotal(response.total);
+    handleGetList(listSearch, 1, sortField, sortOrder, filters, nextPageSize);
+  };
 
-              // Validate page boundaries after getting total
-              helpers.validatePage(response.total);
+  const handleColumnsChanged = (nextColumns: AdminListColumn[]) => {
+    updateSettings('admin', {
+      [name]: {
+        ...settings[name],
+        columns: nextColumns,
+      },
+    });
+    setColumnsState(nextColumns);
+  };
 
-              // Fetch all data for filter dropdowns if needed (with performance monitoring)
-              if (columns.some((column) => !!column.filterComponent)) {
-                const everythingResponse =
-                  await performanceMonitor.timeAsyncOperation(
-                    'fetchAllDataForFilters',
-                    () =>
-                      memoizedGetList(
-                        search,
-                        -1, // Get all pages
-                        undefined,
-                        undefined,
-                        undefined,
-                        pageSize,
-                      ),
-                    { hasFilterComponents: true },
-                  );
-                setListAll(everythingResponse.list);
-              }
+  const handleFiltersChanged = (nextFilters: AdminListColumn[]) => {
+    // Build updated columns by immutably merging filter values from nextFilters
+    const nextColumns = columnsState.map((col) => {
+      const updatedFilter = nextFilters.find((f) => f.name === col.name);
+      if (updatedFilter) {
+        return {
+          ...col,
+          filterSettings: updatedFilter.filterSettings
+            ? { ...updatedFilter.filterSettings }
+            : col.filterSettings,
+        };
+      }
+      return col;
+    });
 
-              return response;
-            },
-            'fetchAdminListData',
-            {
-              operation: 'fetchAdminListData',
-              listName: name,
-              search,
-              page,
-              pageSize,
-              filters: Object.keys(filters),
-            },
-          );
+    updateSettings('admin', {
+      [name]: {
+        ...settings[name],
+        columns: nextColumns,
+      },
+    });
 
-          // Handle the case where the API call failed
-          if (!result) {
-            actions.setError('Failed to load data. Please try again.');
-          }
+    setColumnsState(nextColumns);
 
-          actions.setLoading(false);
-        },
-        {
-          listName: name,
-          search,
-          page,
-          pageSize,
-          filterCount: Object.keys(filters).length,
-          columnCount: columnsState.length,
-        },
-      );
-    },
-    150, // Debounce API calls by 150ms to prevent rapid successive calls
-    {
-      leading: false,
-      trailing: true,
-      maxWait: 500, // Ensure calls don't get delayed indefinitely
-    },
-  );
+    // Only include columns that actually have active filter values
+    const updatedFilters = nextColumns.filter(
+      (col) => !!col.filterComponent && col.filterSettings?.values?.length,
+    );
 
-  const handleGetList = useCallback(() => {
-    debouncedGetList();
-  }, [debouncedGetList]);
+    setListSettings((prev) => ({
+      ...prev,
+      filters: updatedFilters,
+      listPage: 1,
+    }));
 
-  // Enhanced event handlers with performance monitoring
-  const handleSearch = useCallback(
-    (nextSearch: string) => {
-      if (nextSearch === undefined) return;
-      performanceMonitor.timeOperation(
-        'handleSearchChange',
-        () => actions.setSearch(nextSearch),
-        { searchLength: nextSearch.length },
-      );
-    },
-    [actions, performanceMonitor],
-  );
+    updateQueryString(1, search as string);
+  };
 
-  const handleSortChanged = useCallback(
-    (nextSortField: number) => {
-      performanceMonitor.timeOperation(
-        'handleSortChange',
-        () => {
-          const nextSortOrder =
-            sortField !== nextSortField
-              ? SortOrder.SORT_ORDER_ASCENDING
-              : sortOrder === SortOrder.SORT_ORDER_ASCENDING
-              ? SortOrder.SORT_ORDER_DESCENDING
-              : SortOrder.SORT_ORDER_ASCENDING;
-
-          actions.setSort(nextSortField, nextSortOrder);
-
-          // Update settings for persistence
-          const nextColumns = [...columnsState];
-          const foundColumn = nextColumns.find(
-            (column) => column.sortField === nextSortField,
-          );
-
-          updateSettings('admin', {
-            [name]: {
-              columns: foundColumn ? nextColumns : settings[name]?.columns,
-              sort: {
-                field: nextSortField,
-                order: nextSortOrder,
-              },
-            },
-          });
-
-          if (foundColumn) {
-            setColumnsState(nextColumns);
-          }
-        },
-        {
-          sortField: nextSortField,
-          previousSortField: sortField,
-          columnCount: columnsState.length,
-        },
-      );
-    },
-    [
-      sortField,
-      sortOrder,
-      actions,
-      columnsState,
-      updateSettings,
-      name,
-      settings,
-      performanceMonitor,
-    ],
-  );
-
-  const handlePageChanged = useCallback(
-    (nextPage: number) => {
-      performanceMonitor.timeOperation(
-        'handlePageChange',
-        () => actions.setPage(nextPage),
-        { nextPage, previousPage: page },
-      );
-    },
-    [actions, performanceMonitor, page],
-  );
-
-  const handlePageSizeChanged = useCallback(
-    (nextPageSize: number) => {
-      handlePaginationError(
-        async () => {
-          actions.setPageSize(nextPageSize);
-
-          // Update settings for persistence with error handling
-          await handleStateSyncError(
-            async () => {
-              updateSettings('admin', {
-                [name]: {
-                  ...settings[name],
-                  pageSize: nextPageSize,
-                },
-              });
-            },
-            { operation: 'updatePageSizeSettings', pageSize: nextPageSize },
-          );
-        },
-        { operation: 'changePageSize', pageSize: nextPageSize },
-      );
-    },
-    [
-      actions,
-      updateSettings,
-      name,
-      settings,
-      handlePaginationError,
-      handleStateSyncError,
-    ],
-  );
-
-  const handleColumnsChanged = useCallback(
-    (nextColumns: AdminListColumn[]) => {
-      updateSettings('admin', {
-        [name]: {
-          ...settings[name],
-          columns: nextColumns,
-        },
-      });
-      setColumnsState(nextColumns);
-    },
-    [updateSettings, name, settings],
-  );
-
-  const handleFiltersChanged = useCallback(
-    (nextFilters: AdminListColumn[]) => {
-      handleFilterError(
-        async () => {
-          const nextColumns = [...columnsState];
-
-          // Convert column filters to state format
-          const newFilters: Record<string, string[]> = {};
-
-          for (let column of nextColumns) {
-            const indexOfFilter = nextFilters.findIndex(
-              (c) => c.name === column.name,
-            );
-            if (indexOfFilter > -1) {
-              const filterColumn = nextFilters[indexOfFilter];
-              column.filterSettings = filterColumn.filterSettings;
-
-              // Add to state filters if has values
-              if (filterColumn.filterSettings?.values?.length) {
-                newFilters[column.name] = filterColumn.filterSettings.values;
-              }
-            }
-          }
-
-          // Update settings for persistence with error handling
-          await handleStateSyncError(
-            async () => {
-              updateSettings('admin', {
-                [name]: {
-                  ...settings[name],
-                  columns: nextColumns,
-                },
-              });
-            },
-            {
-              operation: 'updateFilterSettings',
-              filters: Object.keys(newFilters),
-            },
-          );
-
-          setColumnsState(nextColumns);
-
-          // Update centralized filter state
-          actions.setBulkFilters(newFilters);
-        },
-        {
-          operation: 'changeFilters',
-          filterCount: nextFilters.length,
-          changedColumns: nextFilters.map((f) => f.name),
-        },
-      );
-    },
-    [
-      columnsState,
-      updateSettings,
-      name,
-      settings,
-      actions,
-      handleFilterError,
-      handleStateSyncError,
-    ],
-  );
-
-  // Initialize settings if they don't exist
-  const initSettingsColumns = useCallback(() => {
-    if (settings[name]) return;
+  const initSettingsColumns = () => {
+    if (!!settings[name]) return;
 
     updateSettings('admin', {
       [name]: {
@@ -506,55 +310,106 @@ const AdminListComponent = ({
         columns,
       },
     });
-  }, [settings, name, updateSettings, columns]);
+  };
 
-  // Initialize columns state
+  // ---------------------------------------------------------------
+  // Initialisation effect.
+  //
+  // Merges the static column definitions with any saved settings
+  // (which may include persisted filter values) and triggers the
+  // very first data fetch with the correct filters.
+  //
+  // When the component mounts during client-side navigation, Recoil
+  // already has the settings so settingsColumns is populated
+  // immediately. On a hard refresh the Recoil atom may still be
+  // loading, so settingsColumns starts as []. We re-run once more
+  // when the real settings arrive.
+  // ---------------------------------------------------------------
+  const prevSettingsKey = useRef<string | null>(null);
+
   useEffect(() => {
+    const key = JSON.stringify(settingsColumns);
+
+    // If we already initialised with this exact settings payload, skip.
+    if (prevSettingsKey.current === key) return;
+    prevSettingsKey.current = key;
+
+    initSettingsColumns();
+
     const adminColumns = loadAdminColumns(columns, settingsColumns);
     setColumnsState(adminColumns);
 
-    // Initialize filters from loaded columns
-    const initialFilters: Record<string, string[]> = {};
-    adminColumns.forEach((column) => {
-      if (column.filterSettings?.values?.length) {
-        initialFilters[column.name] = column.filterSettings.values;
-      }
-    });
+    const activeFilters = adminColumns.filter(
+      (col) => !!col.filterComponent && col.filterSettings?.values?.length,
+    );
 
-    if (Object.keys(initialFilters).length > 0) {
-      actions.setBulkFilters(initialFilters);
-    }
-  }, [columns, settingsColumns, actions]);
+    // Compute the full set of list settings for the initial fetch so
+    // there is a single source of truth — no reliance on the
+    // [listSettings] watcher for the first load.
+    const initSearch = (search as string) || '';
+    const initPage = page ? +page.toString()! : 1;
+    const initSortField = settings[name]?.sort?.field || defaultSortField;
+    const initSortOrder = settings[name]?.sort?.order || defaultSortOrder;
+    const initPageSize = settings[name]?.pageSize || defaultPageSize;
 
-  // Initialize settings and fetch data when component mounts or state changes
+    setListSettings((prev) => ({
+      ...prev,
+      listSearch: initSearch,
+      listPage: initPage,
+      sortField: initSortField,
+      sortOrder: initSortOrder,
+      filters: activeFilters,
+      pageSize: initPageSize,
+    }));
+
+    // Trigger the first fetch directly with the values we just
+    // computed so we don't depend on React scheduling the
+    // [listSettings] effect at the right time.
+    handleGetList(
+      initSearch,
+      initPage,
+      initSortField,
+      initSortOrder,
+      activeFilters,
+      initPageSize,
+    );
+
+    initFetchDone.current = true;
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(settingsColumns)]);
+
+  // ---------------------------------------------------------------
+  // Subsequent-change watcher.
+  //
+  // After initialisation, any user-driven change (filter toggle,
+  // sort click, page change, search) updates listSettings and this
+  // effect re-fetches. The init effect already handled the very
+  // first fetch, so we skip until that's done.
+  // ---------------------------------------------------------------
+  const prevListSettings = useRef(listSettings);
+
   useEffect(() => {
-    initSettingsColumns();
-  }, [initSettingsColumns]);
+    // Don't fetch until the init effect has run at least once.
+    if (!initFetchDone.current) return;
 
-  // Fetch data when state changes (with proper dependencies)
-  useEffect(() => {
-    if (columnsState.length > 0) {
-      handleGetList();
+    // Don't re-fetch if listSettings hasn't actually changed
+    // (avoids the double-fire from the init effect setting state).
+    if (prevListSettings.current === listSettings) return;
+    prevListSettings.current = listSettings;
+
+    if (columnsState.length) {
+      handleGetList(
+        listSearch,
+        listPage,
+        sortField,
+        sortOrder,
+        filters,
+        pageSize,
+      );
     }
-  }, [handleGetList, columnsState.length]);
-
-  // Enhanced retry function for error boundary and error handler
-  const handleRetry = useCallback(async () => {
-    actions.setError(null);
-    clearErrors();
-    await handleGetList();
-  }, [actions, handleGetList, clearErrors]);
-
-  // Create error boundary reset keys based on critical state
-  const errorBoundaryResetKeys = useMemo(() => {
-    return ErrorBoundaryHelpers.createResetKeys({
-      page,
-      pageSize,
-      filters,
-      search,
-      listName: name,
-    });
-  }, [page, pageSize, filters, search, name]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [listSettings]);
 
   useEffect(() => {
     if (tagsAdded?.length) {
@@ -605,107 +460,42 @@ const AdminListComponent = ({
     }
   }, [tagsRemoved]);
 
-  // Memoized list mapping for performance
-  const memoizedListMap = useMemoizedCallback(listMap, [listMap], {
-    maxSize: 3,
-    ttl: 10000, // Cache mapped lists for 10 seconds
-    keyGenerator: (list) =>
-      `${list.length}-${JSON.stringify(list.slice(0, 3))}`, // Use first 3 items as key
-  });
-
   return (
-    <AdminListErrorBoundary
-      resetKeys={errorBoundaryResetKeys}
-      resetOnPropsChange={true}
-      onError={ErrorBoundaryHelpers.createErrorBoundaryHandler({
-        listName: name,
-        operation: 'renderAdminList',
-      })}
-    >
-      <AdminListErrorHandler
-        onRetry={handleRetry}
-        showErrorSummary={hasErrors}
-        maxVisibleErrors={3}
-      >
-        {/* Legacy error boundary for backward compatibility */}
-        <LegacyAdminListErrorBoundary error={error} onRetry={handleRetry}>
-          <article key={name} id={name} css={styles.card}>
-            <AdminListHeader
-              name={name}
-              onSearch={handleSearch}
-              columns={columnsState}
-              onColumnsChanged={handleColumnsChanged}
-              onFiltersChanged={handleFiltersChanged}
-              additionalHeaderButtons={additionalHeaderButtons}
-              selectedIds={selectedIds!}
-              list={list}
-              setList={setList}
-            />
-            <AdminListTable
-              name={name}
-              idPropertyName={idPropertyName}
-              isLoading={isLoading}
-              list={memoizedListMap(list)}
-              listTotal={listTotal}
-              listPage={page}
-              listPageSize={pageSize}
-              listAll={listAll}
-              columns={columnsState}
-              hidePagination={hidePagination}
-              activeSortField={sortField}
-              activeSortOrder={sortOrder}
-              selectedIds={selectedIds}
-              protocols={protocols}
-              users={users}
-              onIdSelected={onIdSelected}
-              onIdAllSelected={onIdAllSelected}
-              onPageChanged={handlePageChanged}
-              onSortChanged={handleSortChanged}
-              onFiltersChanged={handleFiltersChanged}
-              onColumnsChanged={handleColumnsChanged}
-              onPageSizeChanged={handlePageSizeChanged}
-            />
-          </article>
-        </LegacyAdminListErrorBoundary>
-      </AdminListErrorHandler>
-    </AdminListErrorBoundary>
+    <article key={name} id={name} css={styles.card}>
+      <AdminListHeader
+        name={name}
+        onSearch={handleSearch}
+        columns={columnsState}
+        onColumnsChanged={handleColumnsChanged}
+        onFiltersChanged={handleFiltersChanged}
+        additionalHeaderButtons={additionalHeaderButtons}
+        selectedIds={selectedIds!}
+        list={list}
+        setList={setList}
+      />
+      <AdminListTable
+        name={name}
+        idPropertyName={idPropertyName}
+        isLoading={isLoading}
+        list={listMap(list)}
+        listTotal={listTotal}
+        listPage={listPage!}
+        listAll={listAll}
+        columns={columnsState}
+        hidePagination={hidePagination}
+        activeSortField={sortField}
+        activeSortOrder={sortOrder}
+        selectedIds={selectedIds}
+        protocols={protocols}
+        users={users}
+        onIdSelected={onIdSelected}
+        onIdAllSelected={onIdAllSelected}
+        onPageChanged={handlePageChanged}
+        onSortChanged={handleSortChanged}
+        onFiltersChanged={handleFiltersChanged}
+        onColumnsChanged={handleColumnsChanged}
+        onPageSizeChanged={handlePageSizeChanged}
+      />
+    </article>
   );
 };
-
-// Export memoized component for better performance
-export const AdminList = memo(AdminListComponent, (prevProps, nextProps) => {
-  // Custom comparison function to prevent unnecessary re-renders
-  const keysToCompare = [
-    'name',
-    'idPropertyName',
-    'hidePagination',
-    'defaultSortField',
-    'defaultSortOrder',
-    'selectedIds',
-    'tagsAdded',
-    'tagsRemoved',
-  ];
-
-  for (const key of keysToCompare) {
-    if (prevProps[key as keyof Props] !== nextProps[key as keyof Props]) {
-      return false;
-    }
-  }
-
-  // Deep compare arrays
-  if (JSON.stringify(prevProps.columns) !== JSON.stringify(nextProps.columns)) {
-    return false;
-  }
-
-  if (
-    JSON.stringify(prevProps.protocols) !== JSON.stringify(nextProps.protocols)
-  ) {
-    return false;
-  }
-
-  if (JSON.stringify(prevProps.users) !== JSON.stringify(nextProps.users)) {
-    return false;
-  }
-
-  return true;
-});

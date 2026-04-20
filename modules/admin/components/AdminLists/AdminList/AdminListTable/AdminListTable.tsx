@@ -32,7 +32,6 @@ type Props = {
   list: IAdminItem[];
   listTotal?: number;
   listPage: number;
-  listPageSize: number; // Add explicit page size prop
   listAll: any[];
   activeSortField: number;
   activeSortOrder: SortOrder;
@@ -57,7 +56,6 @@ export const AdminListTable = ({
   list,
   listTotal,
   listPage,
-  listPageSize,
   listAll,
   activeSortField,
   activeSortOrder,
@@ -86,12 +84,10 @@ export const AdminListTable = ({
   const [resizeLineLeft, setResizeLineLeft] = useState(0);
   const [isSelectingCheckboxes, setIsSelectingCheckboxes] = useState(false);
   const [isChecking, setIsChecking] = useState(false);
+  const [currentPageSize, setCurrentPageSize] = useState(defaultPageSize);
 
   const wrapperRef = useRef<HTMLDivElement>(null);
   const activeIndex = useRef<number>(0);
-
-  // Use the page size from props (centralized state) instead of local state
-  const currentPageSize = listPageSize || defaultPageSize;
 
   // Calculate pageCount, ensuring it's at least 1 for UI rendering, but 0 if no items exist
   const pageCount =
@@ -111,7 +107,7 @@ export const AdminListTable = ({
     if (order) query.order = order;
 
     router.push({
-      pathname: router.pathname,
+      pathname: '',
       query,
     });
   };
@@ -131,42 +127,44 @@ export const AdminListTable = ({
     columnName: string,
   ) => {
     const column = columns.find((c) => c.name === columnName);
+    if (!column || !column.filterComponent) return;
 
-    let valuesCopy = column?.filterSettings?.values
-      ? [...column?.filterSettings.values]
-      : [];
+    const currentValues = column?.filterSettings?.values ?? [];
+    const valueExists = currentValues.some((value) => value === item.id);
 
-    const valueExists = valuesCopy?.some((value) => value === item.id);
+    const nextValues = valueExists
+      ? currentValues.filter((v) => v !== item.id)
+      : [...currentValues, item.id!];
 
-    if (valueExists) {
-      valuesCopy = valuesCopy.filter((v) => v !== item.id)!;
-    } else {
-      valuesCopy.push(item.id!);
-    }
-
-    const columnsCopy = [...columns];
-
-    const foundFilter = columnsCopy.find(
-      (column) => column.name === columnName,
+    // Create new column objects instead of mutating shared references
+    const columnsCopy = columns.map((col) =>
+      col.name === columnName
+        ? {
+            ...col,
+            filterSettings: {
+              ...col.filterSettings,
+              values: nextValues,
+            },
+          }
+        : col,
     );
-
-    if (!foundFilter || !foundFilter?.filterComponent) return;
-
-    foundFilter.filterSettings = foundFilter.filterSettings || {};
-
-    foundFilter.filterSettings.values = valuesCopy;
 
     onFiltersChanged(columnsCopy);
   };
 
   const handleReset = (columnName: string) => {
-    const filtersCopy = [...columns];
-
-    const foundFilter = filtersCopy.find((f) => f.name === columnName);
-
-    if (!foundFilter || !foundFilter.filterSettings) return;
-
-    foundFilter.filterSettings.values = [];
+    // Create new column objects instead of mutating shared references
+    const filtersCopy = columns.map((col) =>
+      col.name === columnName && col.filterSettings
+        ? {
+            ...col,
+            filterSettings: {
+              ...col.filterSettings,
+              values: [],
+            },
+          }
+        : col,
+    );
 
     onFiltersChanged(filtersCopy);
   };
@@ -249,13 +247,15 @@ export const AdminListTable = ({
     };
   }, [columnsVisible.length]);
 
-  // Enhanced page size change handler that properly triggers state updates
   const handlePageSizeChange = (newPageSize: number) => {
+    setCurrentPageSize(newPageSize);
     if (onPageSizeChanged) {
-      // Trigger the centralized state management update
+      // AdminList.handlePageSizeChanged handles both the page size update
+      // AND the page reset to 1 in a single fetch. Do NOT call
+      // onPageChanged(1) separately — that would trigger a second fetch
+      // using the stale (old) pageSize from listSettings.
       onPageSizeChanged(newPageSize);
     }
-    // Note: Page reset is handled by the centralized state management
   };
 
   if (isLoading)
@@ -438,15 +438,10 @@ export const AdminListTable = ({
                     <select
                       id="page-size-selector"
                       value={currentPageSize}
-                      onChange={(e) => {
-                        const newPageSize = Number(e.target.value);
-                        if (!isNaN(newPageSize) && newPageSize > 0) {
-                          handlePageSizeChange(newPageSize);
-                        }
-                      }}
+                      onChange={(e) =>
+                        handlePageSizeChange(Number(e.target.value))
+                      }
                       css={styles.pageSizeSelect}
-                      disabled={isLoading}
-                      aria-label="Select number of items per page"
                     >
                       {pageSizeOptions.map((size) => (
                         <option key={size} value={size}>
@@ -462,7 +457,6 @@ export const AdminListTable = ({
                 totalRowCount={listTotal || 0}
                 pageCount={pageCount}
                 currentPageSize={currentPageSize}
-                isLoading={isLoading}
                 onPageChanged={onPageChanged}
               />
             </div>
