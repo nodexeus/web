@@ -1,5 +1,5 @@
 import { css } from '@emotion/react';
-import { Node } from '@modules/grpc/library/blockjoy/v1/node';
+import { Node } from '@modules/grpc/library/blockjoy/v1/node copy';
 import { getNodeMetadataString } from '@modules/node';
 import { ProtocolIcon } from '@shared/components';
 import { typo } from 'styles/utils.typography.styles';

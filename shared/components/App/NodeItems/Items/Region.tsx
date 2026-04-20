@@ -1,4 +1,4 @@
-import { Node } from '@modules/grpc/library/blockjoy/v1/node';
+import { Node } from '@modules/grpc/library/blockjoy/v1/node copy';
 
 type Props = Partial<Pick<Node, 'regionName'>>;
 

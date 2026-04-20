@@ -1,5 +1,5 @@
 import { css } from '@emotion/react';
-import { Node } from '@modules/grpc/library/blockjoy/v1/node';
+import { Node } from '@modules/grpc/library/blockjoy/v1/node copy';
 import { ITheme } from 'types/theme';
 import { NodePartials } from '@shared/components';
 import { NodeStatePresentationOptions } from '@modules/node';
