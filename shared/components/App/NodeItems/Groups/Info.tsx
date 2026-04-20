@@ -1,12 +1,17 @@
 import { css } from '@emotion/react';
-import { Node } from '@modules/grpc/library/blockjoy/v1/node copy';
+import { Node } from '@modules/grpc/library/blockjoy/v1/node';
 import { NodeItems } from '@shared/components';
 import { typo } from 'styles/utils.typography.styles';
 
 type Props = Partial<
   Pick<
     Node,
-    'displayName' | 'nodeName' | 'versionKey' | 'versionMetadata' | 'createdAt'
+    | 'displayName'
+    | 'nodeName'
+    | 'versionKey'
+    | 'versionMetadata'
+    | 'createdAt'
+    | 'semanticVersion'
   >
 >;
 

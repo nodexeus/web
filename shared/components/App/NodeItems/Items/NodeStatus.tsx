@@ -1,5 +1,5 @@
 import { NodeState } from '@modules/grpc/library/blockjoy/common/v1/node';
-import { Node } from '@modules/grpc/library/blockjoy/v1/node copy';
+import { Node } from '@modules/grpc/library/blockjoy/v1/node';
 import { NODE_STATE_PRESENTATION } from '@modules/node';
 import { NodePartials } from '@shared/components';
 

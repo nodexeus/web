@@ -1,5 +1,5 @@
 import { css } from '@emotion/react';
-import { Node } from '@modules/grpc/library/blockjoy/v1/node copy';
+import { Node } from '@modules/grpc/library/blockjoy/v1/node';
 import { escapeHtml } from '@shared/utils/escapeHtml';
 import { display } from 'styles/utils.display.styles';
 

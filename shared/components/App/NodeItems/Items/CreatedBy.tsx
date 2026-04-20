@@ -1,5 +1,5 @@
 import { SerializableParam, useRecoilValue } from 'recoil';
-import { Node } from '@modules/grpc/library/blockjoy/v1/node copy';
+import { Node } from '@modules/grpc/library/blockjoy/v1/node';
 import { nodeSelectors } from '@modules/node';
 import { display } from 'styles/utils.display.styles';
 

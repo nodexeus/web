@@ -1,5 +1,5 @@
 import { css } from '@emotion/react';
-import { Node } from '@modules/grpc/library/blockjoy/v1/node copy';
+import { Node } from '@modules/grpc/library/blockjoy/v1/node';
 import { ITheme } from 'types/theme';
 import { formatters } from '@shared/index';
 import { SvgIcon } from '@shared/components';

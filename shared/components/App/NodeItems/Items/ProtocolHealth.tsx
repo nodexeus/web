@@ -1,5 +1,5 @@
 import { NodeHealth } from '@modules/grpc/library/blockjoy/common/v1/node';
-import { Node } from '@modules/grpc/library/blockjoy/v1/node copy';
+import { Node } from '@modules/grpc/library/blockjoy/v1/node';
 import { NodePartials } from '@shared/components';
 import { PROTOCOL_HEALTH_PRESENTATION } from '@modules/node';
 
