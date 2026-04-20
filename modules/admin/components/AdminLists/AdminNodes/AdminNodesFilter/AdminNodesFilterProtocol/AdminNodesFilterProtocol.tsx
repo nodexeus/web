@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { AdminListFilterControl } from '@modules/admin';
 import { unique } from '@shared/index';
 import { sort } from '@shared/components';
-import { Node } from '@modules/grpc/library/blockjoy/v1/node copy';
+import { Node } from '@modules/grpc/library/blockjoy/v1/node';
 import { AdminFilterControlProps } from '@modules/admin/types/AdminFilterControlProps';
 import { capitalize } from 'utils/capitalize';
 

@@ -7,7 +7,7 @@ import {
 import { sort } from '@shared/components';
 import { AdminFilterControlProps } from '@modules/admin/types/AdminFilterControlProps';
 import { useRecoilValue } from 'recoil';
-import { Node } from '@modules/grpc/library/blockjoy/v1/node copy';
+import { Node } from '@modules/grpc/library/blockjoy/v1/node';
 
 export const AdminNodesFilterHost = ({
   columnName,

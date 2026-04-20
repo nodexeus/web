@@ -5,7 +5,7 @@ import {
   dedupedAdminDropdownList,
 } from '@modules/admin';
 import { sort } from '@shared/components';
-import { Node } from '@modules/grpc/library/blockjoy/v1/node copy';
+import { Node } from '@modules/grpc/library/blockjoy/v1/node';
 import { AdminFilterControlProps } from '@modules/admin/types/AdminFilterControlProps';
 import { useRecoilValue } from 'recoil';
 

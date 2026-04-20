@@ -1,7 +1,7 @@
 import { useRecoilValue } from 'recoil';
 import { SerializedStyles } from '@emotion/react';
 import { Tag } from '@modules/grpc/library/blockjoy/common/v1/tag';
-import { Node } from '@modules/grpc/library/blockjoy/v1/node copy';
+import { Node } from '@modules/grpc/library/blockjoy/v1/node';
 import { useNodeUpdate, nodeSelectors } from '@modules/node';
 import { Tags } from '@shared/components';
 import { layoutSelectors } from '@modules/layout';

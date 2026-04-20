@@ -1,5 +1,5 @@
 import { nodeClient } from '@modules/grpc';
-import { Node } from '@modules/grpc/library/blockjoy/v1/node copy';
+import { Node } from '@modules/grpc/library/blockjoy/v1/node';
 import { NextLink } from '@shared/components';
 import { useEffect, useState } from 'react';
 

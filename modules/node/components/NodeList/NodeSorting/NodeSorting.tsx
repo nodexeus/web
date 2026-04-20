@@ -1,5 +1,5 @@
 import { useRecoilState, useRecoilValue, useResetRecoilState } from 'recoil';
-import { NodeSortField } from '@modules/grpc/library/blockjoy/v1/node copy';
+import { NodeSortField } from '@modules/grpc/library/blockjoy/v1/node';
 import { Sorting, SortingItem } from '@shared/components';
 import { nodeAtoms, nodeSelectors, NODE_LIST_SORTING } from '@modules/node';
 import { settingsAtoms, useSettings } from '@modules/settings';

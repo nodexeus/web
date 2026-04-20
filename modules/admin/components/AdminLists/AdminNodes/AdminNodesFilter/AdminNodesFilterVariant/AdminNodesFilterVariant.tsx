@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { AdminListFilterControl, adminSelectors } from '@modules/admin';
 import { useRecoilValue } from 'recoil';
 import { AdminFilterControlProps } from '@modules/admin/types/AdminFilterControlProps';
-import { Node } from '@modules/grpc/library/blockjoy/v1/node copy';
+import { Node } from '@modules/grpc/library/blockjoy/v1/node';
 import { unique } from '@shared/index';
 
 export const AdminNodesFilterVariant = ({
