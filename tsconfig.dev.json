@@ -1,0 +1,22 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "skipLibCheck": true,
+    "incremental": true,
+    "tsBuildInfoFile": ".next/cache/tsconfig.tsbuildinfo"
+  },
+  "exclude": [
+    "node_modules",
+    "test/**/*",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/__tests__/**/*",
+    "**/*.integration.test.tsx",
+    "**/*.integration.test.ts",
+    "**/TASK_*_IMPLEMENTATION_SUMMARY.md",
+    "modules/admin/examples/**/*",
+    "modules/admin/utils/__tests__/**/*",
+    "modules/admin/hooks/__tests__/**/*",
+    "modules/admin/components/**/__tests__/**/*"
+  ]
+}

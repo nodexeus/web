@@ -1,0 +1,8 @@
+--primary: #e84326;
+--primary-dark: #d13d23af;
+--background: #101010;
+--secondary-background: #1f1f1f;
+--text: #ffffff;
+--text-secondary: #a3a3a3;
+--text-dark: #121212;
+--border: #2a2a2a;

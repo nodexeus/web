@@ -1,0 +1,241 @@
+@font-face {
+  font-family: 'Styrene A LC';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/assets/fonts/StyreneALC-RegularItalic.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Styrene A LC';
+  font-style: italic;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/assets/fonts/StyreneALC-BoldItalic.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Styrene A LC';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/assets/fonts/StyreneALC-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Styrene A LC';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/assets/fonts/StyreneALC-Bold.woff2') format('woff2');
+}
+
+body {
+  margin: 0;
+}
+
+main {
+  padding-top: 10px;
+}
+
+#preloader {
+  position: fixed;
+  z-index: 2;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #232524;
+  visibility: visible;
+  opacity: 1;
+  gap: 24px;
+}
+
+#preloader .loader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 20px;
+}
+
+#preloader .loader-text {
+  color: #a7a7a7;
+  font-size: 16px;
+}
+
+@keyframes spin {
+  100% { transform: rotate(1turn); }
+}
+
+#preloader .loader-svg {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  animation: spin 1.2s infinite linear;
+}
+
+@keyframes hide {
+  100% {
+    opacity: 0;
+  }
+}
+
+#preloader.hidden {
+  animation: hide 0.5s both;
+}
+
+@keyframes hide {
+  0%, 90% { opacity: 1; visibility: visible; }
+  100% { opacity: 0; visibility: hidden; }
+}
+
+.card::before,
+.card::after {
+  content: "";
+  position: absolute;
+}
+
+.card > div {
+  position: relative;
+  z-index: 1;
+  background: #272a29;
+}
+
+header {
+  color: #a7a7a7;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 1px;
+  font-family: "Styrene A LC" !important;
+}
+
+body,
+body .netdata-chart,
+body .dygraph-title,
+body .easyPieChartTitle,
+body .easyPieChartLabel,
+body .easyPieChartUnits,
+body .gaugeChartTitle,
+body .gaugeChartLabel,
+body .gaugeChartUnits,
+body .dygraph-label,
+body .dygraph-axis-label,
+body .netdata-chart-legend,
+body .netdata-container[data-chart-library],
+body .netdata-d3pie-chart text {
+  font-family: "Styrene A LC" !important;
+  font-weight: 400 !important;
+}
+
+body .netdata-message {
+  content: "test";
+  color: transparent !important;
+}
+
+body .netdata-legend-toolbox,
+body .netdata-legend-resize-handler {
+  display: none !important;
+}
+
+body .netdata-container[data-chart-library] {
+  font-size: 26px !important;
+  color: #f9f9f9 !important;
+}
+
+.charts {
+  display: flex;
+  gap: 20px;
+}
+
+.charts > div:last-child {
+  min-width: 166px;
+}
+
+.row:not(:last-child) {
+  border-bottom: 1px solid #363938;
+  margin-bottom: 14px;
+  padding-bottom: 14px;
+}
+
+/* .textonly-wrapper {
+  display: flex;
+  flex-direction: column;
+} */
+
+.measurement {
+  transform: translateY(-24px);
+  font-size: 11px;
+  color: #a7a7a7;
+}
+
+/* hides that nasty blue shit when empty */
+.dygraph__history-tip {
+  display: none !important;
+}
+
+[class*="segmentPercentage-inner"], 
+
+[class*="title"]:not([class*="subtitle"]), 
+[class*="footer"] {
+  display: none !important;
+}
+
+[class*="segmentValue-outer"] {
+  fill: #f9f9f9 !important;
+  font-size: 14px !important;
+}
+
+[class*="segmentMainLabel-outer"] {
+  text-transform: capitalize;
+  fill: #777975 !important;
+}
+
+[class*="subtitle"] {
+  fill: #a7a7a7;
+  transform: translateY(-10px);
+}
+
+
+.textonly-wrapper {
+  overflow: hidden;
+  height: 50px;
+  width: 168px;
+}
+
+.textonly-wrapper canvas {
+  display: none;
+}
+
+.textonly-wrapper .netdata-container-easypiechart,
+.textonly-wrapper .easyPieChartLabel {
+  font-size: 26px !important;
+  top: 0 !important;
+  color: #f9f9f9 !important;
+}
+
+.textonly-wrapper .easyPieChartUnits {
+  font-size: 11px !important;
+  text-transform: capitalize;
+  top: 36px !important;
+  color: #a7a7a7 !important;
+}
+
+.textonly-wrapper .easyPieChartLabel,
+.textonly-wrapper .easyPieChartUnits {
+  text-align: left !important;
+  transform: scale(1) !important;
+  margin-left: 0 !important;
+}
+
+.disk-wrapper {
+  margin-top: 10px;
+  border-top: 1px solid #363938;
+  padding-top: 20px;
+}
+
+.disk-pie {
+  padding-top: 20px;
+  height: 200px;
+  max-height: 200px;
+  overflow: hidden;
+}

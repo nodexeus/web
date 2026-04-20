@@ -1,0 +1,27 @@
+name: 'Assign PR to person who created it'
+
+# ** What it does? **
+#    - Assigns PR to person who created it.
+# ** Why we have it? **
+#    - So we know who raised PR more easily
+# ** Who does it impact? **
+#    - All developers.
+
+on: 
+  pull_request:
+    types:
+      - opened
+      - reopened
+    
+permissions:
+  pull-requests: write
+
+jobs:
+  asssign_pr:
+    name: 'Assign PR to person who created it'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Assign PR to person who created it'
+        uses: itsOliverBott/assign-pr-author-as-assignee@latest
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
