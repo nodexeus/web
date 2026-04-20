@@ -24,20 +24,20 @@
       "@assets/*": ["./assets/*"],
       "@modules/*": ["./modules/*"],
       "@shared/*": ["./shared/*"],
-      "@public/*": ["./public/*"]
+      "@public/*": ["./public/*"],
     },
     "plugins": [
       {
-        "name": "next"
-      }
-    ]
+        "name": "next",
+      },
+    ],
   },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
     "stories/Components/TagsField/tagsfields.stories.tss",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
   ],
   "exclude": [
     "node_modules",
@@ -47,6 +47,7 @@
     "**/__tests__/**/*",
     "**/*.integration.test.tsx",
     "**/*.integration.test.ts",
-    "**/TASK_*_IMPLEMENTATION_SUMMARY.md"
-  ]
+    "**/TASK_*_IMPLEMENTATION_SUMMARY.md",
+    "**/examples/**/*",
+  ],
 }
