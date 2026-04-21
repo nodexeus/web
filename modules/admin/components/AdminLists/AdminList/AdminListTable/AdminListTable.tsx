@@ -127,42 +127,44 @@ export const AdminListTable = ({
     columnName: string,
   ) => {
     const column = columns.find((c) => c.name === columnName);
+    if (!column || !column.filterComponent) return;
 
-    let valuesCopy = column?.filterSettings?.values
-      ? [...column?.filterSettings.values]
-      : [];
+    const currentValues = column?.filterSettings?.values ?? [];
+    const valueExists = currentValues.some((value) => value === item.id);
 
-    const valueExists = valuesCopy?.some((value) => value === item.id);
+    const nextValues = valueExists
+      ? currentValues.filter((v) => v !== item.id)
+      : [...currentValues, item.id!];
 
-    if (valueExists) {
-      valuesCopy = valuesCopy.filter((v) => v !== item.id)!;
-    } else {
-      valuesCopy.push(item.id!);
-    }
-
-    const columnsCopy = [...columns];
-
-    const foundFilter = columnsCopy.find(
-      (column) => column.name === columnName,
+    // Create new column objects instead of mutating shared references
+    const columnsCopy = columns.map((col) =>
+      col.name === columnName
+        ? {
+            ...col,
+            filterSettings: {
+              ...col.filterSettings,
+              values: nextValues,
+            },
+          }
+        : col,
     );
-
-    if (!foundFilter || !foundFilter?.filterComponent) return;
-
-    foundFilter.filterSettings = foundFilter.filterSettings || {};
-
-    foundFilter.filterSettings.values = valuesCopy;
 
     onFiltersChanged(columnsCopy);
   };
 
   const handleReset = (columnName: string) => {
-    const filtersCopy = [...columns];
-
-    const foundFilter = filtersCopy.find((f) => f.name === columnName);
-
-    if (!foundFilter || !foundFilter.filterSettings) return;
-
-    foundFilter.filterSettings.values = [];
+    // Create new column objects instead of mutating shared references
+    const filtersCopy = columns.map((col) =>
+      col.name === columnName && col.filterSettings
+        ? {
+            ...col,
+            filterSettings: {
+              ...col.filterSettings,
+              values: [],
+            },
+          }
+        : col,
+    );
 
     onFiltersChanged(filtersCopy);
   };
@@ -245,20 +247,15 @@ export const AdminListTable = ({
     };
   }, [columnsVisible.length]);
 
-  useEffect(() => {
-    if (onPageSizeChanged) {
-      // Apply the current page size when the component mounts
-      onPageSizeChanged(currentPageSize);
-    }
-  }, []);
-
   const handlePageSizeChange = (newPageSize: number) => {
     setCurrentPageSize(newPageSize);
     if (onPageSizeChanged) {
+      // AdminList.handlePageSizeChanged handles both the page size update
+      // AND the page reset to 1 in a single fetch. Do NOT call
+      // onPageChanged(1) separately — that would trigger a second fetch
+      // using the stale (old) pageSize from listSettings.
       onPageSizeChanged(newPageSize);
     }
-    // When changing page size, go back to first page to avoid out-of-bounds issues
-    onPageChanged(1);
   };
 
   if (isLoading)

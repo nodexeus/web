@@ -2,6 +2,7 @@ import { useRouter } from 'next/router';
 import { styles } from './AdminHeader.styles';
 import { SvgIcon } from '@shared/components';
 import IconBack from '@public/assets/icons/common/ArrowLeft.svg';
+import { AdminQuery } from '@modules/admin/types/AdminQuery';
 
 type Props = {
   name: string;

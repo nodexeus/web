@@ -1,12 +1,18 @@
+import { AdminListColumn } from '../types/AdminListColumn';
+
 export const loadAdminColumns = (
   columns: AdminListColumn[],
   settingsColumns: AdminListColumn[],
-) => {
-  let columnsCopy = columns;
+): AdminListColumn[] => {
+  // Deep clone columns to avoid mutating the module-level constant
+  const columnsCopy: AdminListColumn[] = columns.map((col) => ({
+    ...col,
+    filterSettings: col.filterSettings ? { ...col.filterSettings } : undefined,
+  }));
 
-  if (settingsColumns) {
+  if (settingsColumns?.length) {
     columnsCopy.forEach((column) => {
-      const foundSettingsColumn = settingsColumns?.find(
+      const foundSettingsColumn = settingsColumns.find(
         (c) => c?.name === column?.name,
       );
 
@@ -21,10 +27,13 @@ export const loadAdminColumns = (
           if (!column.filterSettings) column.filterSettings = {};
 
           column.filterSettings.values =
-            foundSettingsColumn.filterSettings?.values!;
+            foundSettingsColumn.filterSettings?.values ?? [];
         }
-      } else {
-        column.filterSettings = { values: undefined };
+      } else if (column.filterComponent) {
+        // Column exists in defaults but not in saved settings —
+        // initialize with empty filter values instead of wiping filterSettings
+        if (!column.filterSettings) column.filterSettings = {};
+        column.filterSettings.values = [];
       }
     });
   }

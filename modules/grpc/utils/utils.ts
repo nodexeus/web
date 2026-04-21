@@ -4,9 +4,17 @@ import { authClient } from '../clients/authClient';
 import { UIPagination } from '../clients/nodeClient';
 
 export const getIdentity = () => {
-  if (!window.localStorage.getItem('identity')) return '';
-  const identity = JSON.parse(window.localStorage.getItem('identity') || '{}');
-  return identity;
+  try {
+    const raw = window.localStorage.getItem('identity');
+    if (!raw) return '';
+    return JSON.parse(raw);
+  } catch (err) {
+    console.warn(
+      'Failed to parse identity from localStorage, clearing corrupted data.',
+    );
+    window.localStorage.removeItem('identity');
+    return '';
+  }
 };
 
 export const getOptions = (token?: string) => {
@@ -69,8 +77,8 @@ export const getPaginationOffset = (pagination?: UIPagination) => {
   return !pagination
     ? 0
     : pagination?.currentPage! === 0
-    ? 0
-    : pagination?.currentPage! * pagination?.itemsPerPage!;
+      ? 0
+      : pagination?.currentPage! * pagination?.itemsPerPage!;
 };
 
 export const createSearch = (keyword: string) => `%${keyword}%`;

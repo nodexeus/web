@@ -39,12 +39,14 @@ export const AdminUsers = () => {
     page?: number,
     sortField?: UserSortField,
     sortOrder?: SortOrder,
+    filters?: AdminListColumn[],
+    pageSizeParam?: number,
   ) => {
     const response = await userClient.listUsers(
       keyword,
       {
         currentPage: page!,
-        itemsPerPage: pageSize,
+        itemsPerPage: pageSizeParam || pageSize,
       },
       [{ field: sortField!, order: sortOrder! }],
     );

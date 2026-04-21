@@ -7,7 +7,7 @@ import { RecoilRoot } from 'recoil';
 import { Global } from '@emotion/react';
 import { PrivateRoute } from '@modules/auth';
 import ThemeProvider from '@modules/theme/ThemeProvider';
-import { PortalContainer } from '@shared/components';
+import { PortalContainer, ErrorBoundary } from '@shared/components';
 import 'react-toastify/dist/ReactToastify.css';
 import { globalStyles } from 'styles/global.styles';
 
@@ -36,7 +36,9 @@ function MyApp({ Component, pageProps, router }: AppPropsWithLayout) {
         <Global styles={globalStyles} />
         <ThemeProvider>
           <PrivateRoute router={router}>
-            {getLayout(<Component {...pageProps} />)}
+            <ErrorBoundary level="page">
+              {getLayout(<Component {...pageProps} />)}
+            </ErrorBoundary>
           </PrivateRoute>
           <ToastContainer
             hideProgressBar

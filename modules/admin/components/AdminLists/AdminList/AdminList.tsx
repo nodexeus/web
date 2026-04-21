@@ -3,6 +3,7 @@ import {
   FunctionComponent,
   SetStateAction,
   useEffect,
+  useRef,
   useState,
 } from 'react';
 import { useRouter } from 'next/router';
@@ -104,30 +105,47 @@ export const AdminList = ({
     listPage: page ? +page?.toString()! : 1,
     sortField: settings[name]?.sort?.field || defaultSortField,
     sortOrder: settings[name]?.sort?.order || defaultSortOrder,
-    filters: settingsColumns.filter((column) => !!column.filterComponent),
+    filters: [],
     pageSize: settings[name]?.pageSize || defaultPageSize,
   });
 
-  const { listSearch, listPage, sortField, sortOrder, filters, pageSize } = listSettings;
+  const { listSearch, listPage, sortField, sortOrder, filters, pageSize } =
+    listSettings;
 
   const { updateSettings } = useSettings();
+
+  // Fetch counter: incremented before every fetch. When the async call
+  // resolves we check whether the counter still matches — if it doesn't,
+  // a newer fetch was started and we discard the stale result.
+  const fetchCounter = useRef(0);
+
+  // Whether the initialisation effect has already triggered the first fetch.
+  // While this is false the [listSettings] watcher will not fetch, because
+  // the init effect is responsible for the first load (it has the correct
+  // merged filters, whereas listSettings.filters starts as []).
+  const initFetchDone = useRef(false);
 
   const handleGetList = async (
     keyword: string,
     page: number,
     sortField: number,
     sortOrder: SortOrder,
-    filters?: AdminListColumn[],
-    pageSize?: number,
+    filtersToApply?: AdminListColumn[],
+    pageSizeToApply?: number,
   ) => {
+    const thisFetch = ++fetchCounter.current;
+
     const response = await getList(
       keyword,
       page - 1,
       sortField,
       sortOrder,
-      filters,
-      pageSize,
+      filtersToApply,
+      pageSizeToApply,
     );
+
+    // Another fetch was started after this one — discard stale results.
+    if (thisFetch !== fetchCounter.current) return;
 
     setList(response.list);
     setListTotal(response.total);
@@ -140,8 +158,11 @@ export const AdminList = ({
         undefined,
         undefined,
         undefined,
-        pageSize,
+        pageSizeToApply,
       );
+
+      // Check again after the second await.
+      if (thisFetch !== fetchCounter.current) return;
 
       setListAll(everythingResponse.list);
     }
@@ -152,11 +173,11 @@ export const AdminList = ({
 
     updateQueryString(1, nextSearch);
 
-    setListSettings({
-      ...listSettings,
+    setListSettings((prev) => ({
+      ...prev,
       listSearch: nextSearch,
       listPage: 1,
-    });
+    }));
 
     handleGetList(nextSearch, 1, sortField, sortOrder, filters, pageSize);
   };
@@ -166,14 +187,14 @@ export const AdminList = ({
       sortField !== nextSortField
         ? SortOrder.SORT_ORDER_ASCENDING
         : sortOrder === SortOrder.SORT_ORDER_ASCENDING
-        ? SortOrder.SORT_ORDER_DESCENDING
-        : SortOrder.SORT_ORDER_ASCENDING!;
+          ? SortOrder.SORT_ORDER_DESCENDING
+          : SortOrder.SORT_ORDER_ASCENDING!;
 
-    setListSettings({
-      ...listSettings,
+    setListSettings((prev) => ({
+      ...prev,
       sortField: nextSortField,
       sortOrder: nextSortOrder,
-    });
+    }));
 
     const nextColumns = [...columnsState];
     const foundColumn = nextColumns.find(
@@ -196,21 +217,31 @@ export const AdminList = ({
   };
 
   const handlePageChanged = (nextPage: number) => {
-    setListSettings({
-      ...listSettings,
+    setListSettings((prev) => ({
+      ...prev,
       listPage: nextPage,
-    });
+    }));
 
     updateQueryString(nextPage, search as string);
 
-    handleGetList(listSearch, nextPage, sortField, sortOrder, filters, pageSize);
+    handleGetList(
+      listSearch,
+      nextPage,
+      sortField,
+      sortOrder,
+      filters,
+      pageSize,
+    );
   };
 
   const handlePageSizeChanged = (nextPageSize: number) => {
-    setListSettings({
-      ...listSettings,
+    setListSettings((prev) => ({
+      ...prev,
       pageSize: nextPageSize,
-    });
+      listPage: 1,
+    }));
+
+    updateQueryString(1, search as string);
 
     updateSettings('admin', {
       [name]: {
@@ -219,8 +250,7 @@ export const AdminList = ({
       },
     });
 
-    // Refetch data with the new page size
-    handleGetList(listSearch, listPage, sortField, sortOrder, filters, nextPageSize);
+    handleGetList(listSearch, 1, sortField, sortOrder, filters, nextPageSize);
   };
 
   const handleColumnsChanged = (nextColumns: AdminListColumn[]) => {
@@ -234,16 +264,19 @@ export const AdminList = ({
   };
 
   const handleFiltersChanged = (nextFilters: AdminListColumn[]) => {
-    const nextColumns = [...columnsState];
-
-    for (let column of nextColumns) {
-      const indexOfFilter = nextFilters.findIndex(
-        (c) => c.name === column.name,
-      );
-      if (indexOfFilter > -1) {
-        column = nextFilters[indexOfFilter];
+    // Build updated columns by immutably merging filter values from nextFilters
+    const nextColumns = columnsState.map((col) => {
+      const updatedFilter = nextFilters.find((f) => f.name === col.name);
+      if (updatedFilter) {
+        return {
+          ...col,
+          filterSettings: updatedFilter.filterSettings
+            ? { ...updatedFilter.filterSettings }
+            : col.filterSettings,
+        };
       }
-    }
+      return col;
+    });
 
     updateSettings('admin', {
       [name]: {
@@ -254,11 +287,16 @@ export const AdminList = ({
 
     setColumnsState(nextColumns);
 
-    setListSettings({
-      ...listSettings,
-      filters: nextFilters,
+    // Only include columns that actually have active filter values
+    const updatedFilters = nextColumns.filter(
+      (col) => !!col.filterComponent && col.filterSettings?.values?.length,
+    );
+
+    setListSettings((prev) => ({
+      ...prev,
+      filters: updatedFilters,
       listPage: 1,
-    });
+    }));
 
     updateQueryString(1, search as string);
   };
@@ -274,20 +312,103 @@ export const AdminList = ({
     });
   };
 
-  useEffect(() => {
-    const adminColumns = loadAdminColumns(columns, settingsColumns);
-    setColumnsState(adminColumns);
-    setListSettings({
-      ...listSettings,
-      filters: adminColumns.filter((col) => !!col.filterSettings),
-    });
-  }, []);
+  // ---------------------------------------------------------------
+  // Initialisation effect.
+  //
+  // Merges the static column definitions with any saved settings
+  // (which may include persisted filter values) and triggers the
+  // very first data fetch with the correct filters.
+  //
+  // When the component mounts during client-side navigation, Recoil
+  // already has the settings so settingsColumns is populated
+  // immediately. On a hard refresh the Recoil atom may still be
+  // loading, so settingsColumns starts as []. We re-run once more
+  // when the real settings arrive.
+  // ---------------------------------------------------------------
+  const prevSettingsKey = useRef<string | null>(null);
 
   useEffect(() => {
+    const key = JSON.stringify(settingsColumns);
+
+    // If we already initialised with this exact settings payload, skip.
+    if (prevSettingsKey.current === key) return;
+    prevSettingsKey.current = key;
+
     initSettingsColumns();
+
+    const adminColumns = loadAdminColumns(columns, settingsColumns);
+    setColumnsState(adminColumns);
+
+    const activeFilters = adminColumns.filter(
+      (col) => !!col.filterComponent && col.filterSettings?.values?.length,
+    );
+
+    // Compute the full set of list settings for the initial fetch so
+    // there is a single source of truth — no reliance on the
+    // [listSettings] watcher for the first load.
+    const initSearch = (search as string) || '';
+    const initPage = page ? +page.toString()! : 1;
+    const initSortField = settings[name]?.sort?.field || defaultSortField;
+    const initSortOrder = settings[name]?.sort?.order || defaultSortOrder;
+    const initPageSize = settings[name]?.pageSize || defaultPageSize;
+
+    setListSettings((prev) => ({
+      ...prev,
+      listSearch: initSearch,
+      listPage: initPage,
+      sortField: initSortField,
+      sortOrder: initSortOrder,
+      filters: activeFilters,
+      pageSize: initPageSize,
+    }));
+
+    // Trigger the first fetch directly with the values we just
+    // computed so we don't depend on React scheduling the
+    // [listSettings] effect at the right time.
+    handleGetList(
+      initSearch,
+      initPage,
+      initSortField,
+      initSortOrder,
+      activeFilters,
+      initPageSize,
+    );
+
+    initFetchDone.current = true;
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(settingsColumns)]);
+
+  // ---------------------------------------------------------------
+  // Subsequent-change watcher.
+  //
+  // After initialisation, any user-driven change (filter toggle,
+  // sort click, page change, search) updates listSettings and this
+  // effect re-fetches. The init effect already handled the very
+  // first fetch, so we skip until that's done.
+  // ---------------------------------------------------------------
+  const prevListSettings = useRef(listSettings);
+
+  useEffect(() => {
+    // Don't fetch until the init effect has run at least once.
+    if (!initFetchDone.current) return;
+
+    // Don't re-fetch if listSettings hasn't actually changed
+    // (avoids the double-fire from the init effect setting state).
+    if (prevListSettings.current === listSettings) return;
+    prevListSettings.current = listSettings;
+
     if (columnsState.length) {
-      handleGetList(listSearch, listPage, sortField, sortOrder, filters, pageSize);
+      handleGetList(
+        listSearch,
+        listPage,
+        sortField,
+        sortOrder,
+        filters,
+        pageSize,
+      );
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [listSettings]);
 
   useEffect(() => {

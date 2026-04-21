@@ -1,6 +1,16 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: false,
+  // Development optimizations
+  ...(process.env.NODE_ENV === 'development' && {
+    // Faster builds in development
+    swcMinify: false,
+    // Reduce memory usage
+    experimental: {
+      workerThreads: false,
+      cpus: 1,
+    },
+  }),
   // Enforce consistent URL handling
   trailingSlash: false,
   // Make server-side environment variables available to the API routes

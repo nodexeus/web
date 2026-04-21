@@ -60,7 +60,7 @@ export type CustomNodeReport = NodeReport & { node: Node };
 
 export const useNodeClient = () => {
   const { config } = useConfig();
-  
+
   // Create the client only when config is available
   const getClient = () => {
     if (!config.apiUrl) {
@@ -71,7 +71,7 @@ export const useNodeClient = () => {
     const client = createClient(NodeServiceDefinition, channel);
     return new NodeClient(client);
   };
-  
+
   return { getClient };
 };
 
@@ -189,7 +189,6 @@ class NodeClient {
   async getNode(nodeId: string): Promise<Node> {
     const request: NodeServiceGetRequest = { nodeId };
     console.log('getNodeRequest', request);
-    await authClient.refreshToken();
 
     try {
       const response = await callWithTokenRefresh(

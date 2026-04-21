@@ -35,10 +35,7 @@ export const NodeViewStatus = () => {
         {(!NODE_PROGRESS_STATUSES.includes(node.nodeStatus?.protocol?.state!) ||
           isSuperUser) && (
           <div css={styles.card}>
-            <NodeItems.NodeStatus
-              nodeStatus={node.nodeStatus}
-              view="card"
-            />
+            <NodeItems.NodeStatus nodeStatus={node.nodeStatus} view="card" />
             <h3 css={styles.cardLabel}>Node Status</h3>
           </div>
         )}
@@ -49,7 +46,7 @@ export const NodeViewStatus = () => {
                 nodeStatus={node.nodeStatus}
                 view="card"
               />
-              <h3 css={styles.cardLabel}>Online Health</h3>
+              <h3 css={styles.cardLabel}>Protocol Health</h3>
             </div>
           )}
         {Boolean(node.nodeStatus?.protocol?.state) &&

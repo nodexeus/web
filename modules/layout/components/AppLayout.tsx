@@ -16,7 +16,7 @@ import { useMqtt } from '@modules/mqtt';
 import { useHostList } from '@modules/host';
 import { useBilling, useStripeSetup } from '@modules/billing';
 import { MasterLayout } from '@modules/layout';
-import { ProgressBar } from '@shared/components';
+import { ProgressBar, ErrorBoundary } from '@shared/components';
 
 export type LayoutProps = {
   children: ReactNode;
@@ -89,7 +89,9 @@ const Layout = ({ children, isPageFlex, pageTitle }: LayoutProps) => {
       </Head>
       <ProgressBar />
       <Sidebar />
-      <Page isFlex={isPageFlex}>{children}</Page>
+      <Page isFlex={isPageFlex}>
+        <ErrorBoundary level="section">{children}</ErrorBoundary>
+      </Page>
     </>
   );
 };

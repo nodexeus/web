@@ -48,11 +48,13 @@ export const AdminOrgs = () => {
     page?: number,
     sortField?: OrgSortField,
     sortOrder?: SortOrder,
+    filters?: AdminListColumn[],
+    pageSizeParam?: number,
   ) => {
     const response = await organizationClient.listOrganizations(
       {
         currentPage: page! || 0,
-        itemsPerPage: pageSize,
+        itemsPerPage: pageSizeParam || pageSize,
       },
       [
         {

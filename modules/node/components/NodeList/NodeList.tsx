@@ -7,6 +7,7 @@ import { css, Global } from '@emotion/react';
 import {
   TableSkeleton,
   EmptyColumn,
+  FadeIn,
   PageTitle,
   PageTitleLabel,
   TableDynamic,
@@ -150,25 +151,27 @@ export const NodeList = () => {
           {nodeListLoadingState === 'initializing' ? (
             <TableSkeleton />
           ) : !Boolean(nodeList?.length) ? (
-            <EmptyColumn
-              title="No Nodes."
-              description={
-                isFiltered && isEmpty ? (
-                  'Reset filters.'
-                ) : (
-                  <div>
-                    <h3 css={spacing.bottom.mediumSmall}>
-                      Here is where your nodes will show, once you have some.
-                    </h3>
-                    <a onClick={() => router.push('/launch-node')}>
-                      Launch a node to get started
-                    </a>
-                  </div>
-                )
-              }
-            />
+            <FadeIn>
+              <EmptyColumn
+                title="No Nodes."
+                description={
+                  isFiltered && isEmpty ? (
+                    'Reset filters.'
+                  ) : (
+                    <div>
+                      <h3 css={spacing.bottom.mediumSmall}>
+                        Here is where your nodes will show, once you have some.
+                      </h3>
+                      <a onClick={() => router.push('/launch-node')}>
+                        Launch a node to get started
+                      </a>
+                    </div>
+                  )
+                }
+              />
+            </FadeIn>
           ) : (
-            <>
+            <FadeIn>
               <InfiniteScroll
                 dataLength={nodeList?.length!}
                 next={loadMore}
@@ -201,7 +204,7 @@ export const NodeList = () => {
                   </div>
                 )}
               </InfiniteScroll>
-            </>
+            </FadeIn>
           )}
         </div>
       </div>

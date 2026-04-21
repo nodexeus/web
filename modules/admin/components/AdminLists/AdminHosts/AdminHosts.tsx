@@ -136,11 +136,13 @@ export const AdminHosts = () => {
     page?: number,
     sortField?: number,
     sortOrder?: SortOrder,
+    filters?: AdminListColumn[],
+    pageSizeParam?: number,
   ) => {
     const response = await hostClient.listHosts(
       undefined,
       { keyword },
-      { currentPage: page!, itemsPerPage: pageSize },
+      { currentPage: page!, itemsPerPage: pageSizeParam || pageSize },
       [{ field: sortField!, order: sortOrder! }],
     );
     return {

@@ -35,6 +35,8 @@ export const AdminProtocols = () => {
     page?: number,
     sortField?: number,
     sortOrder?: SortOrder,
+    filters?: AdminListColumn[],
+    pageSizeParam?: number,
   ) => {
     const Filter: ProtocolFilter = {
       keyword,
@@ -43,7 +45,7 @@ export const AdminProtocols = () => {
     const response = await protocolClient.listProtocols(
       undefined,
       { keyword },
-      { currentPage: page!, itemsPerPage: pageSize },
+      { currentPage: page!, itemsPerPage: pageSizeParam || pageSize },
       [{ field: sortField!, order: sortOrder! }],
     );
     return {

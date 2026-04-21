@@ -42,5 +42,7 @@ export * from './TagList/TagList';
 export * from './Tags/Tags';
 export * from './Tooltip/Tooltip';
 export * from './Unauthorized/Unauthorized';
+export * from './ErrorBoundary/ErrorBoundary';
+export * from './FadeIn/FadeIn';
 
 export * from './DraggableList/utils/getItemStyle';

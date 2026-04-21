@@ -6,7 +6,12 @@ import { typo } from 'styles/utils.typography.styles';
 type Props = Partial<
   Pick<
     Node,
-    'displayName' | 'nodeName' | 'versionKey' | 'versionMetadata' | 'createdAt' | 'semanticVersion'
+    | 'displayName'
+    | 'nodeName'
+    | 'versionKey'
+    | 'versionMetadata'
+    | 'createdAt'
+    | 'semanticVersion'
   >
 >;
 
@@ -16,7 +21,6 @@ export const Info = ({
   versionKey,
   versionMetadata,
   createdAt,
-  semanticVersion,
 }: Props) => (
   <span css={styles.wrapper}>
     <NodeItems.ProtocolName
@@ -27,7 +31,6 @@ export const Info = ({
     <span css={[styles.rightColumn, typo.ellipsis]}>
       <NodeItems.DisplayName displayName={displayName} nodeName={nodeName} />
       <NodeItems.CreatedAt createdAt={createdAt} inGroup />
-      <NodeItems.Version semanticVersion={semanticVersion} />
     </span>
   </span>
 );
