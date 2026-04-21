@@ -16,7 +16,7 @@ export const renderNodeConfigControl = (
   const isDisabled = !property.dynamicValue;
 
   const handleTextboxChanged = (name: string, value: string) => {
-    onPropertyChanged(name, propertyGroup.keyGroup!, value);
+    onPropertyChanged(name, propertyGroup.keyGroup || '', value);
   };
 
   switch (property.uiType) {

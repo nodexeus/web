@@ -6,7 +6,7 @@ import IconDelete from '@public/assets/icons/common/Trash.svg';
 
 type Props = {
   isDisabled?: boolean;
-  onDelete: VoidFunction;
+  onDelete: () => Promise<void> | void;
 };
 
 export const AdminDetailHeaderDelete = ({ isDisabled, onDelete }: Props) => {
@@ -19,9 +19,14 @@ export const AdminDetailHeaderDelete = ({ isDisabled, onDelete }: Props) => {
     setStep(nextStep);
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     setIsDeleting(true);
-    onDelete();
+    try {
+      await onDelete();
+    } finally {
+      setIsDeleting(false);
+      setStep(1); // Reset to initial state
+    }
   };
 
   return (

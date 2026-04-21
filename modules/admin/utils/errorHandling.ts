@@ -1,543 +1,200 @@
-import { toast } from 'react-toastify';
-
 /**
- * Error types for admin list operations
+ * Error handling utilities for admin image property operations
  */
-export enum AdminListErrorType {
-  NETWORK_ERROR = 'NETWORK_ERROR',
-  API_ERROR = 'API_ERROR',
-  VALIDATION_ERROR = 'VALIDATION_ERROR',
-  FILTER_ERROR = 'FILTER_ERROR',
-  PAGINATION_ERROR = 'PAGINATION_ERROR',
-  STATE_SYNC_ERROR = 'STATE_SYNC_ERROR',
-  UNKNOWN_ERROR = 'UNKNOWN_ERROR',
-}
 
-/**
- * Error severity levels
- */
-export enum ErrorSeverity {
-  LOW = 'LOW',
-  MEDIUM = 'MEDIUM',
-  HIGH = 'HIGH',
-  CRITICAL = 'CRITICAL',
-}
-
-/**
- * Structured error information
- */
-export interface AdminListError {
-  id: string;
-  type: AdminListErrorType;
-  severity: ErrorSeverity;
+export interface AdminError {
+  code: string;
   message: string;
   details?: string;
-  timestamp: number;
-  context?: Record<string, any>;
-  originalError?: Error;
-  retryable: boolean;
-  userMessage: string;
+}
+
+export interface PropertyError extends AdminError {
+  field?: string;
 }
 
 /**
- * Retry configuration
+ * Parse gRPC error messages and convert them to user-friendly messages
  */
-export interface RetryConfig {
-  maxAttempts: number;
-  baseDelay: number;
-  maxDelay: number;
-  backoffMultiplier: number;
-  retryableErrors: AdminListErrorType[];
-}
-
-/**
- * Default retry configuration
- */
-export const DEFAULT_RETRY_CONFIG: RetryConfig = {
-  maxAttempts: 3,
-  baseDelay: 1000,
-  maxDelay: 10000,
-  backoffMultiplier: 2,
-  retryableErrors: [
-    AdminListErrorType.NETWORK_ERROR,
-    AdminListErrorType.API_ERROR,
-  ],
-};
-
-/**
- * Error recovery options
- */
-export interface ErrorRecoveryOptions {
-  showToast: boolean;
-  logError: boolean;
-  reportError: boolean;
-  fallbackValue?: any;
-  onError?: (error: AdminListError) => void;
-  onRetry?: (attempt: number) => void;
-  onRecovery?: (result: any) => void;
-}
-
-/**
- * Default error recovery options
- */
-export const DEFAULT_RECOVERY_OPTIONS: ErrorRecoveryOptions = {
-  showToast: true,
-  logError: true,
-  reportError: false,
-};
-
-/**
- * Creates a structured error from various error sources
- */
-export const createAdminListError = (
-  error: unknown,
-  type: AdminListErrorType = AdminListErrorType.UNKNOWN_ERROR,
-  context?: Record<string, any>,
-): AdminListError => {
-  const errorId = `error_${Date.now()}_${Math.random()
-    .toString(36)
-    .substr(2, 9)}`;
-  const timestamp = Date.now();
-
-  let message = 'An unknown error occurred';
-  let details: string | undefined;
-  let originalError: Error | undefined;
-  let severity = ErrorSeverity.MEDIUM;
-  let retryable = false;
-
-  // Extract error information based on error type
-  if (error instanceof Error) {
-    originalError = error;
-    message = error.message;
-    details = error.stack;
-  } else if (typeof error === 'string') {
-    message = error;
-  } else if (error && typeof error === 'object') {
-    // Handle API error responses
-    const errorObj = error as any;
-    if (errorObj.message) {
-      message = errorObj.message;
-    }
-    if (errorObj.details) {
-      details = errorObj.details;
-    }
-    if (errorObj.status || errorObj.statusCode) {
-      context = { ...context, status: errorObj.status || errorObj.statusCode };
-    }
+export const parsePropertyError = (error: any): PropertyError => {
+  const errorMessage = error?.message || error?.toString() || 'Unknown error occurred';
+  
+  // Handle specific backend error types
+  if (errorMessage.includes('DuplicateKey')) {
+    const keyMatch = errorMessage.match(/Property key '([^']+)' already exists/);
+    const key = keyMatch ? keyMatch[1] : 'unknown';
+    return {
+      code: 'DUPLICATE_KEY',
+      message: `Property key '${key}' already exists for this image`,
+      field: 'key',
+      details: 'Please choose a different property key or update the existing property instead.'
+    };
   }
-
-  // Determine severity and retryability based on error type
-  switch (type) {
-    case AdminListErrorType.NETWORK_ERROR:
-      severity = ErrorSeverity.HIGH;
-      retryable = true;
-      break;
-    case AdminListErrorType.API_ERROR:
-      severity = ErrorSeverity.HIGH;
-      retryable = true;
-      break;
-    case AdminListErrorType.VALIDATION_ERROR:
-      severity = ErrorSeverity.MEDIUM;
-      retryable = false;
-      break;
-    case AdminListErrorType.FILTER_ERROR:
-      severity = ErrorSeverity.LOW;
-      retryable = true;
-      break;
-    case AdminListErrorType.PAGINATION_ERROR:
-      severity = ErrorSeverity.LOW;
-      retryable = true;
-      break;
-    case AdminListErrorType.STATE_SYNC_ERROR:
-      severity = ErrorSeverity.MEDIUM;
-      retryable = true;
-      break;
-    default:
-      severity = ErrorSeverity.MEDIUM;
-      retryable = false;
+  
+  if (errorMessage.includes('PropertyInUse')) {
+    const matches = errorMessage.match(/Cannot delete property '([^']+)': (\d+) nodes/);
+    const key = matches ? matches[1] : 'unknown';
+    const count = matches ? matches[2] : 'some';
+    return {
+      code: 'PROPERTY_IN_USE',
+      message: `Cannot delete property '${key}'`,
+      details: `${count} nodes are currently using this image. Stop or migrate these nodes before deleting the property.`
+    };
   }
-
-  // Generate user-friendly messages
-  const userMessage = getUserFriendlyMessage(type, message, context);
-
+  
+  if (errorMessage.includes('InvalidConfiguration')) {
+    return {
+      code: 'INVALID_CONFIGURATION',
+      message: 'Invalid property configuration',
+      details: errorMessage.replace('Invalid property configuration: ', '')
+    };
+  }
+  
+  if (errorMessage.includes('ValidationFailed')) {
+    return {
+      code: 'VALIDATION_FAILED',
+      message: 'Property validation failed',
+      details: errorMessage.replace('Property validation failed: ', '')
+    };
+  }
+  
+  if (errorMessage.includes('InheritanceFailed')) {
+    return {
+      code: 'INHERITANCE_FAILED',
+      message: 'Property inheritance failed',
+      details: errorMessage.replace('Property inheritance failed: ', '')
+    };
+  }
+  
+  if (errorMessage.includes('RequiredProperty')) {
+    const keyMatch = errorMessage.match(/Cannot modify property '([^']+)'/);
+    const key = keyMatch ? keyMatch[1] : 'unknown';
+    return {
+      code: 'REQUIRED_PROPERTY',
+      message: `Cannot modify required property '${key}'`,
+      details: 'This property is required by the protocol and cannot be modified or deleted.'
+    };
+  }
+  
+  if (errorMessage.includes('PropertyNotFound')) {
+    const keyMatch = errorMessage.match(/Property '([^']+)' not found/);
+    const key = keyMatch ? keyMatch[1] : 'unknown';
+    return {
+      code: 'PROPERTY_NOT_FOUND',
+      message: `Property '${key}' not found`,
+      details: 'The property may have been deleted by another user.'
+    };
+  }
+  
+  if (errorMessage.includes('InvalidResourceConfig')) {
+    return {
+      code: 'INVALID_RESOURCE_CONFIG',
+      message: 'Invalid resource configuration',
+      details: errorMessage.replace('Invalid resource configuration: ', '')
+    };
+  }
+  
+  if (errorMessage.includes('GroupConflict')) {
+    const groupMatch = errorMessage.match(/Property group '([^']+)' has conflicting/);
+    const group = groupMatch ? groupMatch[1] : 'unknown';
+    return {
+      code: 'GROUP_CONFLICT',
+      message: `Property group '${group}' has conflicting configurations`,
+      details: 'Check that group properties have consistent settings and only one default per group.'
+    };
+  }
+  
+  // Handle network/connection errors
+  if (errorMessage.includes('fetch') || errorMessage.includes('network') || errorMessage.includes('connection')) {
+    return {
+      code: 'NETWORK_ERROR',
+      message: 'Network connection error',
+      details: 'Please check your internet connection and try again.'
+    };
+  }
+  
+  // Handle permission errors
+  if (errorMessage.includes('permission') || errorMessage.includes('unauthorized') || errorMessage.includes('forbidden')) {
+    return {
+      code: 'PERMISSION_ERROR',
+      message: 'Permission denied',
+      details: 'You do not have permission to perform this action.'
+    };
+  }
+  
+  // Default error
   return {
-    id: errorId,
-    type,
-    severity,
-    message,
-    details,
-    timestamp,
-    context,
-    originalError,
-    retryable,
-    userMessage,
+    code: 'UNKNOWN_ERROR',
+    message: 'An unexpected error occurred',
+    details: errorMessage
   };
 };
 
 /**
- * Generates user-friendly error messages
+ * Get user-friendly error message for toast notifications
  */
-const getUserFriendlyMessage = (
-  type: AdminListErrorType,
-  originalMessage: string,
-  context?: Record<string, any>,
-): string => {
-  switch (type) {
-    case AdminListErrorType.NETWORK_ERROR:
-      return 'Unable to connect to the server. Please check your internet connection and try again.';
-
-    case AdminListErrorType.API_ERROR:
-      if (context?.status === 404) {
-        return 'The requested data could not be found.';
-      }
-      if (context?.status === 403) {
-        return 'You do not have permission to access this data.';
-      }
-      if (context?.status === 500) {
-        return 'A server error occurred. Please try again later.';
-      }
-      return 'An error occurred while loading data. Please try again.';
-
-    case AdminListErrorType.VALIDATION_ERROR:
-      return 'The provided data is invalid. Please check your input and try again.';
-
-    case AdminListErrorType.FILTER_ERROR:
-      return 'An error occurred while applying filters. Please try adjusting your filters.';
-
-    case AdminListErrorType.PAGINATION_ERROR:
-      return 'An error occurred while navigating pages. Please try again.';
-
-    case AdminListErrorType.STATE_SYNC_ERROR:
-      return 'An error occurred while saving your preferences. Some settings may not be preserved.';
-
+export const getErrorToastMessage = (error: PropertyError): string => {
+  switch (error.code) {
+    case 'DUPLICATE_KEY':
+      return error.message;
+    case 'PROPERTY_IN_USE':
+      return `${error.message}. ${error.details}`;
+    case 'INVALID_CONFIGURATION':
+    case 'VALIDATION_FAILED':
+      return `${error.message}: ${error.details}`;
+    case 'INHERITANCE_FAILED':
+      return 'Property inheritance failed. Please try again.';
+    case 'REQUIRED_PROPERTY':
+      return error.message;
+    case 'PROPERTY_NOT_FOUND':
+      return `${error.message}. Please refresh the page.`;
+    case 'INVALID_RESOURCE_CONFIG':
+      return `${error.message}: ${error.details}`;
+    case 'GROUP_CONFLICT':
+      return error.message;
+    case 'NETWORK_ERROR':
+      return 'Network error. Please check your connection and try again.';
+    case 'PERMISSION_ERROR':
+      return 'You do not have permission to perform this action.';
     default:
-      return 'An unexpected error occurred. Please try again.';
+      return error.message || 'An unexpected error occurred';
   }
 };
 
 /**
- * Logs error details for debugging
+ * Determine if an error should show a retry button
  */
-export const logAdminListError = (error: AdminListError): void => {
-  const logData = {
-    errorId: error.id,
-    type: error.type,
-    severity: error.severity,
-    message: error.message,
-    timestamp: new Date(error.timestamp).toISOString(),
-    context: error.context,
-    userAgent: navigator.userAgent,
-    url: window.location.href,
-  };
-
-  // Log based on severity
-  switch (error.severity) {
-    case ErrorSeverity.CRITICAL:
-      console.error('🚨 CRITICAL Admin List Error:', logData);
-      break;
-    case ErrorSeverity.HIGH:
-      console.error('❌ HIGH Admin List Error:', logData);
-      break;
-    case ErrorSeverity.MEDIUM:
-      console.warn('⚠️ MEDIUM Admin List Error:', logData);
-      break;
-    case ErrorSeverity.LOW:
-      console.info('ℹ️ LOW Admin List Error:', logData);
-      break;
-  }
-
-  // Log original error if available
-  if (error.originalError) {
-    console.error('Original Error:', error.originalError);
-  }
-
-  // Log stack trace if available
-  if (error.details) {
-    console.error('Error Details:', error.details);
-  }
+export const isRetryableError = (error: PropertyError): boolean => {
+  return ['NETWORK_ERROR', 'UNKNOWN_ERROR', 'INHERITANCE_FAILED'].includes(error.code);
 };
 
 /**
- * Shows user-friendly error toast notifications
+ * Determine if an error should show additional details
  */
-export const showErrorToast = (error: AdminListError): void => {
-  const toastOptions = {
-    toastId: error.id,
-    autoClose:
-      error.severity === ErrorSeverity.CRITICAL ? (false as const) : 5000,
-  };
-
-  switch (error.severity) {
-    case ErrorSeverity.CRITICAL:
-      toast.error(error.userMessage, toastOptions);
-      break;
-    case ErrorSeverity.HIGH:
-      toast.error(error.userMessage, toastOptions);
-      break;
-    case ErrorSeverity.MEDIUM:
-      toast.warning(error.userMessage, toastOptions);
-      break;
-    case ErrorSeverity.LOW:
-      toast.info(error.userMessage, toastOptions);
-      break;
-  }
+export const shouldShowErrorDetails = (error: PropertyError): boolean => {
+  return !['NETWORK_ERROR', 'PERMISSION_ERROR'].includes(error.code) && !!error.details;
 };
 
 /**
- * Calculates delay for retry attempts with exponential backoff
+ * Get confirmation message for destructive operations
  */
-const calculateRetryDelay = (attempt: number, config: RetryConfig): number => {
-  const delay =
-    config.baseDelay * Math.pow(config.backoffMultiplier, attempt - 1);
-  return Math.min(delay, config.maxDelay);
+export const getDeleteConfirmationMessage = (propertyKey: string, propertyName?: string): string => {
+  const displayName = propertyName || propertyKey;
+  return `Are you sure you want to delete the property "${displayName}"?\n\nThis action cannot be undone and may affect nodes using this image.`;
 };
 
 /**
- * Determines if an error is retryable
+ * Get confirmation message for property inheritance operations
  */
-const isRetryableError = (
-  error: AdminListError,
-  config: RetryConfig,
-): boolean => {
-  return error.retryable && config.retryableErrors.includes(error.type);
-};
-
-/**
- * Executes a function with retry logic and error handling
- */
-export const withRetry = async <T>(
-  operation: () => Promise<T>,
-  operationName: string,
-  retryConfig: Partial<RetryConfig> = {},
-  recoveryOptions: Partial<ErrorRecoveryOptions> = {},
-): Promise<T> => {
-  const config = { ...DEFAULT_RETRY_CONFIG, ...retryConfig };
-  const options = { ...DEFAULT_RECOVERY_OPTIONS, ...recoveryOptions };
-
-  let lastError: AdminListError | null = null;
-
-  for (let attempt = 1; attempt <= config.maxAttempts; attempt++) {
-    try {
-      const result = await operation();
-
-      // If we had previous errors but now succeeded, log recovery
-      if (lastError && options.onRecovery) {
-        options.onRecovery(result);
-      }
-
-      return result;
-    } catch (error) {
-      // Create structured error
-      const adminError = createAdminListError(
-        error,
-        AdminListErrorType.API_ERROR,
-        { operation: operationName, attempt },
-      );
-
-      lastError = adminError;
-
-      // Log error if enabled
-      if (options.logError) {
-        logAdminListError(adminError);
-      }
-
-      // Call custom error handler
-      if (options.onError) {
-        options.onError(adminError);
-      }
-
-      // Check if we should retry
-      const shouldRetry =
-        attempt < config.maxAttempts && isRetryableError(adminError, config);
-
-      if (shouldRetry) {
-        // Call retry callback
-        if (options.onRetry) {
-          options.onRetry(attempt);
-        }
-
-        // Wait before retrying
-        const delay = calculateRetryDelay(attempt, config);
-        await new Promise((resolve) => setTimeout(resolve, delay));
-
-        continue;
-      }
-
-      // Final attempt failed, handle error
-      if (options.showToast) {
-        showErrorToast(adminError);
-      }
-
-      // Return fallback value if provided (including undefined)
-      if ('fallbackValue' in options) {
-        return options.fallbackValue;
-      }
-
-      // Re-throw the structured error
-      throw adminError;
-    }
-  }
-
-  // This should never be reached, but TypeScript requires it
-  throw lastError || new Error('Unexpected error in retry logic');
-};
-
-/**
- * Wraps an async operation with comprehensive error handling
- */
-export const withErrorHandling = async <T>(
-  operation: () => Promise<T>,
-  errorType: AdminListErrorType,
-  context?: Record<string, any>,
-  recoveryOptions: Partial<ErrorRecoveryOptions> = {},
-): Promise<T> => {
-  const options = { ...DEFAULT_RECOVERY_OPTIONS, ...recoveryOptions };
-
-  try {
-    return await operation();
-  } catch (error) {
-    // Create structured error
-    const adminError = createAdminListError(error, errorType, context);
-
-    // Log error if enabled
-    if (options.logError) {
-      logAdminListError(adminError);
-    }
-
-    // Show toast if enabled
-    if (options.showToast) {
-      showErrorToast(adminError);
-    }
-
-    // Call custom error handler
-    if (options.onError) {
-      options.onError(adminError);
-    }
-
-    // Return fallback value if provided (including undefined)
-    if ('fallbackValue' in options) {
-      return options.fallbackValue;
-    }
-
-    // Re-throw the structured error
-    throw adminError;
-  }
-};
-
-/**
- * Error recovery utilities for specific admin list operations
- */
-export const AdminListErrorRecovery = {
-  /**
-   * Handles filter operation errors with recovery
-   */
-  handleFilterError: async <T>(
-    operation: () => Promise<T>,
-    context?: Record<string, any>,
-  ): Promise<T | undefined> => {
-    return withErrorHandling(
-      operation,
-      AdminListErrorType.FILTER_ERROR,
-      context,
-      {
-        showToast: true,
-        logError: true,
-        fallbackValue: undefined as T | undefined,
-      },
-    );
-  },
-
-  /**
-   * Handles pagination operation errors with recovery
-   */
-  handlePaginationError: async <T>(
-    operation: () => Promise<T>,
-    context?: Record<string, any>,
-  ): Promise<T | undefined> => {
-    return withErrorHandling(
-      operation,
-      AdminListErrorType.PAGINATION_ERROR,
-      context,
-      {
-        showToast: true,
-        logError: true,
-        fallbackValue: undefined as T | undefined,
-      },
-    );
-  },
-
-  /**
-   * Handles API call errors with retry logic
-   */
-  handleApiCall: async <T>(
-    operation: () => Promise<T>,
-    operationName: string,
-    context?: Record<string, any>,
-  ): Promise<T | undefined> => {
-    return withRetry(operation, operationName, DEFAULT_RETRY_CONFIG, {
-      showToast: true,
-      logError: true,
-      fallbackValue: undefined as T | undefined,
-      onRetry: (attempt) => {
-        console.info(`Retrying ${operationName} (attempt ${attempt})`);
-      },
-    });
-  },
-
-  /**
-   * Handles state synchronization errors
-   */
-  handleStateSyncError: async <T>(
-    operation: () => Promise<T>,
-    context?: Record<string, any>,
-  ): Promise<T | undefined> => {
-    return withErrorHandling(
-      operation,
-      AdminListErrorType.STATE_SYNC_ERROR,
-      context,
-      {
-        showToast: false, // Don't show toast for sync errors as they're not critical
-        logError: true,
-        fallbackValue: undefined as T | undefined,
-      },
-    );
-  },
-};
-
-/**
- * Error boundary integration helpers
- */
-export const ErrorBoundaryHelpers = {
-  /**
-   * Creates an error handler for React error boundaries
-   */
-  createErrorBoundaryHandler:
-    (context?: Record<string, any>) =>
-    (error: Error, errorInfo: React.ErrorInfo) => {
-      const adminError = createAdminListError(
-        error,
-        AdminListErrorType.UNKNOWN_ERROR,
-        {
-          ...context,
-          componentStack: errorInfo.componentStack,
-        },
-      );
-
-      logAdminListError(adminError);
-
-      // Don't show toast in error boundary as it might cause infinite loops
-      // The error boundary UI will handle user communication
-    },
-
-  /**
-   * Creates reset keys for error boundary based on critical state
-   */
-  createResetKeys: (state: Record<string, any>): string[] => {
-    return [
-      state.page?.toString() || '1',
-      state.pageSize?.toString() || '24',
-      JSON.stringify(state.filters || {}),
-      state.search || '',
-    ];
-  },
+export const getInheritanceConfirmationMessage = (
+  sourceVersion: number,
+  targetCount: number,
+  syncType: 'newer' | 'all' | 'selected'
+): string => {
+  const typeDescription = {
+    newer: 'newer versions',
+    all: 'all related versions',
+    selected: 'selected versions'
+  }[syncType];
+  
+  return `This will copy properties from build version ${sourceVersion} to ${targetCount} ${typeDescription}.\n\nExisting properties with the same keys will be overwritten. Continue?`;
 };

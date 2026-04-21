@@ -10,6 +10,7 @@ import {
 } from '@modules/node';
 import { styles } from './NodeLauncherConfig.styles';
 import { NodeLauncherConfigAdvanced } from './NodeLauncherConfigAdvanced/NodeLauncherConfigAdvanced';
+import { NodeLauncherConfigRuntime } from './NodeLauncherConfigRuntime/NodeLauncherConfigRuntime';
 import { NodeLauncherConfigVariant } from './NodeLauncherConfigVariant/NodeLauncherConfigVariant';
 import { useRecoilValue } from 'recoil';
 
@@ -46,6 +47,12 @@ export const NodeLauncherConfig = ({
   );
 
   const selectedProtocol = useRecoilValue(nodeLauncherAtoms.selectedProtocol);
+  const nodeLauncher = useRecoilValue(nodeLauncherAtoms.nodeLauncher);
+
+  // Check if there are any runtime properties to show the Runtime Config section
+  const hasRuntimeProperties = nodeLauncher?.properties?.some(propertyGroup =>
+    propertyGroup.properties.some(property => property.dynamicValue)
+  ) ?? false;
 
   return (
     <NodeLauncherPanel>
@@ -55,6 +62,15 @@ export const NodeLauncherConfig = ({
         <NodeLauncherConfigVariant
           onVariantSegmentsChanged={onVariantSegmentsChanged}
         />
+
+        {(isVariantSegmentsLoaded || selectedProtocol?.key === 'legacy') && hasRuntimeProperties && (
+          <>
+            <FormHeader>Runtime Config</FormHeader>
+            <NodeLauncherConfigRuntime
+              onNodeConfigPropertyChanged={onNodeConfigPropertyChanged}
+            />
+          </>
+        )}
 
         {(isVariantSegmentsLoaded || selectedProtocol?.key === 'legacy') && (
           <>

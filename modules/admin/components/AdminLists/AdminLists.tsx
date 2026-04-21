@@ -3,6 +3,7 @@ import { AdminUsers } from './AdminUsers/AdminUsers';
 import { AdminHosts } from './AdminHosts/AdminHosts';
 import { AdminOrgs } from './AdminOrgs/AdminOrgs';
 import { AdminProtocols } from './AdminProtocols/AdminProtocols';
+import { AdminImages } from './AdminImages/AdminImages';
 import { styles } from './AdminLists.styles';
 import { useRouter } from 'next/router';
 
@@ -17,6 +18,7 @@ const views = [
   { name: 'hosts', component: <AdminHosts /> },
   { name: 'orgs', component: <AdminOrgs /> },
   { name: 'protocols', component: <AdminProtocols /> },
+  { name: 'images', component: <AdminImages /> },
 ];
 
 export const AdminLists = () => {

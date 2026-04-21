@@ -42,7 +42,7 @@ export const mapNodeListToGrid = (
         <TableGridCell
           key={node.nodeId}
           onCellClick={() => onCellClick(node.nodeId)}
-          titleText={escapeHtml(node.sqd_name! || node.displayName! || node.nodeName)}
+          titleText={escapeHtml(node.sqdName! || node.displayName! || node.nodeName)}
           {...({ titleStyle: styles.header })}
           titleStyle={styles.header}
           titleIcon={

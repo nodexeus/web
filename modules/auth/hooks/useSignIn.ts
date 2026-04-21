@@ -34,13 +34,15 @@ export function useSignIn() {
 
   const handleSuccess = async (
     accessToken: string,
+    refreshToken?: string,
     invitationId?: string,
     isInvited?: boolean,
   ) => {
-    setTokenValue(accessToken); // for grpc
+    setTokenValue(accessToken, refreshToken); // for grpc
 
     repository?.saveIdentity({
       accessToken,
+      refreshToken,
     });
 
     const tokenObject: any = readToken(accessToken);
@@ -54,6 +56,7 @@ export function useSignIn() {
         ...current,
         ...userData,
         accessToken,
+        refreshToken,
       }));
 
       if (invitationId && isInvited) {
@@ -98,7 +101,7 @@ export function useSignIn() {
       const response = await authClient.login(params.email, params.password);
 
       if (!isStatusResponse(response)) {
-        await handleSuccess(response!, invitationId, isInvited);
+        await handleSuccess(response.token, response.refresh, invitationId, isInvited);
       } else {
         throw new ApplicationError('LoginError', 'Login Error');
       }

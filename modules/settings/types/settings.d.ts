@@ -80,6 +80,7 @@ type AdminSettings = {
   protocols?: AdminSettingsItem;
   orgs?: AdminSettingsItem;
   users?: AdminSettingsItem;
+  images?: AdminSettingsItem;
 };
 
 type BillingSettings = {

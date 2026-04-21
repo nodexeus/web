@@ -21,6 +21,9 @@ export class IdentityRepository {
       const updatedUser = {
         ...data,
         ...user,
+        // Preserve tokens if they exist in the current data
+        accessToken: data.accessToken || user.accessToken,
+        refreshToken: data.refreshToken || user.refreshToken,
       };
       this._storage.save(this._key, updatedUser);
     }

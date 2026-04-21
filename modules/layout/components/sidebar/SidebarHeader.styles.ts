@@ -7,12 +7,17 @@ export const styles = {
     align-items: center;
     justify-content: space-between;
     height: 72px;
-    padding-left: 60px;
+    padding-left: 10px;
     border-bottom: 1px solid ${theme.colorBorder};
     box-sizing: border-box;
   `,
   wrapperSidebarOpen: css`
     padding-right: 16px;
+  `,
+  leftSection: css`
+    display: flex;
+    align-items: center;
+    gap: 16px;
   `,
   infoIcon: (theme: ITheme) => css`
     & path {

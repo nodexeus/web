@@ -20,11 +20,16 @@ export const NodeViewStatus = () => {
             <h3 css={styles.cardLabel}>Block Height</h3>
           </div>
         )}
-        {((node.apr != null && node.apr > -1) ||
-          isSuperUser) && (
+        {((node.apr != null && node.apr > -1 && node.protocolName === 'SQD')) && (
           <div css={styles.card}>
             <NodeItems.Apr apr={node.apr} view="card" />
-            <h3 css={styles.cardLabel}>APR</h3>
+            <h3 css={styles.cardLabel}>Current APR</h3>
+          </div>
+        )}
+        {((node.jailed != null && node.protocolName === 'SQD')) && (
+          <div css={styles.card}>
+            <NodeItems.Jailed jailed={node.jailed} view="card" />
+            <h3 css={styles.cardLabel}>Jailed Status</h3>
           </div>
         )}
         {(!NODE_PROGRESS_STATUSES.includes(node.nodeStatus?.protocol?.state!) ||
@@ -35,10 +40,7 @@ export const NodeViewStatus = () => {
           </div>
         )}
         {Boolean(node.nodeStatus?.protocol?.health) &&
-          (!NODE_PROGRESS_STATUSES.includes(
-            node.nodeStatus?.protocol?.state!,
-          ) ||
-            isSuperUser) && (
+          node.protocolName !== 'SQD' && (
             <div css={styles.card}>
               <NodeItems.ProtocolHealth
                 nodeStatus={node.nodeStatus}
@@ -48,8 +50,7 @@ export const NodeViewStatus = () => {
             </div>
           )}
         {Boolean(node.nodeStatus?.protocol?.state) &&
-          node.nodeStatus?.protocol?.state !== 'uploading' &&
-          node.nodeStatus?.protocol?.state !== 'downloading' && (
+          node.protocolName !== 'SQD' && (
             <div css={styles.card}>
               <NodeItems.ProtocolStatus
                 nodeStatus={node.nodeStatus}
