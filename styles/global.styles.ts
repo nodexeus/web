@@ -13,61 +13,61 @@ export const globalStyles = (theme: ITheme) => css`
   :root {
     /* --- PRIMARY --- */
     --color-primary: hsl(9, 81%, 53%);
-    --color-primary-o0: hsla(90, 84%, 75%, 0);
-    --color-primary-o30: hsla(8, 89.20%, 60.00%, 0.30);
+    --color-primary-o0: hsla(9, 81%, 53%, 0);
+    --color-primary-o30: hsla(8, 89.2%, 60%, 0.3);
 
     /* --- SECONDARY --- */
-    --color-secondary: hsla(30, 15.40%, 94.90%, 0.69);
+    --color-secondary: hsla(30, 15.4%, 94.9%, 0.69);
     --color-secondary-o0: hsla(29, 82%, 80%, 0);
-    --color-secondary-o30: hsla(30, 68.40%, 92.50%, 0.30);
+    --color-secondary-o30: hsla(30, 68.4%, 92.5%, 0.3);
 
     /* --- TERTIARY --- */
-    --color-tertiary: hsl(60, 5%, 85%);
+    --color-tertiary: hsl(240, 3%, 85%);
 
     /* --- TEXT --- */
-    --color-text-1: hsl(160, 4%, 14%);
-    --color-text-1-o20: hsla(160, 4%, 14%, 0.2);
-    --color-text-1-o30: hsla(160, 4%, 14%, 0.3);
-    --color-text-1-o70: hsla(160, 4%, 14%, 0.7);
-    --color-text-2: hsl(90, 2%, 37%);
-    --color-text-3: hsl(90, 3%, 65%);
-    --color-text-4: hsl(90, 5%, 81%);
-    --color-text-5: hsl(90, 29%, 97%);
-    --color-text-5-o3: hsla(90, 29%, 97%, 0.03);
-    --color-text-5-o10: hsla(90, 29%, 97%, 0.1);
-    --color-text-5-o20: hsla(90, 29%, 97%, 0.2);
-    --color-text-5-o30: hsla(90, 29%, 97%, 0.3);
+    --color-text-1: hsl(240, 3%, 10%);
+    --color-text-1-o20: hsla(240, 3%, 10%, 0.2);
+    --color-text-1-o30: hsla(240, 3%, 10%, 0.3);
+    --color-text-1-o70: hsla(240, 3%, 10%, 0.7);
+    --color-text-2: hsl(240, 2%, 37%);
+    --color-text-3: hsl(240, 2%, 65%);
+    --color-text-4: hsl(240, 2%, 81%);
+    --color-text-5: hsl(240, 5%, 95%);
+    --color-text-5-o3: hsla(240, 5%, 95%, 0.03);
+    --color-text-5-o10: hsla(240, 5%, 95%, 0.1);
+    --color-text-5-o20: hsla(240, 5%, 95%, 0.2);
+    --color-text-5-o30: hsla(240, 5%, 95%, 0.3);
 
     /* --- UTILITY --- */
-    --color-utility-success: hsl(143, 61%, 37%);
-    --color-utility-success-o10: hsla(143, 61%, 37%, 0.1);
+    --color-utility-success: hsl(160, 60%, 50%);
+    --color-utility-success-o10: hsla(160, 60%, 50%, 0.1);
     --color-utility-warning: hsl(0, 79%, 69%);
     --color-utility-warning-o10: hsla(0, 69%, 45%, 0.1);
     --color-utility-warning-o30: hsla(0, 69%, 45%, 0.3);
     --color-utility-note: hsl(40, 80%, 57%);
 
     /* --- BACKGROUND --- */
-    --color-overlay-background-1: hsl(160, 3%, 22%);
-    --color-overlay-background-2: hsl(180, 4%, 15%);
-    --color-overlay-background-2-o50: hsla(180, 4%, 15%, 0.5);
-    --color-background: hsla(0, 0%, 20%, 1);
+    --color-overlay-background-1: hsl(240, 3%, 18%);
+    --color-overlay-background-2: hsl(240, 3%, 12%);
+    --color-overlay-background-2-o50: hsla(240, 3%, 12%, 0.5);
+    --color-background: hsl(240, 3%, 9%);
 
     /* --- BORDER --- */
-    --color-border-1: hsl(160, 4%, 14%);
-    --color-border-2: hsl(90, 2%, 37%);
-    --color-border-3: hsl(0, 0%, 73%);
-    --color-border-4: hsl(0, 0%, 83%);
-    --color-border-5: hsl(90, 29%, 97%);
-    --color-border-5-o10: hsl(90, 29%, 97%, 0.1);
+    --color-border-1: hsl(240, 3%, 10%);
+    --color-border-2: hsl(240, 2%, 37%);
+    --color-border-3: hsl(240, 2%, 73%);
+    --color-border-4: hsl(240, 2%, 83%);
+    --color-border-5: hsl(240, 5%, 95%);
+    --color-border-5-o10: hsla(240, 5%, 95%, 0.1);
 
     /* --- INPUT --- */
-    --color-input-background: hsl(165, 4%, 20%);
-    --color-input-placeholder: hsl(0, 0%, 46%);
+    --color-input-background: hsl(240, 3%, 14%);
+    --color-input-placeholder: hsl(240, 2%, 46%);
 
     /* --- OTHERS --- */
-    --color-foreground-secondary: hsl(160, 4%, 14%); /* Black */
-    --color-foreground-secondary-o10: hsla(160, 4%, 14%, 0.1); /* Black */
-    --color-foreground-tertiary: hsl(160, 5%, 21%); /* Black 2 */
+    --color-foreground-secondary: hsl(240, 3%, 10%); /* Black */
+    --color-foreground-secondary-o10: hsla(240, 3%, 10%, 0.1); /* Black */
+    --color-foreground-tertiary: hsl(240, 3%, 16%); /* Black 2 */
     --color-shadow-o10: hsla(0, 0%, 0%, 0.1);
     --color-shadow-o80: hsla(0, 0%, 0%, 0.8);
   }
@@ -126,12 +126,14 @@ export const globalStyles = (theme: ITheme) => css`
     --letter-spacing-label: calc((1.25 / var(--root-font-size)) * 1rem);
 
     /* --- FONT FAMILIES --- */
-    --font-family-primary: 'Styrene A LC', -apple-system, BlinkMacSystemFont,
-      avenir next, avenir, segoe ui, helvetica neue, helvetica, Ubuntu, roboto,
-      noto, arial, sans-serif;
+    --font-family-primary:
+      'Styrene A LC', -apple-system, BlinkMacSystemFont, avenir next, avenir,
+      segoe ui, helvetica neue, helvetica, Ubuntu, roboto, noto, arial,
+      sans-serif;
 
     /* --- FONT WEIGHTS --- */
     --font-weight-normal: 400;
+    --font-weight-medium: 500;
     --font-weight-bold: 700;
 
     /** --- LEVELS --- */
@@ -175,6 +177,14 @@ export const globalStyles = (theme: ITheme) => css`
       font-weight: 700;
       font-display: swap;
       src: url('/assets/fonts/StyreneALC-Bold.woff2') format('woff2');
+    }
+
+    @font-face {
+      font-family: 'Styrene A LC';
+      font-style: normal;
+      font-weight: 500;
+      font-display: swap;
+      src: url('/assets/fonts/StyreneALC-Medium.otf') format('opentype');
     }
   }
 

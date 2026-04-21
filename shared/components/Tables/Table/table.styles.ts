@@ -1,4 +1,4 @@
-import { css } from '@emotion/react';
+import { css, keyframes } from '@emotion/react';
 import { ITheme } from 'types/theme';
 import { rgba } from 'polished';
 import { breakpoints } from 'styles/variables.styles';
@@ -27,70 +27,69 @@ export const styles = {
       height: ${rowHeight};
     }
   `,
-  table: (isResizable?: boolean) => (theme: ITheme) =>
-    css`
-      width: ${isResizable ? 'fit-content' : '100%'};
-      border-collapse: collapse;
-      ${isResizable && `table-layout: fixed;`}
+  table: (isResizable?: boolean) => (theme: ITheme) => css`
+    width: ${isResizable ? 'fit-content' : '100%'};
+    border-collapse: collapse;
+    ${isResizable && `table-layout: fixed;`}
 
-      @media ${breakpoints.fromXLrg} {
-        .show-on-hover {
-          opacity: 0;
-          transition: opacity 0.3s;
-        }
-
-        tr:hover .show-on-hover {
-          opacity: 1;
-        }
-
-        tr:hover {
-          opacity: 1;
-        }
+    @media ${breakpoints.fromXLrg} {
+      .show-on-hover {
+        opacity: 0;
+        transition: opacity 0.3s;
       }
 
-      & tbody tr {
+      tr:hover .show-on-hover {
+        opacity: 1;
+      }
+
+      tr:hover {
+        opacity: 1;
+      }
+    }
+
+    & tbody tr {
+      ::after {
+        content: '';
+        display: block;
+        position: absolute;
+        left: 0;
+        bottom: -1px;
+        width: 100%;
+        height: 1px;
+        transform: scaleX(0);
+        opacity: 0;
+        background: linear-gradient(
+          90deg,
+          ${rgba(theme.colorText || '#fff', 0)},
+          ${theme.colorText},
+          ${rgba(theme.colorText || '#fff', 0)}
+        );
+        transition: 0.4s;
+      }
+
+      &:hover {
         ::after {
-          content: '';
-          display: block;
-          position: absolute;
-          left: 0;
-          bottom: -1px;
-          width: 100%;
-          height: 1px;
-          transform: scaleX(0);
-          opacity: 0;
-          background: linear-gradient(
-            90deg,
-            ${rgba(theme.colorText || '#fff', 0)},
-            ${theme.colorText},
-            ${rgba(theme.colorText || '#fff', 0)}
-          );
-          transition: 0.4s;
-        }
-
-        &:hover {
-          ::after {
-            transform: scaleX(1);
-            opacity: 1;
-          }
-        }
-      }
-
-      tr path {
-        transition: 0.3s;
-      }
-
-      & tbody tr {
-        position: relative;
-        border-bottom: 1px solid ${theme.colorBorder};
-        opacity: 0.8;
-        transition: 0.3s;
-
-        &.active {
+          transform: scaleX(1);
           opacity: 1;
         }
       }
-    `,
+    }
+
+    tr path {
+      transition: 0.3s;
+    }
+
+    & tbody tr {
+      position: relative;
+      border-bottom: 1px solid ${theme.colorBorder};
+      opacity: 0.8;
+      transition: 0.3s;
+
+      &.active {
+        opacity: 1;
+      }
+    }
+  `,
   tableDynamic: (theme: ITheme) => css`
     th {
       padding: 0;
@@ -120,8 +119,32 @@ export const styles = {
     }
   `,
   tableSkeleton: css`
-    display: grid;
-    gap: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 8px 0;
+    animation: ${keyframes`
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    `} 0.35s ease-out both;
+  `,
+  tableSkeletonRow: css`
+    display: flex;
+    gap: 16px;
+    padding: 14px 4px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+
+    &:first-of-type {
+      padding-bottom: 12px;
+      margin-bottom: 4px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
   `,
   tableHoverIcon: (theme: ITheme) => css`
     @media ${breakpoints.fromXLrg} {

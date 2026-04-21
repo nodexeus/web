@@ -5,6 +5,7 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import {
   TableSkeleton,
   EmptyColumn,
+  FadeIn,
   Table,
   TableGrid,
 } from '@shared/components';
@@ -81,48 +82,52 @@ export const HostList = () => {
         {hostListLoadingState === 'initializing' ? (
           <TableSkeleton />
         ) : !Boolean(hostList?.length) ? (
-          <EmptyColumn
-            title="No Hosts."
-            description={
-              isFiltered && isEmpty ? (
-                'Nothing to see here.'
-              ) : (
-                <div>
-                  <h3 css={spacing.bottom.mediumSmall}>
-                    Here is where your hosts will show, once you have some.
-                  </h3>
-                </div>
-              )
-            }
-          />
+          <FadeIn>
+            <EmptyColumn
+              title="No Hosts."
+              description={
+                isFiltered && isEmpty ? (
+                  'Nothing to see here.'
+                ) : (
+                  <div>
+                    <h3 css={spacing.bottom.mediumSmall}>
+                      Here is where your hosts will show, once you have some.
+                    </h3>
+                  </div>
+                )
+              }
+            />
+          </FadeIn>
         ) : (
-          <InfiniteScroll
-            dataLength={hostList.length}
-            next={loadMore}
-            hasMore={hasMore}
-            style={{ overflow: 'hidden' }}
-            scrollThreshold={0.75}
-            loader={''}
-          >
-            {activeView === 'table' ? (
-              <Table
-                isLoading={hostListLoadingState}
-                headers={headers}
-                rows={rows}
-                queryParams={queryParams}
-                handleSort={updateSorting}
-                onRowClick={handleHostClick}
-              />
-            ) : (
-              <div css={styles.gridWrapper}>
-                <TableGrid
+          <FadeIn>
+            <InfiniteScroll
+              dataLength={hostList.length}
+              next={loadMore}
+              hasMore={hasMore}
+              style={{ overflow: 'hidden' }}
+              scrollThreshold={0.75}
+              loader={''}
+            >
+              {activeView === 'table' ? (
+                <Table
                   isLoading={hostListLoadingState}
-                  cells={cells!}
-                  entityName="hosts"
+                  headers={headers}
+                  rows={rows}
+                  queryParams={queryParams}
+                  handleSort={updateSorting}
+                  onRowClick={handleHostClick}
                 />
-              </div>
-            )}
-          </InfiniteScroll>
+              ) : (
+                <div css={styles.gridWrapper}>
+                  <TableGrid
+                    isLoading={hostListLoadingState}
+                    cells={cells!}
+                    entityName="hosts"
+                  />
+                </div>
+              )}
+            </InfiniteScroll>
+          </FadeIn>
         )}
       </div>
     </div>
