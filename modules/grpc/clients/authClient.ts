@@ -14,6 +14,7 @@ import {
   handleError,
   setTokenValue,
 } from '@modules/grpc';
+import { debugLog } from '@/lib/debug';
 
 export type NewPassword = {
   old_pwd: string;
@@ -23,6 +24,7 @@ export type NewPassword = {
 
 class AuthClient {
   private client: AuthServiceClient;
+  private refreshPromise: Promise<string | null> | null = null;
 
   constructor() {
     const channel = createChannel(
@@ -32,7 +34,10 @@ class AuthClient {
     this.client = createClient(AuthServiceDefinition, channel);
   }
 
-  async login(email: string, password: string): Promise<{token: string, refresh: string}> {
+  async login(
+    email: string,
+    password: string,
+  ): Promise<{ token: string; refresh: string }> {
     try {
       const response = await this.client.login({
         email,
@@ -70,7 +75,7 @@ class AuthClient {
 
   async listPermissions(userId: string, orgId: string): Promise<string[]> {
     const request = { userId, orgId, includeToken: true };
-    console.log('listPermissionsRequest', request);
+    debugLog('listPermissionsRequest', request);
     try {
       await this.refreshToken();
       const response = await this.client.listPermissions(request, getOptions());
@@ -112,33 +117,62 @@ class AuthClient {
   async refreshToken(): Promise<string | null> {
     const currentDateTimestamp = Math.round(new Date().getTime() / 1000);
     const identity = getIdentity();
-    const accessToken = identity.accessToken;
-    const refreshToken = identity.refreshToken;
-    const accessTokenExpiry = localStorage.getItem('accessTokenExpiry');
 
-    if (
-      !!accessTokenExpiry &&
-      currentDateTimestamp > +accessTokenExpiry! - 30
-    ) {
-      if (!refreshToken) {
-        console.error('No refresh token available');
-        return null;
+    // Derive expiry from the token itself — don't trust the separately cached value
+    let accessTokenExpiry: number | null = null;
+    try {
+      const payload = identity.accessToken?.split('.')[1];
+      if (payload) {
+        accessTokenExpiry = JSON.parse(atob(payload)).exp;
       }
-
-      try {
-        const refreshTokenResponse = await this.client.refresh({
-          token: accessToken,
-          refresh: refreshToken,
-        });
-        setTokenValue(refreshTokenResponse.token, refreshTokenResponse.refresh);
-        return refreshTokenResponse.token;
-      } catch (err) {
-        console.log('refreshTokenError', err);
-        return null;
-      }
+    } catch {
+      // If we can't decode, force a refresh
+      accessTokenExpiry = 0;
     }
 
-    return accessToken;
+    // If token is still valid, return it
+    if (accessTokenExpiry && currentDateTimestamp <= accessTokenExpiry - 30) {
+      return identity.accessToken;
+    }
+
+    // If a refresh is already in-flight, wait for it
+    if (this.refreshPromise) return this.refreshPromise;
+
+    // Start a new refresh
+    this.refreshPromise = this._doRefresh().finally(() => {
+      this.refreshPromise = null;
+    });
+
+    return this.refreshPromise;
+  }
+
+  private async _doRefresh(): Promise<string | null> {
+    try {
+      const response = await fetch('/api/auth/refresh', {
+        method: 'POST',
+        credentials: 'include', // sends httpOnly cookies
+      });
+
+      if (!response.ok) {
+        // Refresh failed — session is dead
+        localStorage.removeItem('identity');
+        window.location.href = '/login';
+        return null;
+      }
+
+      const data = await response.json();
+      if (data.accessToken) {
+        setTokenValue(data.accessToken);
+        return data.accessToken;
+      }
+
+      return null;
+    } catch (err) {
+      console.error('Token refresh failed');
+      localStorage.removeItem('identity');
+      window.location.href = '/login';
+      return null;
+    }
   }
 }
 

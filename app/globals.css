@@ -1,0 +1,94 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        --background: 220 14% 96%;
+        --foreground: 224 10% 15%;
+        --card: 0 0% 100%;
+        --card-foreground: 224 10% 15%;
+        --popover: 0 0% 100%;
+        --popover-foreground: 224 10% 15%;
+        --primary: 9 81% 53%;
+        --primary-foreground: 0 0% 100%;
+        --secondary: 220 13% 91%;
+        --secondary-foreground: 224 10% 15%;
+        --muted: 220 13% 91%;
+        --muted-foreground: 220 8% 46%;
+        --accent: 220 13% 91%;
+        --accent-foreground: 224 10% 15%;
+        --destructive: 0 72% 51%;
+        --destructive-foreground: 0 0% 100%;
+        --border: 220 13% 87%;
+        --input: 220 13% 87%;
+        --ring: 9 81% 53%;
+        --radius: 0.5rem;
+        --success: 160 60% 38%;
+        --success-foreground: 0 0% 100%;
+        --warning: 33 80% 50%;
+        --warning-foreground: 0 0% 100%;
+        --sidebar: 220 14% 98%;
+        --sidebar-foreground: 224 10% 15%;
+        --sidebar-border: 220 13% 90%;
+        --sidebar-accent: 220 13% 93%;
+        --sidebar-accent-foreground: 224 10% 15%;
+    }
+
+    .dark {
+        --background: 240 5% 6%;
+        --foreground: 240 5% 93%;
+        --card: 240 5% 8%;
+        --card-foreground: 240 5% 93%;
+        --popover: 240 5% 8%;
+        --popover-foreground: 240 5% 93%;
+        --primary: 9 81% 53%;
+        --primary-foreground: 0 0% 6%;
+        --secondary: 240 4% 16%;
+        --secondary-foreground: 240 5% 93%;
+        --muted: 240 4% 16%;
+        --muted-foreground: 240 3% 55%;
+        --accent: 240 4% 16%;
+        --accent-foreground: 240 5% 93%;
+        --destructive: 0 62% 45%;
+        --destructive-foreground: 0 0% 98%;
+        --border: 240 4% 16%;
+        --input: 240 4% 16%;
+        --ring: 9 81% 53%;
+        --radius: 0.5rem;
+        --success: 160 60% 45%;
+        --success-foreground: 0 0% 6%;
+        --warning: 33 80% 50%;
+        --warning-foreground: 0 0% 6%;
+        --sidebar: 240 5% 7%;
+        --sidebar-foreground: 240 5% 93%;
+        --sidebar-border: 240 4% 13%;
+        --sidebar-accent: 240 4% 12%;
+        --sidebar-accent-foreground: 240 5% 93%;
+    }
+}
+
+@layer base {
+    * {
+        @apply border-border;
+    }
+    body {
+        @apply bg-background text-foreground;
+        font-family:
+            'Styrene A LC',
+            -apple-system,
+            BlinkMacSystemFont,
+            avenir next,
+            avenir,
+            segoe ui,
+            helvetica neue,
+            helvetica,
+            Ubuntu,
+            roboto,
+            noto,
+            arial,
+            sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+}

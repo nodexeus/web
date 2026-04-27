@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/debug';
 import {
   Invoice,
   Org,
@@ -49,11 +50,11 @@ class OrganizationClient {
 
   async getOrganization(orgId: string): Promise<Org> {
     const request: OrgServiceGetRequest = { orgId };
-    console.log('getOrganizationRequest', request);
+    debugLog('getOrganizationRequest', request);
     try {
       await authClient.refreshToken();
       const response = await this.client.get(request, getOptions());
-      console.log('getOrganizationResponse', response.org);
+      debugLog('getOrganizationResponse', response.org);
       return response.org!;
     } catch (err) {
       return handleError(err);
@@ -66,9 +67,10 @@ class OrganizationClient {
     keyword?: string,
     isAdmin?: boolean,
     includePersonal?: boolean,
+    memberId?: string,
   ): Promise<OrgServiceListResponse> {
     const request: OrgServiceListRequest = {
-      memberId: !isAdmin ? getIdentity().userId : undefined,
+      memberId: memberId ?? (!isAdmin ? getIdentity().userId : undefined),
       offset: getPaginationOffset(
         pagination || { currentPage: 0, itemsPerPage: 1000 },
       ),
@@ -91,11 +93,11 @@ class OrganizationClient {
       request.search = search;
     }
 
-    console.log('listOrganizationsRequest', request);
+    debugLog('listOrganizationsRequest', request);
     try {
       await authClient.refreshToken();
       const response = await this.client.list(request, getOptions());
-      console.log('listOrganizationsResponse', response);
+      debugLog('listOrganizationsResponse', response);
       return response;
     } catch (err: any) {
       return handleError(err);
@@ -104,11 +106,11 @@ class OrganizationClient {
 
   async createOrganization(name: string): Promise<Org> {
     const request = { name };
-    console.log('createOrganizationRequest', request);
+    debugLog('createOrganizationRequest', request);
     try {
       await authClient.refreshToken();
       const response = await this.client.create(request, getOptions());
-      console.log('createOrganizationResponse', response);
+      debugLog('createOrganizationResponse', response);
       return response.org!;
     } catch (err) {
       return handleError(err);
@@ -140,7 +142,7 @@ class OrganizationClient {
       userId,
       orgId,
     };
-    console.log('removeMemberRequest', request);
+    debugLog('removeMemberRequest', request);
     try {
       await authClient.refreshToken();
       await this.client.removeMember(request, getOptions());

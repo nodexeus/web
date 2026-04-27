@@ -1,7 +1,17 @@
-import { readToken } from '@shared/utils/readToken';
 import { Metadata } from 'nice-grpc-web';
 import { authClient } from '../clients/authClient';
 import { UIPagination } from '../clients/nodeClient';
+import { friendlyError } from '@/lib/friendly-error';
+
+// Inline readToken to remove @shared dependency
+function readToken(token: string) {
+  try {
+    const middle = token.split('.')[1];
+    return JSON.parse(Buffer.from(middle, 'base64').toString());
+  } catch (err) {
+    console.error('readToken: failed to parse token');
+  }
+}
 
 export const getIdentity = () => {
   try {
@@ -26,30 +36,32 @@ export const getOptions = (token?: string) => {
 };
 
 export const handleError = (error: any, shouldRedirect: boolean = true) => {
-  // check if token has expired or user not found
-  if (
-    error?.message?.includes('JWT') ||
-    error?.message?.includes('TOKEN_EXPIRED') ||
-    ['UserService', 'NOT_FOUND'].every((msg) => error?.message?.includes(msg))
-  ) {
+  const msg = error?.message || '';
+
+  // Detect authentication failures — redirect to login so the user can re-authenticate
+  const isAuthError =
+    msg.includes('JWT') ||
+    msg.includes('TOKEN_EXPIRED') ||
+    msg.includes('UNAUTHENTICATED') ||
+    ['UserService', 'NOT_FOUND'].every((s) => msg.includes(s));
+
+  if (isAuthError) {
     localStorage.removeItem('identity');
     if (shouldRedirect) {
-      window.location.href = '/';
+      window.location.href = '/login';
     }
   }
 
-  throw new Error(error?.toString());
+  throw new Error(friendlyError(error));
 };
 
-export const setTokenValue = (token: string, refreshToken?: string) => {
-  localStorage.setItem('accessTokenExpiry', readToken(token).exp);
+export const setTokenValue = (token: string, _refreshToken?: string) => {
   const identity = getIdentity() || {}; // Use empty object if no identity exists
-  
+
   identity.accessToken = token;
-  if (refreshToken) {
-    identity.refreshToken = refreshToken;
-  }
-  
+  // Refresh token is stored in httpOnly cookie only — never in localStorage
+  delete identity.refreshToken;
+
   const updatedIdentityString = JSON.stringify(identity);
   window.localStorage.setItem('identity', updatedIdentityString);
 };
@@ -63,13 +75,6 @@ export const callWithTokenRefresh = async (
     return await method(...args, getOptions());
   } catch (err) {
     return handleError(err);
-  }
-};
-
-export const checkForRefreshTokenError = (message: string) => {
-  if (message.includes('Refresh')) {
-    localStorage.clear();
-    window.location.href = '';
   }
 };
 

@@ -27,7 +27,6 @@ ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN yarn build
 
-RUN env
 # Production image
 FROM node:20-alpine AS runner
 WORKDIR /app

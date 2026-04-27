@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/debug';
 import {
   User,
   UserServiceClient,
@@ -40,10 +41,10 @@ class UserClient {
 
   async getUser(userId: string): Promise<User> {
     try {
-      console.log('getUserRequest', { userId });
+      debugLog('getUserRequest', { userId });
       await authClient.refreshToken();
       const response = await this.client.get({ userId }, getOptions());
-      console.log('getUserResponse', response);
+      debugLog('getUserResponse', response);
       return response.user!;
     } catch (err) {
       return handleError(err);
@@ -76,11 +77,11 @@ class UserClient {
       };
     }
 
-    console.log('listUsersRequest', request);
+    debugLog('listUsersRequest', request);
     try {
       await authClient.refreshToken();
       const response = await this.client.list(request, getOptions());
-      console.log('listUsersResponse', response);
+      debugLog('listUsersResponse', response);
       return response;
     } catch (err) {
       return handleError(err);
