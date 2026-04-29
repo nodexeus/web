@@ -1,82 +1,96 @@
-# BlockVisor App Web
+# Nodexeus Web
 
-User-centric, intuitive dashboard designed for the seamless operation, management, and monitoring of Web3 nodes. It empowers users to deploy, control, and optimize decentralized network infrastructure effortlessly.
+User-centric dashboard for deploying, managing, and monitoring blockchain nodes and infrastructure. Built on Next.js 14 with the App Router.
 
 ## Getting Started
 
 ### Prerequisites
 
--   **Node.js:** v16.16.0 (see [.nvmrc](.nvmrc))
--   **Yarn:** Used for dependency management.
+- **Node.js:** v20 (see [.nvmrc](.nvmrc))
+- **Yarn:** Used for dependency management
 
-### Installation 📦
+### Installation
 
 1. Clone the repository:
 
     ```bash
-    git clone git@github.com:blockjoy/blockvisor-app-web.git
-    cd blockvisor-app-web
+    git clone git@github.com:nodexeus/web.git
+    cd web
     ```
 
-2. Install the dependencies
+2. Install dependencies:
+
     ```bash
     yarn install
     ```
 
-### Running the project 🚀
+3. Copy the environment template and fill in values:
 
--   **Development:**
+    ```bash
+    cp .env.template .env.local
+    ```
+
+### Running the project
+
+- **Development:**
 
     ```bash
     yarn dev
     ```
 
--   **Production:**
+- **Production build:**
 
     ```bash
     yarn build && yarn start
     ```
 
--   **Run the project locally on mobile device or tablet:**
+The project starts on `http://localhost:3000`.
 
-    ```
-    yarn dev
+## Environment Variables
 
-    http://192.168.1.13:8000/ or whatever ip address the project assigns
-    P.S. Watch out that your mobile/tablet device is on same network as your computer
-    ```
+Copy [.env.template](.env.template) to `.env.local` and configure:
 
-The project will start automatically on a localhost with port 3000.
+| Variable | Description |
+|---|---|
+| `NEXT_PUBLIC_API_URL` | gRPC-Web API endpoint |
+| `NEXT_PUBLIC_MQTT_URL` | MQTT WebSocket URL for real-time events |
+| `NEXT_PUBLIC_STRIPE_KEY` | Stripe publishable key (optional) |
+| `NEXT_PUBLIC_VERCEL_ENV` | Deployment environment (`production`, `development`) |
+| `NEXT_PUBLIC_SHORT_SHA` | Git commit SHA — injected automatically by CI |
 
-## Deployment 🗳️
+See [Next.js environment variable docs](https://nextjs.org/docs/app/building-your-application/configuring/environment-variables) for details.
 
-### Vercel
-
-The easiest way to deploy is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-[Docs: Next.js deployment](https://nextjs.org/docs/deployment)
+## Deployment
 
 ### Docker
 
-Build an image
+Build:
 
-```
-docker build --build-arg NEXT_PUBLIC_VERCEL_ENV=production \
---build-arg NEXT_PUBLIC_API_URL=value -t someTag .
-```
-
-Run
-
-```
- docker run -p 80:3000 someTag
+```bash
+docker build \
+  --build-arg NEXT_PUBLIC_VERCEL_ENV=production \
+  --build-arg NEXT_PUBLIC_API_URL=<value> \
+  --build-arg NEXT_PUBLIC_MQTT_URL=<value> \
+  --build-arg NEXT_PUBLIC_SHORT_SHA=$(git rev-parse --short HEAD) \
+  -t nodexeus/bv-web:latest .
 ```
 
-## Environment variables ✨
+Run:
 
-This project uses environment variables to manage configuration settings. The [.env.template](.env.template) file provides a blueprint of all the necessary environment variables. Copy this file to [.env.local](.env.local) and update the values accordingly for your local development.
+```bash
+docker run -p 3000:3000 nodexeus/bv-web:latest
+```
 
-[Docs: Environment variables](https://nextjs.org/docs/pages/building-your-application/configuring/environment-variables)
+### CI/CD
 
-## Documentation
+Pushes to `develop` and `main` trigger [bv-web-build.yml](.github/workflows/bv-web-build.yml), which builds and pushes images to Docker Hub for three environments: **demo**, **development**, and **production**.
 
-Visit https://nextjs.org/docs to view the full documentation.
+## Tech Stack
+
+- [Next.js 14](https://nextjs.org/) — App Router, server components, API routes
+- [React 18](https://react.dev/) — UI framework
+- [TanStack Query](https://tanstack.com/query) — Server state management
+- [Zustand](https://zustand-demo.pmnd.rs/) — Client state management
+- [Tailwind CSS](https://tailwindcss.com/) + [shadcn/ui](https://ui.shadcn.com/) — Styling
+- [nice-grpc-web](https://github.com/nicolo-ribaudo/nice-grpc) — gRPC-Web client
+- [MQTT.js](https://github.com/mqttjs/MQTT.js) — Real-time messaging

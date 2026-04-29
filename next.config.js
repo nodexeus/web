@@ -1,6 +1,43 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: false,
+  reactStrictMode: true,
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin',
+          },
+          {
+            key: 'X-DNS-Prefetch-Control',
+            value: 'on',
+          },
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=()',
+          },
+          ...(process.env.NODE_ENV === 'production'
+            ? [
+                {
+                  key: 'Strict-Transport-Security',
+                  value: 'max-age=63072000; includeSubDomains; preload',
+                },
+              ]
+            : []),
+        ],
+      },
+    ];
+  },
   // Development optimizations
   ...(process.env.NODE_ENV === 'development' && {
     // Faster builds in development
@@ -13,21 +50,6 @@ const nextConfig = {
   }),
   // Enforce consistent URL handling
   trailingSlash: false,
-  // Make server-side environment variables available to the API routes
-  serverRuntimeConfig: {
-    // Will only be available on the server side
-    apiUrl: process.env.API_URL,
-    mqttUrl: process.env.MQTT_URL,
-    stripeKey: process.env.STRIPE_KEY,
-  },
-  publicRuntimeConfig: {
-    // Will be available on both server and client
-    // Prioritize non-NEXT_PUBLIC_ variables, fall back to NEXT_PUBLIC_ variables
-    apiUrl: process.env.API_URL || process.env.NEXT_PUBLIC_API_URL,
-    mqttUrl: process.env.MQTT_URL || process.env.NEXT_PUBLIC_MQTT_URL,
-    stripeKey: process.env.STRIPE_KEY || process.env.NEXT_PUBLIC_STRIPE_KEY,
-    environment: process.env.NODE_ENV,
-  },
   webpack(config) {
     config.module.rules.push({
       test: /\.svg$/i,

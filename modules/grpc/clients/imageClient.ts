@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/debug';
 import { callWithTokenRefresh, handleError } from '@modules/grpc';
 import { createChannel, createClient } from 'nice-grpc-web';
 import {
@@ -30,7 +31,7 @@ class ImageClient {
   async getImage(
     request: ImageServiceGetImageRequest,
   ): Promise<ImageServiceGetImageResponse> {
-    console.log('getImageRequest', request);
+    debugLog('getImageRequest', request);
 
     try {
       const response: ImageServiceGetImageResponse = await callWithTokenRefresh(
@@ -38,7 +39,7 @@ class ImageClient {
         request,
       );
 
-      console.log('getImageResponse', response);
+      debugLog('getImageResponse', response);
       return response;
     } catch (err) {
       return handleError(err);
@@ -48,15 +49,16 @@ class ImageClient {
   async getImageDetails(
     request: ImageServiceGetImageDetailsRequest,
   ): Promise<ImageServiceGetImageDetailsResponse> {
-    console.log('getImageDetailsRequest', request);
+    debugLog('getImageDetailsRequest', request);
 
     try {
-      const response: ImageServiceGetImageDetailsResponse = await callWithTokenRefresh(
-        this.client.getImageDetails.bind(this.client),
-        request,
-      );
+      const response: ImageServiceGetImageDetailsResponse =
+        await callWithTokenRefresh(
+          this.client.getImageDetails.bind(this.client),
+          request,
+        );
 
-      console.log('getImageDetailsResponse', response);
+      debugLog('getImageDetailsResponse', response);
       return response;
     } catch (err) {
       return handleError(err);
@@ -66,15 +68,16 @@ class ImageClient {
   async addImageProperty(
     request: ImageServiceAddImagePropertyRequest,
   ): Promise<ImageServiceAddImagePropertyResponse> {
-    console.log('addImagePropertyRequest', request);
+    debugLog('addImagePropertyRequest', request);
 
     try {
-      const response: ImageServiceAddImagePropertyResponse = await callWithTokenRefresh(
-        this.client.addImageProperty.bind(this.client),
-        request,
-      );
+      const response: ImageServiceAddImagePropertyResponse =
+        await callWithTokenRefresh(
+          this.client.addImageProperty.bind(this.client),
+          request,
+        );
 
-      console.log('addImagePropertyResponse', response);
+      debugLog('addImagePropertyResponse', response);
       return response;
     } catch (err) {
       return handleError(err);
@@ -84,15 +87,16 @@ class ImageClient {
   async updateImageProperty(
     request: ImageServiceUpdateImagePropertyRequest,
   ): Promise<ImageServiceUpdateImagePropertyResponse> {
-    console.log('updateImagePropertyRequest', request);
+    debugLog('updateImagePropertyRequest', request);
 
     try {
-      const response: ImageServiceUpdateImagePropertyResponse = await callWithTokenRefresh(
-        this.client.updateImageProperty.bind(this.client),
-        request,
-      );
+      const response: ImageServiceUpdateImagePropertyResponse =
+        await callWithTokenRefresh(
+          this.client.updateImageProperty.bind(this.client),
+          request,
+        );
 
-      console.log('updateImagePropertyResponse', response);
+      debugLog('updateImagePropertyResponse', response);
       return response;
     } catch (err) {
       return handleError(err);
@@ -102,15 +106,16 @@ class ImageClient {
   async deleteImageProperty(
     request: ImageServiceDeleteImagePropertyRequest,
   ): Promise<ImageServiceDeleteImagePropertyResponse> {
-    console.log('deleteImagePropertyRequest', request);
+    debugLog('deleteImagePropertyRequest', request);
 
     try {
-      const response: ImageServiceDeleteImagePropertyResponse = await callWithTokenRefresh(
-        this.client.deleteImageProperty.bind(this.client),
-        request,
-      );
+      const response: ImageServiceDeleteImagePropertyResponse =
+        await callWithTokenRefresh(
+          this.client.deleteImageProperty.bind(this.client),
+          request,
+        );
 
-      console.log('deleteImagePropertyResponse', response);
+      debugLog('deleteImagePropertyResponse', response);
       return response;
     } catch (err) {
       return handleError(err);
@@ -120,15 +125,16 @@ class ImageClient {
   async copyImageProperties(
     request: ImageServiceCopyImagePropertiesRequest,
   ): Promise<ImageServiceCopyImagePropertiesResponse> {
-    console.log('copyImagePropertiesRequest', request);
+    debugLog('copyImagePropertiesRequest', request);
 
     try {
-      const response: ImageServiceCopyImagePropertiesResponse = await callWithTokenRefresh(
-        this.client.copyImageProperties.bind(this.client),
-        request,
-      );
+      const response: ImageServiceCopyImagePropertiesResponse =
+        await callWithTokenRefresh(
+          this.client.copyImageProperties.bind(this.client),
+          request,
+        );
 
-      console.log('copyImagePropertiesResponse', response);
+      debugLog('copyImagePropertiesResponse', response);
       return response;
     } catch (err) {
       return handleError(err);
@@ -138,15 +144,16 @@ class ImageClient {
   async listImages(
     request: ImageServiceListImagesRequest,
   ): Promise<ImageServiceListImagesResponse> {
-    console.log('listImagesRequest', request);
+    debugLog('listImagesRequest', request);
 
     try {
-      const response: ImageServiceListImagesResponse = await callWithTokenRefresh(
-        this.client.listImages.bind(this.client),
-        request,
-      );
+      const response: ImageServiceListImagesResponse =
+        await callWithTokenRefresh(
+          this.client.listImages.bind(this.client),
+          request,
+        );
 
-      console.log('listImagesResponse', response);
+      debugLog('listImagesResponse', response);
       return response;
     } catch (err) {
       return handleError(err);

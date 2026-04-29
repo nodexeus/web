@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/debug';
 import {
   Protocol,
   ProtocolSearch,
@@ -83,14 +84,14 @@ class ProtocolClient {
       request.search = search;
     }
 
-    console.log('listProtocolsRequest', request);
+    debugLog('listProtocolsRequest', request);
     try {
       const response: ProtocolServiceListProtocolsResponse =
         await callWithTokenRefresh(
           this.client.listProtocols.bind(this.client),
           request,
         );
-      console.log('listProtocolsResponse', response);
+      debugLog('listProtocolsResponse', response);
       return response;
     } catch (err: any) {
       return handleError(err);
@@ -102,14 +103,14 @@ class ProtocolClient {
       protocolId,
       orgId,
     };
-    console.log('getProtocolRequest', request);
+    debugLog('getProtocolRequest', request);
     try {
       const response: ProtocolServiceGetProtocolResponse =
         await callWithTokenRefresh(
           this.client.getProtocol.bind(this.client),
           request,
         );
-      console.log('getProtocolResponse', response);
+      debugLog('getProtocolResponse', response);
       return response.protocol!;
     } catch (err: any) {
       return handleError(err);
@@ -119,14 +120,14 @@ class ProtocolClient {
   async addVersion(
     request: ProtocolServiceAddVersionRequest,
   ): Promise<ProtocolVersion> {
-    console.log('addVersionRequest', request);
+    debugLog('addVersionRequest', request);
     try {
       const response: ProtocolServiceAddVersionResponse =
         await callWithTokenRefresh(
           this.client.addVersion.bind(this.client),
           request,
         );
-      console.log('addVersionResponse', response);
+      debugLog('addVersionResponse', response);
       return response.version!;
     } catch (err: any) {
       return handleError(err);
@@ -136,14 +137,14 @@ class ProtocolClient {
   async addProtocol(
     request: ProtocolServiceAddProtocolRequest,
   ): Promise<Protocol | undefined> {
-    console.log('addProtocolRequest', request);
+    debugLog('addProtocolRequest', request);
     try {
       const response: ProtocolServiceAddProtocolResponse =
         await callWithTokenRefresh(
           this.client.addProtocol.bind(this.client),
           request,
         );
-      console.log('addProtocolResponse', response);
+      debugLog('addProtocolResponse', response);
       return response.protocol;
     } catch (err: any) {
       return handleError(err);
@@ -153,14 +154,14 @@ class ProtocolClient {
   async updateProtocol(
     request: ProtocolServiceUpdateProtocolRequest,
   ): Promise<Protocol | undefined> {
-    console.log('updateProtocolRequest', request);
+    debugLog('updateProtocolRequest', request);
     try {
       const response: ProtocolServiceUpdateProtocolResponse =
         await callWithTokenRefresh(
           this.client.updateProtocol.bind(this.client),
           request,
         );
-      console.log('updateProtocolResponse', response);
+      debugLog('updateProtocolResponse', response);
       return response.protocol;
     } catch (err: any) {
       return handleError(err);
@@ -170,14 +171,14 @@ class ProtocolClient {
   async listVariants(
     request: ProtocolServiceListVariantsRequest,
   ): Promise<string[]> {
-    console.log('listVariantsRequest', request);
+    debugLog('listVariantsRequest', request);
     try {
       const response: ProtocolServiceListVariantsResponse =
         await callWithTokenRefresh(
           this.client.listVariants.bind(this.client),
           request,
         );
-      console.log('listVariantsResponse', response);
+      debugLog('listVariantsResponse', response);
       return response.variantKeys;
     } catch (err: any) {
       return handleError(err);
@@ -187,14 +188,14 @@ class ProtocolClient {
   async listVersions(
     request: ProtocolServiceListVersionsRequest,
   ): Promise<ProtocolVersion[]> {
-    console.log('listVersionsRequest', request);
+    debugLog('listVersionsRequest', request);
     try {
       const response: ProtocolServiceListVersionsResponse =
         await callWithTokenRefresh(
           this.client.listVersions.bind(this.client),
           request,
         );
-      console.log('listVersionsResponse', response);
+      debugLog('listVersionsResponse', response);
       return response.protocolVersions;
     } catch (err: any) {
       return handleError(err);
@@ -204,14 +205,14 @@ class ProtocolClient {
   async updateVersion(
     request: ProtocolServiceUpdateVersionRequest,
   ): Promise<Protocol | undefined> {
-    console.log('updateVersionRequest', request);
+    debugLog('updateVersionRequest', request);
     try {
       const response: ProtocolServiceUpdateProtocolResponse =
         await callWithTokenRefresh(
           this.client.updateVersion.bind(this.client),
           request,
         );
-      console.log('updateVersionResponse', response);
+      debugLog('updateVersionResponse', response);
       return response.protocol;
     } catch (err: any) {
       return handleError(err);
@@ -221,14 +222,14 @@ class ProtocolClient {
   async getPricing(
     request: ProtocolServiceGetPricingRequest,
   ): Promise<Amount | null> {
-    console.log('getPricingRequest', request);
+    debugLog('getPricingRequest', request);
     try {
       const response: ProtocolServiceGetPricingResponse =
         await callWithTokenRefresh(
           this.client.getPricing.bind(this.client),
           request,
         );
-      console.log('getPricingResponse', response);
+      debugLog('getPricingResponse', response);
       return response.billingAmount?.amount ?? null;
     } catch (err: any) {
       return handleError(err);

@@ -22,6 +22,7 @@ import {
   handleError,
 } from '@modules/grpc';
 import { createChannel, createClient } from 'nice-grpc-web';
+import { debugLog } from '@/lib/debug';
 import {
   SearchOperator,
   SortOrder,
@@ -34,6 +35,7 @@ export type UIHostFilterCriteria = {
   hostSpace?: [number, number];
   keyword?: string;
   orgIds?: string[];
+  bvVersions?: string[];
 };
 
 export type HostPagination = {
@@ -56,8 +58,8 @@ class HostClient {
     sort?: HostSort[],
   ): Promise<HostServiceListHostsResponse> {
     const request: HostServiceListHostsRequest = {
-      orgIds: orgId ? [orgId!] : filter?.orgIds ?? [],
-      bvVersions: [],
+      orgIds: orgId ? [orgId!] : (filter?.orgIds ?? []),
+      bvVersions: filter?.bvVersions ?? [],
       offset: getPaginationOffset(pagination!),
       limit: pagination?.itemsPerPage!,
       sort: sort || [
@@ -79,14 +81,14 @@ class HostClient {
       request.search = search;
     }
 
-    console.log('listHostsRequest', request);
+    debugLog('listHostsRequest', request);
 
     try {
       const response = await callWithTokenRefresh(
         this.client.listHosts.bind(this.client),
         request,
       );
-      console.log('listHostsResponse', response);
+      debugLog('listHostsResponse', response);
       return response;
     } catch (err) {
       return handleError(err);
@@ -95,13 +97,13 @@ class HostClient {
 
   async getHost(hostId: string): Promise<Host> {
     const request: HostServiceGetHostRequest = { hostId };
-    console.log('getHostRequest', request);
+    debugLog('getHostRequest', request);
     try {
       const response = await callWithTokenRefresh(
         this.client.getHost.bind(this.client),
         request,
       );
-      console.log('getHostResponse', response);
+      debugLog('getHostResponse', response);
       return response.host!;
     } catch (err) {
       return handleError(err);
@@ -109,13 +111,13 @@ class HostClient {
   }
 
   async updateHost(request: HostServiceUpdateHostRequest): Promise<Host> {
-    console.log('updateHostRequest', request);
+    debugLog('updateHostRequest', request);
     try {
       const response = await callWithTokenRefresh(
         this.client.updateHost.bind(this.client),
         request,
       );
-      console.log('updateHostResponse', response);
+      debugLog('updateHostResponse', response);
       return response;
     } catch (err) {
       return handleError(err);
@@ -128,7 +130,7 @@ class HostClient {
       imageId,
     };
 
-    console.log('listRegionsRequest', request);
+    debugLog('listRegionsRequest', request);
 
     try {
       const response: HostServiceListRegionsResponse =
@@ -136,7 +138,7 @@ class HostClient {
           this.client.listRegions.bind(this.client),
           request,
         );
-      console.log('listRegionsResponse', response);
+      debugLog('listRegionsResponse', response);
       return response.regions;
     } catch (err) {
       return handleError(err);

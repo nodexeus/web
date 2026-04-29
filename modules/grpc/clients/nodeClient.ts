@@ -1,4 +1,3 @@
-import { useConfig } from '@shared/context/ConfigProvider';
 import {
   Node,
   NodeServiceCreateRequest,
@@ -13,7 +12,7 @@ import {
   NodeServiceGetRequest,
   NodeServiceDeleteRequest,
 } from '../library/blockjoy/v1/node';
-import { NodeReport } from '../library/blockjoy/common/v1/node';
+import { debugLog } from '@/lib/debug';
 import {
   SearchOperator,
   SortOrder,
@@ -22,19 +21,11 @@ import {
   authClient,
   callWithTokenRefresh,
   createSearch,
-  getIdentity,
   getOptions,
   getPaginationOffset,
   handleError,
 } from '@modules/grpc';
 import { createChannel, createClient } from 'nice-grpc-web';
-
-export type UINode = {
-  orgId: string;
-  protocolId: string;
-  version?: string;
-  network: string;
-};
 
 export type UINodeFilterCriteria = {
   protocol?: string[];
@@ -54,25 +45,6 @@ export type UINodeFilterCriteria = {
 export type UIPagination = {
   currentPage: number;
   itemsPerPage: number;
-};
-
-export type CustomNodeReport = NodeReport & { node: Node };
-
-export const useNodeClient = () => {
-  const { config } = useConfig();
-
-  // Create the client only when config is available
-  const getClient = () => {
-    if (!config.apiUrl) {
-      console.warn('API URL not available in config');
-      return null;
-    }
-    const channel = createChannel(config.apiUrl);
-    const client = createClient(NodeServiceDefinition, channel);
-    return new NodeClient(client);
-  };
-
-  return { getClient };
 };
 
 class NodeClient {
@@ -133,14 +105,14 @@ class NodeClient {
       request.search = search;
     }
 
-    console.log('listNodesRequest', request);
+    debugLog('listNodesRequest', request);
 
     try {
       const response = await callWithTokenRefresh(
         this.client.list.bind(this.client),
         request,
       );
-      console.log('listNodesResponse', response);
+      debugLog('listNodesResponse', response);
       return response;
     } catch (err) {
       return handleError(err);
@@ -172,14 +144,14 @@ class NodeClient {
       ],
     };
 
-    console.log('listNodesByHostRequest', request);
+    debugLog('listNodesByHostRequest', request);
 
     try {
       const response = await callWithTokenRefresh(
         this.client.list.bind(this.client),
         request,
       );
-      console.log('listNodesByHostResponse', response);
+      debugLog('listNodesByHostResponse', response);
       return response;
     } catch (err) {
       return handleError(err);
@@ -188,7 +160,7 @@ class NodeClient {
 
   async getNode(nodeId: string): Promise<Node> {
     const request: NodeServiceGetRequest = { nodeId };
-    console.log('getNodeRequest', request);
+    debugLog('getNodeRequest', request);
 
     try {
       const response = await callWithTokenRefresh(
@@ -196,7 +168,7 @@ class NodeClient {
         { nodeId },
       );
 
-      console.log('getNodeResponse', response.node);
+      debugLog('getNodeResponse', response.node);
       return response.node!;
     } catch (err) {
       return handleError(err);
@@ -204,11 +176,11 @@ class NodeClient {
   }
 
   async createNode(node: NodeServiceCreateRequest): Promise<Node> {
-    console.log('createNodeRequest', node);
+    debugLog('createNodeRequest', node);
     try {
       await authClient.refreshToken();
       const response = await this.client.create(node, getOptions());
-      console.log('createNodeResponse', response.nodes);
+      debugLog('createNodeResponse', response.nodes);
       return response.nodes[0];
     } catch (err) {
       return handleError(err);
@@ -216,7 +188,7 @@ class NodeClient {
   }
 
   async updateNode(node: NodeServiceUpdateConfigRequest): Promise<void> {
-    console.log('updateNodeRequest', node);
+    debugLog('updateNodeRequest', node);
     try {
       await authClient.refreshToken();
       await this.client.updateConfig(node, getOptions());
@@ -227,7 +199,7 @@ class NodeClient {
 
   async deleteNode(nodeId: string): Promise<void> {
     const request: NodeServiceDeleteRequest = { nodeId };
-    console.log('deleteNodeRequest', request);
+    debugLog('deleteNodeRequest', request);
     try {
       await authClient.refreshToken();
       await this.client.delete(request, getOptions());
@@ -268,49 +240,7 @@ class NodeClient {
       await authClient.refreshToken();
       await this.client.upgradeImage({ nodeIds, imageId }, getOptions());
     } catch (err) {
-      console.log('upgradeNodeError', err);
-      return handleError(err);
-    }
-  }
-
-  async reportProblem(nodeId: string, message: string): Promise<void> {
-    try {
-      const { nodeId: userId } = getIdentity();
-
-      const request = { userId, nodeId, message };
-
-      console.log('reportProblemRequest', request);
-
-      await authClient.refreshToken();
-
-      const response = await this.client.reportError(
-        { nodeId, message },
-        getOptions(),
-      );
-
-      console.log('reportProblemResponse', response);
-    } catch (err) {
-      return handleError(err);
-    }
-  }
-
-  async listNodeProblems(): Promise<CustomNodeReport[]> {
-    try {
-      await authClient.refreshToken();
-
-      const response = await this.client.list({ limit: 1000 }, getOptions());
-
-      const { nodes } = response;
-
-      const reports = nodes.flatMap((node) =>
-        node.reports.map((report) => ({
-          ...report,
-          node,
-        })),
-      );
-
-      return reports;
-    } catch (err) {
+      debugLog('upgradeNodeError', err);
       return handleError(err);
     }
   }
