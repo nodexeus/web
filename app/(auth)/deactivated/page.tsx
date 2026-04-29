@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { userClient } from '@modules/grpc/clients/userClient';
-import { AlertTriangle, Loader2 } from 'lucide-react';
+import Link from 'next/link';
+import { AlertTriangle, Loader2, UserX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export default function DeactivatedPage() {
