@@ -370,7 +370,7 @@ function ActionsDropdown({
       label: 'Admin Details',
       icon: SlidersHorizontal,
       onClick: () => {
-        window.location.href = `/admin?name=nodes&id=${node.nodeId}`;
+        window.location.href = `/admin/nodes/${node.nodeId}`;
       },
     });
   }
