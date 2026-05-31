@@ -20,8 +20,16 @@ function policyLabel(policy: LbPolicy): string {
       return 'Round Robin';
     case LbPolicy.LB_POLICY_LEAST_CONN:
       return 'Least Connections';
+    case LbPolicy.LB_POLICY_FIRST:
+      return 'First Available';
+    case LbPolicy.LB_POLICY_RANDOM:
+      return 'Random';
+    case LbPolicy.LB_POLICY_IP_HASH:
+      return 'IP Hash';
+    case LbPolicy.LB_POLICY_URI_HASH:
+      return 'URI Hash';
     default:
-      return 'Unknown';
+      return 'Unspecified';
   }
 }
 

@@ -29,6 +29,8 @@ import {
   Server,
   Tag,
   Link2,
+  Pencil,
+  X,
 } from 'lucide-react';
 
 // ─── Helpers ──────────────────────────────────────────────────────
@@ -39,9 +41,139 @@ function policyLabel(policy: LbPolicy): string {
       return 'Round Robin';
     case LbPolicy.LB_POLICY_LEAST_CONN:
       return 'Least Connections';
+    case LbPolicy.LB_POLICY_FIRST:
+      return 'First Available';
+    case LbPolicy.LB_POLICY_RANDOM:
+      return 'Random';
+    case LbPolicy.LB_POLICY_IP_HASH:
+      return 'IP Hash';
+    case LbPolicy.LB_POLICY_URI_HASH:
+      return 'URI Hash';
     default:
-      return 'Unknown';
+      return 'Unspecified';
   }
+}
+
+const POLICY_OPTIONS: { value: LbPolicy; label: string }[] = [
+  { value: LbPolicy.LB_POLICY_ROUND_ROBIN, label: 'Round Robin' },
+  { value: LbPolicy.LB_POLICY_LEAST_CONN, label: 'Least Connections' },
+  { value: LbPolicy.LB_POLICY_FIRST, label: 'First Available' },
+  { value: LbPolicy.LB_POLICY_RANDOM, label: 'Random' },
+  { value: LbPolicy.LB_POLICY_IP_HASH, label: 'IP Hash' },
+  { value: LbPolicy.LB_POLICY_URI_HASH, label: 'URI Hash' },
+];
+
+// ─── Edit Policy Control ──────────────────────────────────────────
+// Renders only the editing UI (select + Save + Cancel).
+// PolicyRow below manages the pencil trigger and visibility.
+
+function EditPolicyControl({
+  lbId,
+  currentPolicy,
+  onClose,
+}: {
+  lbId: string;
+  currentPolicy: LbPolicy;
+  onClose: () => void;
+}) {
+  const queryClient = useQueryClient();
+  const [selected, setSelected] = useState<LbPolicy>(currentPolicy);
+
+  const updatePolicyMutation = useMutation({
+    mutationFn: (policy: LbPolicy) =>
+      loadBalancerClient.updateLoadBalancer({ lbId, policy }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['loadBalancer', lbId] });
+      queryClient.invalidateQueries({ queryKey: ['loadBalancers'] });
+      onClose();
+    },
+  });
+
+  function handleCancel() {
+    updatePolicyMutation.reset();
+    onClose();
+  }
+
+  return (
+    <div className="space-y-1.5">
+      <div className="flex items-center gap-2">
+        <select
+          value={selected}
+          onChange={(e) => setSelected(Number(e.target.value) as LbPolicy)}
+          disabled={updatePolicyMutation.isPending}
+          className="h-8 rounded-md border border-input bg-background px-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
+        >
+          {POLICY_OPTIONS.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
+        <Button
+          size="sm"
+          className="h-8 px-3 text-xs"
+          disabled={updatePolicyMutation.isPending || selected === currentPolicy}
+          onClick={() => updatePolicyMutation.mutate(selected)}
+        >
+          {updatePolicyMutation.isPending ? (
+            <Loader2 className="h-3 w-3 animate-spin" />
+          ) : (
+            'Save'
+          )}
+        </Button>
+        <button
+          onClick={handleCancel}
+          disabled={updatePolicyMutation.isPending}
+          className="inline-flex h-8 w-8 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:opacity-50"
+          title="Cancel"
+        >
+          <X className="h-3.5 w-3.5" />
+        </button>
+      </div>
+      {updatePolicyMutation.isError && (
+        <p className="text-xs text-destructive">
+          {friendlyError(updatePolicyMutation.error)}
+        </p>
+      )}
+    </div>
+  );
+}
+
+// ─── Policy row (label + inline edit) ────────────────────────────
+
+function PolicyRow({ lbId, policy }: { lbId: string; policy: LbPolicy }) {
+  const [policyEditing, setPolicyEditing] = useState(false);
+
+  return (
+    <div className="group flex items-start gap-3 rounded-md px-3 py-2.5 transition-colors hover:bg-accent/30">
+      <Tag className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+      <div className="min-w-0 flex-1">
+        <p className="text-xs text-muted-foreground">Policy</p>
+        <div className="mt-0.5">
+          {policyEditing ? (
+            <EditPolicyControl
+              lbId={lbId}
+              currentPolicy={policy}
+              onClose={() => setPolicyEditing(false)}
+            />
+          ) : (
+            <div className="flex items-center gap-1">
+              <p className="text-sm">{policyLabel(policy)}</p>
+              <span className="opacity-0 transition-opacity group-hover:opacity-100">
+                <button
+                  onClick={() => setPolicyEditing(true)}
+                  className="ml-1 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                  title="Edit policy"
+                >
+                  <Pencil className="h-3 w-3" />
+                </button>
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function typeLabel(type: LbType): string {
@@ -388,11 +520,8 @@ export default function LoadBalancerDetailPage() {
                   mono
                   copyable
                 />
-                <DetailRow
-                  icon={Tag}
-                  label="Policy"
-                  value={policyLabel(lb.policy)}
-                />
+                {/* Policy row with inline edit */}
+                <PolicyRow lbId={lb.lbId} policy={lb.policy} />
                 <DetailRow
                   icon={Network}
                   label="Type"

@@ -189,6 +189,18 @@ export default function LoadBalancersPage() {
                 <option value={LbPolicy.LB_POLICY_LEAST_CONN}>
                   Least Connections
                 </option>
+                <option value={LbPolicy.LB_POLICY_FIRST}>
+                  First Available
+                </option>
+                <option value={LbPolicy.LB_POLICY_RANDOM}>
+                  Random
+                </option>
+                <option value={LbPolicy.LB_POLICY_IP_HASH}>
+                  IP Hash
+                </option>
+                <option value={LbPolicy.LB_POLICY_URI_HASH}>
+                  URI Hash
+                </option>
               </select>
             </div>
           </div>
