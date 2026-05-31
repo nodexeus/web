@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { loadBalancerClient } from '@modules/grpc/clients/loadBalancerClient';
-import { nodeClient } from '@modules/grpc/clients/nodeClient';
 import { friendlyError } from '@/lib/friendly-error';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -96,6 +95,7 @@ function AddMemberForm({
       loadBalancerClient.addMember(lbId, member),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['loadBalancer', lbId] });
+      queryClient.invalidateQueries({ queryKey: ['loadBalancers'] });
       // reset form
       setNodeId('');
       setHost('');
@@ -290,6 +290,7 @@ export function LoadBalancerMembers({
       loadBalancerClient.removeMember(lbId, memberId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['loadBalancer', lbId] });
+      queryClient.invalidateQueries({ queryKey: ['loadBalancers'] });
       setRemovingId(null);
     },
     onError: () => {
