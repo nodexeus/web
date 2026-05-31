@@ -27,6 +27,7 @@ import {
   MessageCircle,
   LayoutDashboard,
   ShieldCheck,
+  Network,
 } from 'lucide-react';
 
 const navSections = [
@@ -36,6 +37,7 @@ const navSections = [
       { name: 'Nodes', href: '/nodes', icon: Server },
       { name: 'Launch Node', href: '/launch-node', icon: Rocket },
       { name: 'Hosts', href: '/hosts', icon: HardDrive },
+      { name: 'Load Balancers', href: '/load-balancers', icon: Network },
     ],
   },
   {
