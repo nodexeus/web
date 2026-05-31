@@ -52,11 +52,13 @@ Copy [.env.template](.env.template) to `.env.local` and configure:
 
 | Variable | Description |
 |---|---|
-| `NEXT_PUBLIC_API_URL` | gRPC-Web API endpoint |
-| `NEXT_PUBLIC_MQTT_URL` | MQTT WebSocket URL for real-time events |
-| `NEXT_PUBLIC_STRIPE_KEY` | Stripe publishable key (optional) |
+| `NEXT_PUBLIC_API_URL` | gRPC-Web API endpoint (used by the browser client) |
+| `API_URL` | Server-side fallback for the gRPC API URL (used by the BFF auth routes) |
+| `NEXT_PUBLIC_MQTT_URL` | MQTT WebSocket URL for real-time events (optional) |
+| `NEXT_PUBLIC_STRIPE_KEY` | Stripe publishable key — enables billing UI when set (optional) |
 | `NEXT_PUBLIC_VERCEL_ENV` | Deployment environment (`production`, `development`) |
 | `NEXT_PUBLIC_SHORT_SHA` | Git commit SHA — injected automatically by CI |
+| `ALLOWED_ORIGINS` | Comma-separated allowed origin hostnames for API-route CSRF protection (required behind a reverse proxy) |
 
 See [Next.js environment variable docs](https://nextjs.org/docs/app/building-your-application/configuring/environment-variables) for details.
 
