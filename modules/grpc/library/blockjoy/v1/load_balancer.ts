@@ -27,6 +27,14 @@ export enum LbPolicy {
   LB_POLICY_UNSPECIFIED = 0,
   LB_POLICY_ROUND_ROBIN = 1,
   LB_POLICY_LEAST_CONN = 2,
+  /** LB_POLICY_FIRST - Always selects the first available backend. */
+  LB_POLICY_FIRST = 3,
+  /** LB_POLICY_RANDOM - Selects a backend at random. */
+  LB_POLICY_RANDOM = 4,
+  /** LB_POLICY_IP_HASH - Hashes the client IP to select a backend. */
+  LB_POLICY_IP_HASH = 5,
+  /** LB_POLICY_URI_HASH - Hashes the request URI to select a backend. */
+  LB_POLICY_URI_HASH = 6,
   UNRECOGNIZED = -1,
 }
 
