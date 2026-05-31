@@ -7,4 +7,5 @@ export * from './clients/authClient';
 export * from './clients/userClient';
 export * from './clients/invitationClient';
 export * from './clients/imageClient';
+export * from './clients/loadBalancerClient';
 export * from './utils/utils';
