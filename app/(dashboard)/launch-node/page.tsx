@@ -142,7 +142,12 @@ export default function LaunchNodePage() {
     queryFn: () => protocolClient.listProtocols(orgId || undefined),
     enabled: Boolean(orgId),
   });
-  const protocols = protocolsResponse?.protocols ?? [];
+  // Load-balancer offerings (protocol key `load-balancer`) are launched from the
+  // Load Balancers page, not as plain nodes, so exclude them here. The legacy
+  // `loadbalancer` (no hyphen) eRPC node stays a normal launchable protocol.
+  const protocols = (protocolsResponse?.protocols ?? []).filter(
+    (p) => p.key !== 'load-balancer',
+  );
 
   // Loading gate
   if (!orgId) {

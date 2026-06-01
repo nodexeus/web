@@ -14,6 +14,19 @@ import { Plus, Loader2, X } from 'lucide-react';
 
 const NAME_REGEX = /^[a-z0-9][a-z0-9-]{0,38}[a-z0-9]$|^[a-z0-9]$/;
 
+const POLICY_LABELS: Record<number, string> = {
+  [LbPolicy.LB_POLICY_ROUND_ROBIN]: 'Round Robin',
+  [LbPolicy.LB_POLICY_LEAST_CONN]: 'Least Connections',
+  [LbPolicy.LB_POLICY_FIRST]: 'First Available',
+  [LbPolicy.LB_POLICY_RANDOM]: 'Random',
+  [LbPolicy.LB_POLICY_IP_HASH]: 'IP Hash',
+  [LbPolicy.LB_POLICY_URI_HASH]: 'URI Hash',
+};
+
+function policyLabel(policy: LbPolicy): string {
+  return POLICY_LABELS[policy] ?? `Policy ${policy}`;
+}
+
 function validateName(name: string): string | null {
   if (!name) return 'Name is required.';
   if (name.length > 40) return 'Name must be 40 characters or fewer.';
@@ -28,6 +41,7 @@ export default function LoadBalancersPage() {
 
   const [showCreate, setShowCreate] = useState(false);
   const [name, setName] = useState('');
+  const [imageId, setImageId] = useState('');
   const [regionId, setRegionId] = useState('');
   const [policy, setPolicy] = useState<LbPolicy>(LbPolicy.LB_POLICY_ROUND_ROBIN);
 
@@ -39,17 +53,34 @@ export default function LoadBalancersPage() {
     enabled: Boolean(defaultOrg?.orgId),
   });
 
-  const { data: regions = [], isLoading: isLoadingRegions } = useQuery({
-    queryKey: ['allRegions', defaultOrg?.orgId],
-    queryFn: () => hostClient.listAllRegions(defaultOrg!.orgId),
+  const { data: offerings = [], isLoading: isLoadingOfferings } = useQuery({
+    queryKey: ['lbEngineOfferings', defaultOrg?.orgId],
+    queryFn: () => loadBalancerClient.listEngines(defaultOrg!.orgId),
     enabled: Boolean(defaultOrg?.orgId) && showCreate,
   });
+
+  const selectedOffering = offerings.find((o) => o.imageId === imageId);
+  const availablePolicies = selectedOffering?.policies ?? [];
+
+  const { data: regions = [], isLoading: isLoadingRegions } = useQuery({
+    queryKey: ['regions', defaultOrg?.orgId, imageId],
+    queryFn: () => hostClient.listRegions(defaultOrg!.orgId, imageId),
+    enabled: Boolean(defaultOrg?.orgId) && showCreate && Boolean(imageId),
+  });
+
+  function resetForm() {
+    setName('');
+    setImageId('');
+    setRegionId('');
+    setPolicy(LbPolicy.LB_POLICY_ROUND_ROBIN);
+  }
 
   const createMutation = useMutation({
     mutationFn: () =>
       loadBalancerClient.createLoadBalancer({
         orgId: defaultOrg!.orgId,
         name,
+        imageId,
         policy,
         regionId,
       }),
@@ -57,9 +88,7 @@ export default function LoadBalancersPage() {
       queryClient.invalidateQueries({
         queryKey: ['loadBalancers', defaultOrg?.orgId],
       });
-      setName('');
-      setRegionId('');
-      setPolicy(LbPolicy.LB_POLICY_ROUND_ROBIN);
+      resetForm();
       setShowCreate(false);
     },
   });
@@ -70,16 +99,27 @@ export default function LoadBalancersPage() {
 
   function handleCancelCreate() {
     setShowCreate(false);
-    setName('');
-    setRegionId('');
-    setPolicy(LbPolicy.LB_POLICY_ROUND_ROBIN);
+    resetForm();
     createMutation.reset();
+  }
+
+  // Selecting a different offering resets the dependent (image-scoped) region
+  // choice and constrains the policy to the offering's supported subset.
+  function handleSelectOffering(nextImageId: string) {
+    setImageId(nextImageId);
+    setRegionId('');
+    const offering = offerings.find((o) => o.imageId === nextImageId);
+    const policies = offering?.policies ?? [];
+    setPolicy(
+      policies.length > 0 ? policies[0] : LbPolicy.LB_POLICY_ROUND_ROBIN,
+    );
   }
 
   const isSubmitDisabled =
     createMutation.isPending ||
     Boolean(nameError) ||
     !name ||
+    !imageId ||
     !regionId;
 
   const isLoadingAny = !defaultOrg || isLoading;
@@ -118,7 +158,7 @@ export default function LoadBalancersPage() {
             </button>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {/* Name */}
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
@@ -142,6 +182,33 @@ export default function LoadBalancersPage() {
               )}
             </div>
 
+            {/* Offering */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                Type
+              </label>
+              <select
+                value={imageId}
+                onChange={(e) => handleSelectOffering(e.target.value)}
+                disabled={isLoadingOfferings}
+                className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
+              >
+                <option value="">
+                  {isLoadingOfferings ? 'Loading types…' : 'Select a type'}
+                </option>
+                {offerings.map((o) => (
+                  <option key={o.imageId} value={o.imageId}>
+                    {o.displayName}
+                  </option>
+                ))}
+              </select>
+              {offerings.length === 0 && !isLoadingOfferings && (
+                <p className="text-xs text-muted-foreground">
+                  No load balancer types available
+                </p>
+              )}
+            </div>
+
             {/* Region */}
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
@@ -150,11 +217,15 @@ export default function LoadBalancersPage() {
               <select
                 value={regionId}
                 onChange={(e) => setRegionId(e.target.value)}
-                disabled={isLoadingRegions}
+                disabled={!imageId || isLoadingRegions}
                 className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
               >
                 <option value="">
-                  {isLoadingRegions ? 'Loading regions…' : 'Select a region'}
+                  {!imageId
+                    ? 'Select a type first'
+                    : isLoadingRegions
+                      ? 'Loading regions…'
+                      : 'Select a region'}
                 </option>
                 {(regions as RegionInfo[]).map((ri) => {
                   const r = ri.region;
@@ -166,7 +237,7 @@ export default function LoadBalancersPage() {
                   );
                 })}
               </select>
-              {regions.length === 0 && !isLoadingRegions && (
+              {imageId && regions.length === 0 && !isLoadingRegions && (
                 <p className="text-xs text-muted-foreground">
                   No regions available
                 </p>
@@ -181,26 +252,14 @@ export default function LoadBalancersPage() {
               <select
                 value={policy}
                 onChange={(e) => setPolicy(Number(e.target.value) as LbPolicy)}
-                className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                disabled={!imageId}
+                className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
               >
-                <option value={LbPolicy.LB_POLICY_ROUND_ROBIN}>
-                  Round Robin
-                </option>
-                <option value={LbPolicy.LB_POLICY_LEAST_CONN}>
-                  Least Connections
-                </option>
-                <option value={LbPolicy.LB_POLICY_FIRST}>
-                  First Available
-                </option>
-                <option value={LbPolicy.LB_POLICY_RANDOM}>
-                  Random
-                </option>
-                <option value={LbPolicy.LB_POLICY_IP_HASH}>
-                  IP Hash
-                </option>
-                <option value={LbPolicy.LB_POLICY_URI_HASH}>
-                  URI Hash
-                </option>
+                {availablePolicies.map((p) => (
+                  <option key={p} value={p}>
+                    {policyLabel(p)}
+                  </option>
+                ))}
               </select>
             </div>
           </div>

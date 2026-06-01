@@ -1,4 +1,5 @@
 import {
+  LbEngineOffering,
   LoadBalancer,
   LoadBalancerServiceClient,
   LoadBalancerServiceDefinition,
@@ -42,6 +43,18 @@ export class LoadBalancerClient {
         this.client.list.bind(this.client),
         request,
       );
+    } catch (err) {
+      return handleError(err);
+    }
+  }
+
+  async listEngines(orgId: string): Promise<LbEngineOffering[]> {
+    try {
+      const response = await callWithTokenRefresh(
+        this.client.listEngines.bind(this.client),
+        { orgId },
+      );
+      return response.offerings;
     } catch (err) {
       return handleError(err);
     }
