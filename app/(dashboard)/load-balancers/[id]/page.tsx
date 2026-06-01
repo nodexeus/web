@@ -9,10 +9,7 @@ import { friendlyError } from '@/lib/friendly-error';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { LoadBalancerMembers } from '@/components/load-balancers/load-balancer-members';
-import {
-  LbPolicy,
-  LbType,
-} from '@modules/grpc/library/blockjoy/v1/load_balancer';
+import { LbPolicy } from '@modules/grpc/library/blockjoy/v1/load_balancer';
 import type { Node } from '@modules/grpc/library/blockjoy/v1/node';
 import {
   ArrowLeft,
@@ -176,15 +173,10 @@ function PolicyRow({ lbId, policy }: { lbId: string; policy: LbPolicy }) {
   );
 }
 
-function typeLabel(type: LbType): string {
-  switch (type) {
-    case LbType.LB_TYPE_BASIC:
-      return 'Basic';
-    case LbType.LB_TYPE_ADVANCED_RPC:
-      return 'Advanced RPC';
-    default:
-      return 'Unknown';
-  }
+function engineLabel(engine: string): string {
+  if (!engine) return 'Unknown';
+  // Title-case the resolved engine key for display, e.g. "caddy" -> "Caddy".
+  return engine.charAt(0).toUpperCase() + engine.slice(1);
 }
 
 function formatDate(date: Date | undefined): string {
@@ -524,8 +516,8 @@ export default function LoadBalancerDetailPage() {
                 <PolicyRow lbId={lb.lbId} policy={lb.policy} />
                 <DetailRow
                   icon={Network}
-                  label="Type"
-                  value={typeLabel(lb.type)}
+                  label="Engine"
+                  value={engineLabel(lb.engine)}
                 />
                 <DetailRow
                   icon={Calendar}
