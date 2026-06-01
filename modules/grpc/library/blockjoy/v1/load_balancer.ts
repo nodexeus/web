@@ -11,17 +11,6 @@ import { Timestamp } from "../../google/protobuf/timestamp";
 
 export const protobufPackage = "blockjoy.v1";
 
-/**
- * The kind of load balancer engine. Only BASIC is implemented in v1;
- * ADVANCED_RPC is reserved for the future eRPC engine.
- */
-export enum LbType {
-  LB_TYPE_UNSPECIFIED = 0,
-  LB_TYPE_BASIC = 1,
-  LB_TYPE_ADVANCED_RPC = 2,
-  UNRECOGNIZED = -1,
-}
-
 /** The backend selection policy. */
 export enum LbPolicy {
   LB_POLICY_UNSPECIFIED = 0,
@@ -77,13 +66,18 @@ export interface LoadBalancer {
   name: string;
   /** The full public hostname, e.g. reth-a3f9k.lb.nodexeus.io. */
   fqdn: string;
-  type: LbType;
   policy: LbPolicy;
   /** The id of the backing Caddy node. */
   nodeId: string;
   members: LoadBalancerMember[];
   createdAt: Date | undefined;
-  updatedAt: Date | undefined;
+  updatedAt:
+    | Date
+    | undefined;
+  /** The resolved engine key, e.g. "caddy" (for display). */
+  engine: string;
+  /** The backing image. */
+  imageId: string;
 }
 
 /** A member to add to a load balancer. */
@@ -105,6 +99,8 @@ export interface LoadBalancerServiceCreateRequest {
   policy: LbPolicy;
   /** The region the backing Caddy node is placed in. */
   regionId: string;
+  /** The backing image to provision the load balancer from. */
+  imageId: string;
 }
 
 export interface LoadBalancerServiceCreateResponse {
@@ -163,6 +159,26 @@ export interface LoadBalancerServiceRemoveMemberRequest {
 
 export interface LoadBalancerServiceRemoveMemberResponse {
   loadBalancer: LoadBalancer | undefined;
+}
+
+export interface LoadBalancerServiceListEnginesRequest {
+  orgId: string;
+}
+
+/** A load balancer engine offering: a marketed variant backed by an image. */
+export interface LbEngineOffering {
+  imageId: string;
+  versionId: string;
+  /** The marketed variant name, e.g. "Basic". */
+  displayName: string;
+  description: string;
+  /** The hidden engine key, e.g. "caddy". */
+  engine: string;
+  policies: LbPolicy[];
+}
+
+export interface LoadBalancerServiceListEnginesResponse {
+  offerings: LbEngineOffering[];
 }
 
 function createBaseLoadBalancerMember(): LoadBalancerMember {
@@ -289,12 +305,13 @@ function createBaseLoadBalancer(): LoadBalancer {
     orgId: "",
     name: "",
     fqdn: "",
-    type: 0,
     policy: 0,
     nodeId: "",
     members: [],
     createdAt: undefined,
     updatedAt: undefined,
+    engine: "",
+    imageId: "",
   };
 }
 
@@ -312,9 +329,6 @@ export const LoadBalancer: MessageFns<LoadBalancer> = {
     if (message.fqdn !== "") {
       writer.uint32(34).string(message.fqdn);
     }
-    if (message.type !== 0) {
-      writer.uint32(40).int32(message.type);
-    }
     if (message.policy !== 0) {
       writer.uint32(48).int32(message.policy);
     }
@@ -329,6 +343,12 @@ export const LoadBalancer: MessageFns<LoadBalancer> = {
     }
     if (message.updatedAt !== undefined) {
       Timestamp.encode(toTimestamp(message.updatedAt), writer.uint32(82).fork()).join();
+    }
+    if (message.engine !== "") {
+      writer.uint32(90).string(message.engine);
+    }
+    if (message.imageId !== "") {
+      writer.uint32(98).string(message.imageId);
     }
     return writer;
   },
@@ -372,14 +392,6 @@ export const LoadBalancer: MessageFns<LoadBalancer> = {
           message.fqdn = reader.string();
           continue;
         }
-        case 5: {
-          if (tag !== 40) {
-            break;
-          }
-
-          message.type = reader.int32() as any;
-          continue;
-        }
         case 6: {
           if (tag !== 48) {
             break;
@@ -420,6 +432,22 @@ export const LoadBalancer: MessageFns<LoadBalancer> = {
           message.updatedAt = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
           continue;
         }
+        case 11: {
+          if (tag !== 90) {
+            break;
+          }
+
+          message.engine = reader.string();
+          continue;
+        }
+        case 12: {
+          if (tag !== 98) {
+            break;
+          }
+
+          message.imageId = reader.string();
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -438,12 +466,13 @@ export const LoadBalancer: MessageFns<LoadBalancer> = {
     message.orgId = object.orgId ?? "";
     message.name = object.name ?? "";
     message.fqdn = object.fqdn ?? "";
-    message.type = object.type ?? 0;
     message.policy = object.policy ?? 0;
     message.nodeId = object.nodeId ?? "";
     message.members = object.members?.map((e) => LoadBalancerMember.fromPartial(e)) || [];
     message.createdAt = object.createdAt ?? undefined;
     message.updatedAt = object.updatedAt ?? undefined;
+    message.engine = object.engine ?? "";
+    message.imageId = object.imageId ?? "";
     return message;
   },
 };
@@ -543,7 +572,7 @@ export const NewLbMember: MessageFns<NewLbMember> = {
 };
 
 function createBaseLoadBalancerServiceCreateRequest(): LoadBalancerServiceCreateRequest {
-  return { orgId: "", name: "", policy: 0, regionId: "" };
+  return { orgId: "", name: "", policy: 0, regionId: "", imageId: "" };
 }
 
 export const LoadBalancerServiceCreateRequest: MessageFns<LoadBalancerServiceCreateRequest> = {
@@ -559,6 +588,9 @@ export const LoadBalancerServiceCreateRequest: MessageFns<LoadBalancerServiceCre
     }
     if (message.regionId !== "") {
       writer.uint32(34).string(message.regionId);
+    }
+    if (message.imageId !== "") {
+      writer.uint32(42).string(message.imageId);
     }
     return writer;
   },
@@ -602,6 +634,14 @@ export const LoadBalancerServiceCreateRequest: MessageFns<LoadBalancerServiceCre
           message.regionId = reader.string();
           continue;
         }
+        case 5: {
+          if (tag !== 42) {
+            break;
+          }
+
+          message.imageId = reader.string();
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -620,6 +660,7 @@ export const LoadBalancerServiceCreateRequest: MessageFns<LoadBalancerServiceCre
     message.name = object.name ?? "";
     message.policy = object.policy ?? 0;
     message.regionId = object.regionId ?? "";
+    message.imageId = object.imageId ?? "";
     return message;
   },
 };
@@ -1306,6 +1347,216 @@ export const LoadBalancerServiceRemoveMemberResponse: MessageFns<LoadBalancerSer
   },
 };
 
+function createBaseLoadBalancerServiceListEnginesRequest(): LoadBalancerServiceListEnginesRequest {
+  return { orgId: "" };
+}
+
+export const LoadBalancerServiceListEnginesRequest: MessageFns<LoadBalancerServiceListEnginesRequest> = {
+  encode(message: LoadBalancerServiceListEnginesRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.orgId !== "") {
+      writer.uint32(10).string(message.orgId);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): LoadBalancerServiceListEnginesRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseLoadBalancerServiceListEnginesRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.orgId = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  create(base?: DeepPartial<LoadBalancerServiceListEnginesRequest>): LoadBalancerServiceListEnginesRequest {
+    return LoadBalancerServiceListEnginesRequest.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<LoadBalancerServiceListEnginesRequest>): LoadBalancerServiceListEnginesRequest {
+    const message = createBaseLoadBalancerServiceListEnginesRequest();
+    message.orgId = object.orgId ?? "";
+    return message;
+  },
+};
+
+function createBaseLbEngineOffering(): LbEngineOffering {
+  return { imageId: "", versionId: "", displayName: "", description: "", engine: "", policies: [] };
+}
+
+export const LbEngineOffering: MessageFns<LbEngineOffering> = {
+  encode(message: LbEngineOffering, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.imageId !== "") {
+      writer.uint32(10).string(message.imageId);
+    }
+    if (message.versionId !== "") {
+      writer.uint32(18).string(message.versionId);
+    }
+    if (message.displayName !== "") {
+      writer.uint32(26).string(message.displayName);
+    }
+    if (message.description !== "") {
+      writer.uint32(34).string(message.description);
+    }
+    if (message.engine !== "") {
+      writer.uint32(42).string(message.engine);
+    }
+    writer.uint32(50).fork();
+    for (const v of message.policies) {
+      writer.int32(v);
+    }
+    writer.join();
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): LbEngineOffering {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseLbEngineOffering();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.imageId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.versionId = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.displayName = reader.string();
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.description = reader.string();
+          continue;
+        }
+        case 5: {
+          if (tag !== 42) {
+            break;
+          }
+
+          message.engine = reader.string();
+          continue;
+        }
+        case 6: {
+          if (tag === 48) {
+            message.policies.push(reader.int32() as any);
+
+            continue;
+          }
+
+          if (tag === 50) {
+            const end2 = reader.uint32() + reader.pos;
+            while (reader.pos < end2) {
+              message.policies.push(reader.int32() as any);
+            }
+
+            continue;
+          }
+
+          break;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  create(base?: DeepPartial<LbEngineOffering>): LbEngineOffering {
+    return LbEngineOffering.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<LbEngineOffering>): LbEngineOffering {
+    const message = createBaseLbEngineOffering();
+    message.imageId = object.imageId ?? "";
+    message.versionId = object.versionId ?? "";
+    message.displayName = object.displayName ?? "";
+    message.description = object.description ?? "";
+    message.engine = object.engine ?? "";
+    message.policies = object.policies?.map((e) => e) || [];
+    return message;
+  },
+};
+
+function createBaseLoadBalancerServiceListEnginesResponse(): LoadBalancerServiceListEnginesResponse {
+  return { offerings: [] };
+}
+
+export const LoadBalancerServiceListEnginesResponse: MessageFns<LoadBalancerServiceListEnginesResponse> = {
+  encode(message: LoadBalancerServiceListEnginesResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    for (const v of message.offerings) {
+      LbEngineOffering.encode(v!, writer.uint32(10).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): LoadBalancerServiceListEnginesResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseLoadBalancerServiceListEnginesResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.offerings.push(LbEngineOffering.decode(reader, reader.uint32()));
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  create(base?: DeepPartial<LoadBalancerServiceListEnginesResponse>): LoadBalancerServiceListEnginesResponse {
+    return LoadBalancerServiceListEnginesResponse.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<LoadBalancerServiceListEnginesResponse>): LoadBalancerServiceListEnginesResponse {
+    const message = createBaseLoadBalancerServiceListEnginesResponse();
+    message.offerings = object.offerings?.map((e) => LbEngineOffering.fromPartial(e)) || [];
+    return message;
+  },
+};
+
 /** Manages load balancers for an org. */
 export type LoadBalancerServiceDefinition = typeof LoadBalancerServiceDefinition;
 export const LoadBalancerServiceDefinition = {
@@ -1375,6 +1626,15 @@ export const LoadBalancerServiceDefinition = {
       responseStream: false,
       options: {},
     },
+    /** List the load balancer engine offerings available to an org. */
+    listEngines: {
+      name: "ListEngines",
+      requestType: LoadBalancerServiceListEnginesRequest,
+      requestStream: false,
+      responseType: LoadBalancerServiceListEnginesResponse,
+      responseStream: false,
+      options: {},
+    },
   },
 } as const;
 
@@ -1414,6 +1674,11 @@ export interface LoadBalancerServiceImplementation<CallContextExt = {}> {
     request: LoadBalancerServiceRemoveMemberRequest,
     context: CallContext & CallContextExt,
   ): Promise<DeepPartial<LoadBalancerServiceRemoveMemberResponse>>;
+  /** List the load balancer engine offerings available to an org. */
+  listEngines(
+    request: LoadBalancerServiceListEnginesRequest,
+    context: CallContext & CallContextExt,
+  ): Promise<DeepPartial<LoadBalancerServiceListEnginesResponse>>;
 }
 
 export interface LoadBalancerServiceClient<CallOptionsExt = {}> {
@@ -1452,6 +1717,11 @@ export interface LoadBalancerServiceClient<CallOptionsExt = {}> {
     request: DeepPartial<LoadBalancerServiceRemoveMemberRequest>,
     options?: CallOptions & CallOptionsExt,
   ): Promise<LoadBalancerServiceRemoveMemberResponse>;
+  /** List the load balancer engine offerings available to an org. */
+  listEngines(
+    request: DeepPartial<LoadBalancerServiceListEnginesRequest>,
+    options?: CallOptions & CallOptionsExt,
+  ): Promise<LoadBalancerServiceListEnginesResponse>;
 }
 
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
