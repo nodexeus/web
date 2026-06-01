@@ -145,27 +145,6 @@ class HostClient {
     }
   }
 
-  async listAllRegions(orgId: string): Promise<RegionInfo[]> {
-    const request: HostServiceListRegionsRequest = {
-      orgId,
-      imageId: '',
-    };
-
-    debugLog('listAllRegionsRequest', request);
-
-    try {
-      const response: HostServiceListRegionsResponse =
-        await callWithTokenRefresh(
-          this.client.listRegions.bind(this.client),
-          request,
-        );
-      debugLog('listAllRegionsResponse', response);
-      return response.regions;
-    } catch (err) {
-      return handleError(err);
-    }
-  }
-
   async deleteHost(hostId: string): Promise<void> {
     const request: HostServiceDeleteHostRequest = { hostId };
     await callWithTokenRefresh(
