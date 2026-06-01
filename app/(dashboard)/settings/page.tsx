@@ -702,7 +702,7 @@ function ApiKeysSection() {
             API Key Created
           </p>
           <p className="mb-3 text-xs text-muted-foreground">
-            Copy this token now — you won't be able to see it again.
+            Copy this token now — you won&apos;t be able to see it again.
           </p>
           <div className="flex items-center gap-2 rounded-md bg-background p-2">
             <code className="flex-1 break-all text-xs">
