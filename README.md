@@ -11,11 +11,17 @@ User-centric dashboard for deploying, managing, and monitoring blockchain nodes 
 
 ### Installation
 
-1. Clone the repository:
+1. Clone the repository (with the `proto` submodule):
 
     ```bash
-    git clone git@github.com:nodexeus/web.git
+    git clone --recurse-submodules git@github.com:nodexeus/web.git
     cd web
+    ```
+
+    If you already cloned without `--recurse-submodules`, initialize it:
+
+    ```bash
+    git submodule update --init
     ```
 
 2. Install dependencies:
@@ -45,6 +51,30 @@ User-centric dashboard for deploying, managing, and monitoring blockchain nodes 
     ```
 
 The project starts on `http://localhost:3000`.
+
+## gRPC / Protobuf bindings
+
+The TypeScript gRPC bindings in `modules/grpc/library/` are **generated** from the shared
+protobuf definitions, which are vendored as the **`proto` git submodule**
+(`git@github.com:nodexeus/protobufs.git`, tracking `main`) — the same contract consumed by the
+API and BlockVisor agent. The generated files are committed; do not hand-edit them.
+
+To regenerate after the protobuf contract changes:
+
+```bash
+# 1. Bump the submodule to the latest published contract (origin/main)
+git submodule update --remote proto
+
+# 2. Regenerate the TypeScript bindings into modules/grpc/library/
+yarn gen:proto
+
+# 3. Review, then commit both the submodule bump and the regenerated bindings
+git add proto modules/grpc/library
+```
+
+`yarn gen:proto` runs `protoc` + [`ts-proto`](https://github.com/stephenh/ts-proto) (declared in
+`devDependencies`) over `proto/blockjoy/**`, emitting `nice-grpc` browser clients. Pin the submodule
+to a specific protobuf commit if you need to generate against a contract that isn't yet on `main`.
 
 ## Environment Variables
 
