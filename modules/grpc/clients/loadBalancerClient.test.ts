@@ -48,6 +48,18 @@ function mockSvc(overrides: Record<string, any> = {}) {
       loadBalancer: { lbId: 'lb1', name: 'reth-updated' },
     }),
     delete: vi.fn().mockResolvedValue({}),
+    listEngines: vi.fn().mockResolvedValue({
+      offerings: [
+        {
+          imageId: 'img1',
+          versionId: 'ver1',
+          displayName: 'Basic',
+          description: 'Basic load balancer',
+          engine: 'caddy',
+          policies: [1, 2],
+        },
+      ],
+    }),
     addMember: vi.fn().mockResolvedValue({
       loadBalancer: { lbId: 'lb1', name: 'reth-lb' },
     }),
@@ -113,6 +125,34 @@ describe('LoadBalancerClient', () => {
     });
   });
 
+  describe('listEngines', () => {
+    it('calls listEngines with orgId and maps the response offerings', async () => {
+      const svc = mockSvc();
+      const client = new LoadBalancerClient(svc as any);
+
+      const offerings = await client.listEngines('org1');
+
+      expect(svc.listEngines).toHaveBeenCalledOnce();
+      expect(svc.listEngines).toHaveBeenCalledWith({ orgId: 'org1' });
+      expect(offerings).toHaveLength(1);
+      expect(offerings[0]).toMatchObject({
+        imageId: 'img1',
+        displayName: 'Basic',
+        engine: 'caddy',
+        policies: [1, 2],
+      });
+    });
+
+    it('propagates errors from listEngines', async () => {
+      const svc = mockSvc({
+        listEngines: vi.fn().mockRejectedValue(new Error('boom')),
+      });
+      const client = new LoadBalancerClient(svc as any);
+
+      await expect(client.listEngines('org1')).rejects.toThrow('boom');
+    });
+  });
+
   describe('createLoadBalancer', () => {
     it('calls create with the request and returns the loadBalancer field', async () => {
       const svc = mockSvc();
@@ -124,6 +164,24 @@ describe('LoadBalancerClient', () => {
       expect(svc.create).toHaveBeenCalledOnce();
       expect(svc.create).toHaveBeenCalledWith(request);
       expect(lb.lbId).toBe('lb1');
+    });
+
+    it('passes imageId through to the create RPC', async () => {
+      const svc = mockSvc();
+      const client = new LoadBalancerClient(svc as any);
+      const request = {
+        orgId: 'org1',
+        name: 'reth-lb',
+        imageId: 'img1',
+        regionId: 'region1',
+        policy: 1,
+      } as any;
+
+      await client.createLoadBalancer(request);
+
+      expect(svc.create).toHaveBeenCalledWith(
+        expect.objectContaining({ imageId: 'img1' }),
+      );
     });
   });
 
