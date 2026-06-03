@@ -11,6 +11,8 @@ import {
   NodeSortField,
   NodeServiceGetRequest,
   NodeServiceDeleteRequest,
+  NodeServiceMigrationCandidatesResponse,
+  NodeServiceMigrateResponse,
 } from '../library/blockjoy/v1/node';
 import { debugLog } from '@/lib/debug';
 import {
@@ -47,7 +49,7 @@ export type UIPagination = {
   itemsPerPage: number;
 };
 
-class NodeClient {
+export class NodeClient {
   private client: NodeServiceClient;
 
   constructor(client?: NodeServiceClient) {
@@ -241,6 +243,34 @@ class NodeClient {
       await this.client.upgradeImage({ nodeIds, imageId }, getOptions());
     } catch (err) {
       debugLog('upgradeNodeError', err);
+      return handleError(err);
+    }
+  }
+
+  async listMigrationCandidates(
+    nodeId: string,
+  ): Promise<NodeServiceMigrationCandidatesResponse> {
+    try {
+      return await callWithTokenRefresh(
+        this.client.migrationCandidates.bind(this.client),
+        { nodeId },
+      );
+    } catch (err) {
+      return handleError(err);
+    }
+  }
+
+  async migrateNode(
+    sourceNodeId: string,
+    targetNodeId: string,
+    destinationOrgId: string,
+  ): Promise<NodeServiceMigrateResponse> {
+    try {
+      return await callWithTokenRefresh(
+        this.client.migrate.bind(this.client),
+        { sourceNodeId, targetNodeId, destinationOrgId },
+      );
+    } catch (err) {
       return handleError(err);
     }
   }
