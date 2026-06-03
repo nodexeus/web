@@ -48,7 +48,9 @@ import {
   Cpu,
   MemoryStick,
   Database,
+  ArrowLeftRight,
 } from 'lucide-react';
+import { MigrateDialog } from './MigrateDialog';
 
 // ─── Status helpers ──────────────────────────────────────────────
 
@@ -304,24 +306,28 @@ function ActionsDropdown({
   onStop,
   onRestart,
   onDelete,
+  onMigrate,
   isActing,
   isSuperUser,
   canStart,
   canStop,
   canRestart,
   canDelete,
+  canMigrate,
 }: {
   node: Node;
   onStart: () => void;
   onStop: () => void;
   onRestart: () => void;
   onDelete: () => void;
+  onMigrate: () => void;
   isActing: boolean;
   isSuperUser: boolean;
   canStart: boolean;
   canStop: boolean;
   canRestart: boolean;
   canDelete: boolean;
+  canMigrate: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -372,6 +378,15 @@ function ActionsDropdown({
       onClick: () => {
         window.location.href = `/admin/nodes/${node.nodeId}`;
       },
+    });
+  }
+
+  if (canMigrate) {
+    items.push({
+      label: 'Migrate',
+      icon: ArrowLeftRight,
+      onClick: onMigrate,
+      separator: items.length > 0,
     });
   }
 
@@ -646,6 +661,7 @@ export default function NodeDetailPage() {
   const queryClient = useQueryClient();
   const nodeId = params.id as string;
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showMigrate, setShowMigrate] = useState(false);
 
   const {
     isSuperUser,
@@ -653,6 +669,7 @@ export default function NodeDetailPage() {
     canStopNode,
     canRestartNode,
     canDeleteNode,
+    canMigrateNode,
   } = usePermissions();
 
   const {
@@ -847,12 +864,14 @@ export default function NodeDetailPage() {
               onStop={() => stopMutation.mutate()}
               onRestart={() => restartMutation.mutate()}
               onDelete={() => setShowDeleteConfirm(true)}
+              onMigrate={() => setShowMigrate(true)}
               isActing={isActing}
               isSuperUser={isSuperUser}
               canStart={canStartNode}
               canStop={canStopNode}
               canRestart={canRestartNode}
               canDelete={canDeleteNode}
+              canMigrate={canMigrateNode}
             />
           </div>
 
@@ -864,6 +883,15 @@ export default function NodeDetailPage() {
             onConfirm={() => deleteMutation.mutate()}
             onCancel={() => setShowDeleteConfirm(false)}
           />
+
+          {/* Migration wizard dialog */}
+          {showMigrate && (
+            <MigrateDialog
+              nodeId={node.nodeId}
+              nodeName={nodeName}
+              onClose={() => setShowMigrate(false)}
+            />
+          )}
 
           {/* Jailed alert — only shows if jailed */}
           <JailedAlert node={node} />
