@@ -316,6 +316,48 @@ export interface NodeServiceDeleteRequest {
 export interface NodeServiceDeleteResponse {
 }
 
+export interface NodeServiceMigrationCandidatesRequest {
+  /** The source node whose identity will be migrated. */
+  nodeId: string;
+}
+
+export interface NodeServiceMigrationCandidatesResponse {
+  candidates: MigrationCandidate[];
+}
+
+export interface MigrationCandidate {
+  /** Full target node summary (name, org, host, state, ip, ...). */
+  node:
+    | Node
+    | undefined;
+  /** Whether the candidate is currently Running. */
+  isRunning: boolean;
+  /**
+   * Warning: the candidate's org has more than one node (likely a real
+   * customer org rather than an idle staging slot).
+   */
+  inUse: boolean;
+}
+
+export interface NodeServiceMigrateRequest {
+  /** The live source node A whose identity is taken over. */
+  sourceNodeId: string;
+  /** The replacement target node B that takes over A's identity. */
+  targetNodeId: string;
+  /** The org that A is moved into after migration. Required. */
+  destinationOrgId: string;
+}
+
+/** Result of a node migration: both nodes after the identity swap. */
+export interface NodeServiceMigrateResponse {
+  /** Updated source node A (now tagged "-migrated"). */
+  source:
+    | Node
+    | undefined;
+  /** Updated target node B (now live under A's old identity). */
+  target: Node | undefined;
+}
+
 function createBaseNode(): Node {
   return {
     nodeId: "",
@@ -2607,6 +2649,300 @@ export const NodeServiceDeleteResponse: MessageFns<NodeServiceDeleteResponse> = 
   },
 };
 
+function createBaseNodeServiceMigrationCandidatesRequest(): NodeServiceMigrationCandidatesRequest {
+  return { nodeId: "" };
+}
+
+export const NodeServiceMigrationCandidatesRequest: MessageFns<NodeServiceMigrationCandidatesRequest> = {
+  encode(message: NodeServiceMigrationCandidatesRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.nodeId !== "") {
+      writer.uint32(10).string(message.nodeId);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): NodeServiceMigrationCandidatesRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseNodeServiceMigrationCandidatesRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.nodeId = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  create(base?: DeepPartial<NodeServiceMigrationCandidatesRequest>): NodeServiceMigrationCandidatesRequest {
+    return NodeServiceMigrationCandidatesRequest.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<NodeServiceMigrationCandidatesRequest>): NodeServiceMigrationCandidatesRequest {
+    const message = createBaseNodeServiceMigrationCandidatesRequest();
+    message.nodeId = object.nodeId ?? "";
+    return message;
+  },
+};
+
+function createBaseNodeServiceMigrationCandidatesResponse(): NodeServiceMigrationCandidatesResponse {
+  return { candidates: [] };
+}
+
+export const NodeServiceMigrationCandidatesResponse: MessageFns<NodeServiceMigrationCandidatesResponse> = {
+  encode(message: NodeServiceMigrationCandidatesResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    for (const v of message.candidates) {
+      MigrationCandidate.encode(v!, writer.uint32(10).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): NodeServiceMigrationCandidatesResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseNodeServiceMigrationCandidatesResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.candidates.push(MigrationCandidate.decode(reader, reader.uint32()));
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  create(base?: DeepPartial<NodeServiceMigrationCandidatesResponse>): NodeServiceMigrationCandidatesResponse {
+    return NodeServiceMigrationCandidatesResponse.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<NodeServiceMigrationCandidatesResponse>): NodeServiceMigrationCandidatesResponse {
+    const message = createBaseNodeServiceMigrationCandidatesResponse();
+    message.candidates = object.candidates?.map((e) => MigrationCandidate.fromPartial(e)) || [];
+    return message;
+  },
+};
+
+function createBaseMigrationCandidate(): MigrationCandidate {
+  return { node: undefined, isRunning: false, inUse: false };
+}
+
+export const MigrationCandidate: MessageFns<MigrationCandidate> = {
+  encode(message: MigrationCandidate, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.node !== undefined) {
+      Node.encode(message.node, writer.uint32(10).fork()).join();
+    }
+    if (message.isRunning !== false) {
+      writer.uint32(16).bool(message.isRunning);
+    }
+    if (message.inUse !== false) {
+      writer.uint32(24).bool(message.inUse);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): MigrationCandidate {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMigrationCandidate();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.node = Node.decode(reader, reader.uint32());
+          continue;
+        }
+        case 2: {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.isRunning = reader.bool();
+          continue;
+        }
+        case 3: {
+          if (tag !== 24) {
+            break;
+          }
+
+          message.inUse = reader.bool();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  create(base?: DeepPartial<MigrationCandidate>): MigrationCandidate {
+    return MigrationCandidate.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<MigrationCandidate>): MigrationCandidate {
+    const message = createBaseMigrationCandidate();
+    message.node = (object.node !== undefined && object.node !== null) ? Node.fromPartial(object.node) : undefined;
+    message.isRunning = object.isRunning ?? false;
+    message.inUse = object.inUse ?? false;
+    return message;
+  },
+};
+
+function createBaseNodeServiceMigrateRequest(): NodeServiceMigrateRequest {
+  return { sourceNodeId: "", targetNodeId: "", destinationOrgId: "" };
+}
+
+export const NodeServiceMigrateRequest: MessageFns<NodeServiceMigrateRequest> = {
+  encode(message: NodeServiceMigrateRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.sourceNodeId !== "") {
+      writer.uint32(10).string(message.sourceNodeId);
+    }
+    if (message.targetNodeId !== "") {
+      writer.uint32(18).string(message.targetNodeId);
+    }
+    if (message.destinationOrgId !== "") {
+      writer.uint32(26).string(message.destinationOrgId);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): NodeServiceMigrateRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseNodeServiceMigrateRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.sourceNodeId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.targetNodeId = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.destinationOrgId = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  create(base?: DeepPartial<NodeServiceMigrateRequest>): NodeServiceMigrateRequest {
+    return NodeServiceMigrateRequest.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<NodeServiceMigrateRequest>): NodeServiceMigrateRequest {
+    const message = createBaseNodeServiceMigrateRequest();
+    message.sourceNodeId = object.sourceNodeId ?? "";
+    message.targetNodeId = object.targetNodeId ?? "";
+    message.destinationOrgId = object.destinationOrgId ?? "";
+    return message;
+  },
+};
+
+function createBaseNodeServiceMigrateResponse(): NodeServiceMigrateResponse {
+  return { source: undefined, target: undefined };
+}
+
+export const NodeServiceMigrateResponse: MessageFns<NodeServiceMigrateResponse> = {
+  encode(message: NodeServiceMigrateResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.source !== undefined) {
+      Node.encode(message.source, writer.uint32(10).fork()).join();
+    }
+    if (message.target !== undefined) {
+      Node.encode(message.target, writer.uint32(18).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): NodeServiceMigrateResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseNodeServiceMigrateResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.source = Node.decode(reader, reader.uint32());
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.target = Node.decode(reader, reader.uint32());
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  create(base?: DeepPartial<NodeServiceMigrateResponse>): NodeServiceMigrateResponse {
+    return NodeServiceMigrateResponse.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<NodeServiceMigrateResponse>): NodeServiceMigrateResponse {
+    const message = createBaseNodeServiceMigrateResponse();
+    message.source = (object.source !== undefined && object.source !== null)
+      ? Node.fromPartial(object.source)
+      : undefined;
+    message.target = (object.target !== undefined && object.target !== null)
+      ? Node.fromPartial(object.target)
+      : undefined;
+    return message;
+  },
+};
+
 /** Service for interacting with a node. */
 export type NodeServiceDefinition = typeof NodeServiceDefinition;
 export const NodeServiceDefinition = {
@@ -2712,6 +3048,24 @@ export const NodeServiceDefinition = {
       responseStream: false,
       options: {},
     },
+    /** Super-admin: list nodes eligible to be a migration target for a given source node. */
+    migrationCandidates: {
+      name: "MigrationCandidates",
+      requestType: NodeServiceMigrationCandidatesRequest as typeof NodeServiceMigrationCandidatesRequest,
+      requestStream: false,
+      responseType: NodeServiceMigrationCandidatesResponse as typeof NodeServiceMigrationCandidatesResponse,
+      responseStream: false,
+      options: {},
+    },
+    /** Super-admin: migrate a node's identity onto a target node. */
+    migrate: {
+      name: "Migrate",
+      requestType: NodeServiceMigrateRequest as typeof NodeServiceMigrateRequest,
+      requestStream: false,
+      responseType: NodeServiceMigrateResponse as typeof NodeServiceMigrateResponse,
+      responseStream: false,
+      options: {},
+    },
   },
 } as const;
 
@@ -2771,6 +3125,16 @@ export interface NodeServiceImplementation<CallContextExt = {}> {
     request: NodeServiceDeleteRequest,
     context: CallContext & CallContextExt,
   ): Promise<DeepPartial<NodeServiceDeleteResponse>>;
+  /** Super-admin: list nodes eligible to be a migration target for a given source node. */
+  migrationCandidates(
+    request: NodeServiceMigrationCandidatesRequest,
+    context: CallContext & CallContextExt,
+  ): Promise<DeepPartial<NodeServiceMigrationCandidatesResponse>>;
+  /** Super-admin: migrate a node's identity onto a target node. */
+  migrate(
+    request: NodeServiceMigrateRequest,
+    context: CallContext & CallContextExt,
+  ): Promise<DeepPartial<NodeServiceMigrateResponse>>;
 }
 
 export interface NodeServiceClient<CallOptionsExt = {}> {
@@ -2829,6 +3193,16 @@ export interface NodeServiceClient<CallOptionsExt = {}> {
     request: DeepPartial<NodeServiceDeleteRequest>,
     options?: CallOptions & CallOptionsExt,
   ): Promise<NodeServiceDeleteResponse>;
+  /** Super-admin: list nodes eligible to be a migration target for a given source node. */
+  migrationCandidates(
+    request: DeepPartial<NodeServiceMigrationCandidatesRequest>,
+    options?: CallOptions & CallOptionsExt,
+  ): Promise<NodeServiceMigrationCandidatesResponse>;
+  /** Super-admin: migrate a node's identity onto a target node. */
+  migrate(
+    request: DeepPartial<NodeServiceMigrateRequest>,
+    options?: CallOptions & CallOptionsExt,
+  ): Promise<NodeServiceMigrateResponse>;
 }
 
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;

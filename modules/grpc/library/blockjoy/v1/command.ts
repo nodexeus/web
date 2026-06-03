@@ -122,6 +122,7 @@ export interface NodeCommand {
   upgrade?: NodeUpgrade | undefined;
   delete?: NodeDelete | undefined;
   runPlugin?: NodeRunPlugin | undefined;
+  rename?: NodeRename | undefined;
 }
 
 export interface NodeCreate {
@@ -165,6 +166,17 @@ export interface NodeRunPlugin {
   function: string;
   /** Opaque payload passed to the function as its single string argument. */
   payload: Uint8Array;
+}
+
+/**
+ * Rename a node's identity (name + dns). Applied by the host to its in-memory
+ * name index and the cached node state; the subsequent NodeRestart re-renders
+ * config files with the new NODE_NAME.
+ */
+export interface NodeRename {
+  nodeId: string;
+  newNodeName: string;
+  newDnsName: string;
 }
 
 function createBaseCommand(): Command {
@@ -989,6 +1001,7 @@ function createBaseNodeCommand(): NodeCommand {
     upgrade: undefined,
     delete: undefined,
     runPlugin: undefined,
+    rename: undefined,
   };
 }
 
@@ -1026,6 +1039,9 @@ export const NodeCommand: MessageFns<NodeCommand> = {
     }
     if (message.runPlugin !== undefined) {
       NodeRunPlugin.encode(message.runPlugin, writer.uint32(90).fork()).join();
+    }
+    if (message.rename !== undefined) {
+      NodeRename.encode(message.rename, writer.uint32(98).fork()).join();
     }
     return writer;
   },
@@ -1125,6 +1141,14 @@ export const NodeCommand: MessageFns<NodeCommand> = {
           message.runPlugin = NodeRunPlugin.decode(reader, reader.uint32());
           continue;
         }
+        case 12: {
+          if (tag !== 98) {
+            break;
+          }
+
+          message.rename = NodeRename.decode(reader, reader.uint32());
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -1163,6 +1187,9 @@ export const NodeCommand: MessageFns<NodeCommand> = {
       : undefined;
     message.runPlugin = (object.runPlugin !== undefined && object.runPlugin !== null)
       ? NodeRunPlugin.fromPartial(object.runPlugin)
+      : undefined;
+    message.rename = (object.rename !== undefined && object.rename !== null)
+      ? NodeRename.fromPartial(object.rename)
       : undefined;
     return message;
   },
@@ -1604,6 +1631,76 @@ export const NodeRunPlugin: MessageFns<NodeRunPlugin> = {
     const message = createBaseNodeRunPlugin();
     message.function = object.function ?? "";
     message.payload = object.payload ?? new Uint8Array(0);
+    return message;
+  },
+};
+
+function createBaseNodeRename(): NodeRename {
+  return { nodeId: "", newNodeName: "", newDnsName: "" };
+}
+
+export const NodeRename: MessageFns<NodeRename> = {
+  encode(message: NodeRename, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.nodeId !== "") {
+      writer.uint32(10).string(message.nodeId);
+    }
+    if (message.newNodeName !== "") {
+      writer.uint32(18).string(message.newNodeName);
+    }
+    if (message.newDnsName !== "") {
+      writer.uint32(26).string(message.newDnsName);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): NodeRename {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseNodeRename();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.nodeId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.newNodeName = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.newDnsName = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  create(base?: DeepPartial<NodeRename>): NodeRename {
+    return NodeRename.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<NodeRename>): NodeRename {
+    const message = createBaseNodeRename();
+    message.nodeId = object.nodeId ?? "";
+    message.newNodeName = object.newNodeName ?? "";
+    message.newDnsName = object.newDnsName ?? "";
     return message;
   },
 };
