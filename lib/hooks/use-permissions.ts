@@ -42,6 +42,8 @@ export function usePermissions() {
     hasPermission('node-restart') || hasPermission('node-admin-restart');
   const canCreateNode = hasPermission('node-create');
   const canReportNode = hasPermission('node-report');
+  // Node migration is super-admin only (no org-scoped variant).
+  const canMigrateNode = hasPermission('node-admin-migrate');
 
   return {
     permissions,
@@ -54,5 +56,6 @@ export function usePermissions() {
     canRestartNode,
     canCreateNode,
     canReportNode,
+    canMigrateNode,
   };
 }
